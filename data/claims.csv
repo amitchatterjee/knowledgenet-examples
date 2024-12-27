@@ -1,6 +1,6 @@
 id,policy_id,date,amount,automobile_id,driver_id,status,description,police_report
 C1,P1,2023-01-15,5000,201,D1,approved,Accident on highway,
-C2,P2,2023-02-20,3000,202,D2,pending,Minor collision in parking lot,
-C3,P3,2023-03-10,7000,203,D5,approved,Rear-ended at traffic light,
+C2,P2,2023-02-20,3000,202,D2,pending,Minor collision in parking lot,R1
+C3,P3,2023-03-10,7000,203,D5,pending,Rear-ended at traffic light,
 C4,P4,2023-04-05,2500,204,,rejected,Hit a tree,
 C5,P5,2023-05-18,4500,205,,approved,Side swipe on freeway,

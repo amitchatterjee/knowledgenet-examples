@@ -4,38 +4,50 @@ from knowledgenet.controls import insert, update, delete
 from knowledgenet.helper import assign
 from knowledgenet.ftypes import Collector
 
-from autoins.entities import Action, Adj, Claim, Driver, Policy
+from autoins.entities import Action, Adj, Claim, Driver, PoliceReport, Policy
 
 @ruledef
-def create_adj_claims():
-    return Rule(id='create-adj-claims', repository='autoclaims', ruleset='001-init',
+def create_adj():
+    return Rule(id='create-adj', repository='autoclaims', ruleset='001-init',
         when=Condition(of_type=Claim, matches=lambda ctx,this: this.status == 'pending' 
                        and assign(ctx, claim=this)),
         then=lambda ctx: insert(ctx, Adj(ctx.claim)))
 
 @ruledef
-def add_policy_to_adj_claim():
+def add_policy_to_adj():
     def add_policy_to_adj_claim(ctx):
-        ctx.aclaim.policy = ctx.policy
-        update(ctx, ctx.aclaim)
-    return Rule(id='add-policy-to-adj-claim', repository='autoclaims', ruleset='001-init', 
+        ctx.adj.policy = ctx.policy
+        update(ctx, ctx.adj)
+    return Rule(id='add-policy-to-adj', repository='autoclaims', ruleset='001-init', 
             run_once=True,
-        when=[Condition(of_type=Adj, matches=lambda ctx,this: assign(ctx, aclaim=this)),
-              Condition(of_type=Policy, matches=lambda ctx,this: ctx.aclaim.claim.policy_id == this.id 
+        when=[Condition(of_type=Adj, matches=lambda ctx,this: assign(ctx, adj=this)),
+              Condition(of_type=Policy, matches=lambda ctx,this: ctx.adj.claim.policy_id == this.id 
                         and assign(ctx, policy=this))],
         then=add_policy_to_adj_claim)
 
 @ruledef
-def add_driver_to_adj_claim():
-    def add_driver_to_adj_claim(ctx):
-        ctx.aclaim.driver = ctx.driver
-        update(ctx, ctx.aclaim)
-    return Rule(id='add-driver-to-adj-claim', repository='autoclaims', ruleset='001-init', 
+def add_driver_to_adj():
+    def add_driver_to_adj(ctx):
+        ctx.adj.driver = ctx.driver
+        update(ctx, ctx.adj)
+    return Rule(id='add-driver-to-adj', repository='autoclaims', ruleset='001-init', 
             run_once=True,
-        when=[Condition(of_type=Adj, matches=lambda ctx,this: assign(ctx, aclaim=this)),
-              Condition(of_type=Driver, matches=lambda ctx,this: ctx.aclaim.claim.driver_id == this.id 
+        when=[Condition(of_type=Adj, matches=lambda ctx,this: assign(ctx, adj=this)),
+              Condition(of_type=Driver, matches=lambda ctx,this: ctx.adj.claim.driver_id == this.id 
                         and assign(ctx, driver=this))],
-        then=add_driver_to_adj_claim)
+        then=add_driver_to_adj)
+
+@ruledef
+def add_police_report_to_adj():
+    def add_police_report_to_adj(ctx):
+        ctx.adj.police_report = ctx.police_report
+        update(ctx, ctx.adj)
+    return Rule(id='add-police_report-to-adj', repository='autoclaims', ruleset='001-init', 
+            run_once=True,
+        when=[Condition(of_type=Adj, matches=lambda ctx,this: assign(ctx, adj=this)),
+              Condition(of_type=PoliceReport, matches=lambda ctx,this: ctx.adj.claim.police_report== this.id 
+                        and assign(ctx, police_report=this))],
+        then=add_police_report_to_adj)
 
 @ruledef
 def create_action_collector():
@@ -45,5 +57,4 @@ def create_action_collector():
         then=lambda ctx: insert(ctx, Collector(of_type=Action, group='action-collector', 
                                     adj=ctx.adj, 
                                     filter=lambda this,obj: this.adj.claim.id == obj.claim_id)))
-
 

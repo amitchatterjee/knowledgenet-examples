@@ -6,7 +6,7 @@ import json
 from knowledgenet import scanner
 from knowledgenet.service import Service
 from knowledgenet.ftypes import Collector
-from autoins.entities import Action, Adj, Claim, Driver, Policy
+from autoins.entities import Action, Adj, Claim, Driver, PoliceReport, Policy
 from autoins.fact_loader import load_from_csv
 
 def argsparser():
@@ -57,6 +57,11 @@ def init_facts(subfiles, args):
             elif f.startswith('drivers'):
                 load_from_csv(facts, Driver, os.path.join(path,f), converters={
                     'dob': pd.to_datetime
+                })
+            elif f.startswith('police_reports'):
+                load_from_csv(facts, PoliceReport, os.path.join(path,f), converters={
+                    'date': pd.to_datetime,
+                    'responsible_parties': lambda d: d.split(';') if d else [],
                 })
     return facts
 

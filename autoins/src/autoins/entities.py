@@ -75,6 +75,16 @@ class PoliceReport:
         self.date = date
         self.description = description
         self.responsible_parties = responsible_parties
+    def __str__(self) -> str:
+        return f'PoliceReport({self.id})'
+    def __repr__(self) -> str:
+        return self.__str__()
+    def __eq__(self, obj):
+        if isinstance(obj, PoliceReport):
+            return self.id == obj.id
+        return False
+    def __hash__(self):
+        return hash(self.id)
 
 class Adj:
     '''
@@ -104,7 +114,8 @@ class Adj:
         return {'Adj': {
             'claim': str(self.claim),
             'policy': str(self.policy) if self.policy else None,
-            'driver': str(self.driver) if self.driver else None
+            'driver': str(self.driver) if self.driver else None,
+            'police_report': str(self.police_report) if self.police_report else None
             }
         }
 
