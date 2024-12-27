@@ -2,6 +2,7 @@ from knowledgenet.scanner import ruledef
 from knowledgenet.rule import Rule, Condition
 from knowledgenet.controls import insert, update, delete
 from knowledgenet.helper import assign
+from knowledgenet.ftypes import Collector
 
 from autoins.entities import AdjClaim, Claim, Driver, Policy
 
@@ -35,6 +36,15 @@ def add_driver_to_adj_claim():
               Condition(of_type=Driver, matches_exp=lambda ctx,this: ctx.aclaim.claim.driver_id == this.id 
                         and assign(ctx, driver=this))],
         then=add_driver_to_adj_claim)
+
+@ruledef
+def create_action_collector():
+    return Rule(id='create-action-collector', repository='autoclaims', ruleset='001-init', run_once=True,
+        when=Condition(of_type=AdjClaim, matches_exp=lambda ctx,this: not this.claim.police_report 
+                       and assign(ctx, adjclaim=this)),
+        then=lambda ctx: insert(ctx, Collector(of_type=AdjClaim, group='action-collector', 
+                                    adjclaim=ctx.adjclaim, 
+                                    filter=lambda this,obj: this.adjclaim.claim.id == obj.claim.id)))
 
 @ruledef
 def del_unneeded_claim_facts():
