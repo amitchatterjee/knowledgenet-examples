@@ -76,20 +76,24 @@ class PoliceReport:
         self.description = description
         self.responsible_parties = responsible_parties
 
-class AdjClaim:
+class Adj:
+    '''
+    The primary purpose of the Adj class is to reduce combinatorial explosion of facts. It also makes audit rules easier to write.
+    '''
     def __init__(self, claim: Claim):
         self.claim = claim
         self.policy = None
         self.driver = None
+        self.police_report = None
 
     def __str__(self) -> str:
-        return f'AdjClaim:({self.claim.id})'
+        return f'Adj:({self.claim.id})'
 
     def __repr__(self) -> str:
         return self.__str__()
 
     def __eq__(self, obj):
-        if isinstance(obj, AdjClaim):
+        if isinstance(obj, Adj):
             return self.claim.id == obj.claim.id
         return False
 
@@ -97,11 +101,12 @@ class AdjClaim:
         return hash(self.claim.id)
 
     def to_dict(self):
-        return {
-        'claim': str(self.claim),
-        'policy': str(self.policy) if self.policy else None,
-        'driver': str(self.driver) if self.driver else None
-    }
+        return {'Adj': {
+            'claim': str(self.claim),
+            'policy': str(self.policy) if self.policy else None,
+            'driver': str(self.driver) if self.driver else None
+            }
+        }
 
 class Action:
     def __init__(self, id, claim_id, action, explain, pay_amount):
@@ -126,10 +131,11 @@ class Action:
         return hash(self.id)
     
     def to_dict(self):
-        return {
-        'id': self.id,
-        'claim': self.claim_id,
-        'action': self.action,
-        'explain': self.explain,
-        'pay_amount': self.pay_amount
-    }
+        return {'Action':{
+            'id': self.id,
+            'claim': self.claim_id,
+            'action': self.action,
+            'explain': self.explain,
+            'pay_amount': self.pay_amount
+            }
+        }

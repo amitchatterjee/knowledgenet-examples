@@ -6,7 +6,7 @@ import json
 from knowledgenet import scanner
 from knowledgenet.service import Service
 from knowledgenet.ftypes import Collector
-from autoins.entities import Claim, Driver, Policy
+from autoins.entities import Action, Adj, Claim, Driver, Policy
 from autoins.fact_loader import load_from_csv
 
 def argsparser():
@@ -69,7 +69,7 @@ if __name__ == "__main__":
     result_facts = service.execute(facts, tracer=sys.stdout if args.trace else None)
     print("\n\nResult:")
     for result_fact in result_facts:
-        if type(result_fact) in [Claim, Driver, Policy]:
+        if type(result_fact) in [Adj, Action]:
             print(json.dumps(result_fact.to_dict()))
         elif type(result_fact) == Collector:
             print(f"Collector({result_fact.group}, collection:{result_fact.collection})")
