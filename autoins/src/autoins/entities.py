@@ -10,7 +10,7 @@ class Policy:
         self.coverage = coverage
 
     def __str__(self) -> str:
-        return f'Policy:{self.id}'
+        return f'Policy({self.id})'
     def __repr__(self) -> str:
         return self.__str__()
     def __eq__(self, obj):
@@ -34,16 +34,39 @@ class Driver:
         self.dob = dob
         self.license_number = license_number
         self.license_state = license_state
+    def __str__(self) -> str:
+        return f'Driver({self.id})'
+    def __repr__(self) -> str:
+        return self.__str__()
+    def __eq__(self, obj):
+        if isinstance(obj, Driver):
+            return self.id == obj.id
+        return False
+    def __hash__(self):
+        return hash(self.id)
 
 class Claim:
-    def __init__(self, id, policy_id, date, amount, automobile_id, status, description):
+    def __init__(self, id, policy_id, date, amount, automobile_id, driver_id, status, description, police_report):
         self.id = id
         self.policy_id = policy_id
         self.date = date
         self.amount = amount
+        self.driver_id = driver_id
         self.status = status
         self.automobile = automobile_id
         self.description = description
+        self.police_report = police_report
+
+    def __str__(self) -> str:
+        return f'Claim({self.id})'
+    def __repr__(self) -> str:
+        return self.__str__()
+    def __eq__(self, obj):
+        if isinstance(obj, Claim):
+            return self.id == obj.id
+        return False
+    def __hash__(self):
+        return hash(self.id)
 
 class PoliceReport:
     def __init__(self, id, policy, date, description, responsible_parties):
@@ -52,3 +75,61 @@ class PoliceReport:
         self.date = date
         self.description = description
         self.responsible_parties = responsible_parties
+
+class AdjClaim:
+    def __init__(self, claim: Claim):
+        self.claim = claim
+        self.policy = None
+        self.driver = None
+
+    def __str__(self) -> str:
+        return f'AdjClaim:({self.claim.id})'
+
+    def __repr__(self) -> str:
+        return self.__str__()
+
+    def __eq__(self, obj):
+        if isinstance(obj, AdjClaim):
+            return self.claim.id == obj.claim.id
+        return False
+
+    def __hash__(self):
+        return hash(self.claim.id)
+
+    def to_dict(self):
+        return {
+        'claim': str(self.claim),
+        'policy': str(self.policy) if self.policy else None,
+        'driver': str(self.driver) if self.driver else None
+    }
+
+class Action:
+    def __init__(self, id, claim_id, action, explain, pay_amount):
+        self.id = id
+        self.claim_id = claim_id
+        self.pay_amount = pay_amount
+        self.action = action
+        self.explain = explain
+
+    def __str__(self) -> str:
+        return f'Action({self.id}, action={self.action})'
+
+    def __repr__(self) -> str:
+        return self.__str__()
+
+    def __eq__(self, obj):
+        if isinstance(obj, Action):
+            return self.id == obj.id
+        return False
+
+    def __hash__(self):
+        return hash(self.id)
+    
+    def to_dict(self):
+        return {
+        'id': self.id,
+        'claim': self.claim_id,
+        'action': self.action,
+        'explain': self.explain,
+        'pay_amount': self.pay_amount
+    }
