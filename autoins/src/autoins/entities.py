@@ -1,3 +1,6 @@
+import uuid
+
+
 class Policy:
     def __init__(self, id, policy_holder, start_date, end_date, drivers, automobiles, deductible, coverage):
         self.id = id
@@ -120,15 +123,16 @@ class Adj:
         }
 
 class Action:
-    def __init__(self, id, claim_id, action, explain, pay_amount):
+    def __init__(self, code, claim_id, action, explain, pay_percent, id=str(uuid.uuid4())):
         self.id = id
+        self.code = code
         self.claim_id = claim_id
-        self.pay_amount = pay_amount
+        self.pay_percent = pay_percent
         self.action = action
         self.explain = explain
 
     def __str__(self) -> str:
-        return f'Action({self.id}, action={self.action})'
+        return f'Action({self.id}, code={self.code}, action={self.action})'
 
     def __repr__(self) -> str:
         return self.__str__()
@@ -144,9 +148,10 @@ class Action:
     def to_dict(self):
         return {'Action':{
             'id': self.id,
+            'code': self.code,
             'claim': self.claim_id,
             'action': self.action,
             'explain': self.explain,
-            'pay_amount': self.pay_amount
+            'pay_percent': self.pay_percent
             }
         }

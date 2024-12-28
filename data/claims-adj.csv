@@ -1,0 +1,3 @@
+id,policy_id,date,amount,automobile_id,driver_id,status,description,police_report
+C1,P2,2023-02-20,3000,202,D2,pending,Minor collision in parking lot,R1
+C2,P3,2023-03-10,7000,203,D5,pending,Rear-ended at traffic light,

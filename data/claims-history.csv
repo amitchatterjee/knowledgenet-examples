@@ -1,0 +1,5 @@
+id,policy_id,date,amount,automobile_id,driver_id,status,description,police_report
+H1,P1,2023-01-15,5000,201,D1,approved,Accident on highway,
+H1,P2,2023-01-15,5000,201,D1,approved,Accident on highway,
+H4,P4,2023-04-05,2500,204,,rejected,Hit a tree,
+H5,P5,2023-05-18,4500,205,,approved,Side swipe on freeway,
