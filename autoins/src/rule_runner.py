@@ -8,6 +8,7 @@ from knowledgenet.service import Service
 from knowledgenet.ftypes import Collector
 from autoins.entities import Action, Adj, Claim, Driver, PoliceReport, Policy
 from autoins.fact_loader import load_from_csv
+import logging
 
 def argsparser():
     parser = argparse.ArgumentParser(description="Auto Insurance Payment Rules Service")
@@ -16,6 +17,7 @@ def argsparser():
     parser.add_argument('--factsPaths', required=True, nargs='+', help='Full paths from where the facts are loaded')
     parser.add_argument('--decision', required=True, help='Full path name where the decisions are written to')
     parser.add_argument('--trace', action='store_true', help='Enable tracing of rule execution')
+    parser.add_argument('--log', help='Log severity level. The valid values are DEBUG, INFO, WARNING, ERROR, CRITICAL', default='INFO')
     return parser.parse_args()
 
 def subdirs(parent):
@@ -24,15 +26,7 @@ def subdirs(parent):
 def subfiles(parent):
     return [name for name in os.listdir(parent) if os.path.isfile(os.path.join(parent, name))]
 
-def init_repository(args):
-    rules_paths = []
-    for path in args.rulesPaths:
-        repo = subdirs(path)
-        for r in repo:
-            rules_paths.append(r)
-    return scanner.load_rules_from_filepaths(rules_paths)
-
-def init_facts(subfiles, args):
+def init_facts(args):
     facts = set()
     for path in args.factsPaths:
         files = subfiles(path)
@@ -65,12 +59,30 @@ def init_facts(subfiles, args):
                 })
     return facts
 
-if __name__ == "__main__":
-    args = argsparser()
-    init_repository(args)
+def init_knowledgebase(args):
+    rules_paths = []
+    for path in args.rulesPaths:
+        repo = subdirs(path)
+        for r in repo:
+            rules_paths.append(r)
+    scanner.load_rules_from_filepaths(rules_paths)
     repository = scanner.lookup(args.repository)
     service = Service(repository)
-    facts = init_facts(subfiles, args)
+    logging.info(f"Loaded {len(repository.rulesets)} rulesets")
+    facts = init_facts(args)
+    logging.info(f"Loaded {len(facts)} facts")
+    return service,facts
+
+def init_logging(args):
+    handlers = [logging.StreamHandler(sys.stdout)]
+    logging.basicConfig(level=getattr(logging, args.log.upper(), None), handlers=handlers)
+
+if __name__ == "__main__":
+    args = argsparser()
+
+    init_logging(args)
+
+    service, facts = init_knowledgebase(args)
     result_facts = service.execute(facts, tracer=sys.stdout if args.trace else None)
     print("\n\nResult:")
     for result_fact in result_facts:
