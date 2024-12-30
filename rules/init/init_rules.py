@@ -55,6 +55,6 @@ def create_action_collector():
                 run_once=True, order=1,
         when=Condition(of_type=Adj, matches=lambda ctx,this: assign(ctx, adj=this)),
         then=lambda ctx: insert(ctx, Collector(of_type=Action, group='action-collector', 
-                                    adj=ctx.adj, 
-                                    filter=lambda this,action: this.adj.claim.id == action.claim_id)))
+                                    claim_id=ctx.adj.claim.id, 
+                                    filter=lambda this,action: this.claim_id == action.claim_id)))
 

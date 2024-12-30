@@ -1,4 +1,4 @@
-import logging
+import uuid
 from knowledgenet.scanner import ruledef
 from knowledgenet.rule import Rule, Condition
 from knowledgenet.controls import insert, update, delete
@@ -12,11 +12,12 @@ ruleset='004-payment'
 @ruledef
 def select_action():
     def select(ctx):
-        logging.info(f'compute payment for {ctx.adj} - {len(ctx.actions.collection)}')
-        if len(ctx.actions.collection) == 0:
-            #insert(ctx, Action('NOCHG', ctx.adj.claim.id, 'p', 'pay', 0.00))
+        if len(ctx.actions) == 0:
+            insert(ctx, Action(str(uuid.uuid4()), 'NOCHG', ctx.claim_id, 'p', 'pay', 0.00))
+        else:
+            # TODO select the best action
             return
-    return Rule(id='select-action', repository='autoclaims', ruleset=ruleset,
+    return Rule(id='select-action', repository='autoclaims', ruleset=ruleset, run_once=True,
         when=Condition(of_type=Collector, group='action-collector', 
-                        matches=lambda ctx,this: assign(ctx, actions=this, adj=this.adj)),
+                    matches=lambda ctx,this: assign(ctx, actions=this.collection, claim_id=this.claim_id)),
         then=select)

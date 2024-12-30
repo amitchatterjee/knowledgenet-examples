@@ -1,5 +1,3 @@
-import uuid
-
 
 class Policy:
     def __init__(self, id, policy_holder, start_date, end_date, drivers, automobiles, deductible, coverage):
@@ -123,7 +121,7 @@ class Adj:
         }
 
 class Action:
-    def __init__(self, code, claim_id, action, explain, pay_percent, id=str(uuid.uuid4())):
+    def __init__(self, id, code, claim_id, action, explain, pay_percent):
         self.id = id
         self.code = code
         self.claim_id = claim_id
