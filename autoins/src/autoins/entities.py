@@ -70,12 +70,13 @@ class Claim:
         return hash(self.id)
 
 class PoliceReport:
-    def __init__(self, id, policy, date, description, responsible_parties):
+    def __init__(self, id, policy, date, description, responsible_parties, liability_percent):
         self.id = id
         self.policy = policy
         self.date = date
         self.description = description
         self.responsible_parties = responsible_parties
+        self.liability_percent = liability_percent
     def __str__(self) -> str:
         return f'PoliceReport({self.id})'
     def __repr__(self) -> str:
@@ -121,13 +122,16 @@ class Adj:
         }
 
 class Action:
-    def __init__(self, id, code, claim_id, action, explain, pay_percent):
+    def __init__(self, id, code, claim_id, action, explain, pay_percent, rank=0, pay_amount=None, inactive=True):
         self.id = id
         self.code = code
         self.claim_id = claim_id
         self.pay_percent = pay_percent
         self.action = action
         self.explain = explain
+        self.pay_amount = pay_amount
+        self.inactive = inactive
+        self.rank = rank
 
     def __str__(self) -> str:
         return f'Action({self.id}, code={self.code}, action={self.action})'
@@ -150,6 +154,9 @@ class Action:
             'claim': self.claim_id,
             'action': self.action,
             'explain': self.explain,
-            'pay_percent': self.pay_percent
+            'rank': self.rank,
+            'pay_percent': self.pay_percent,
+            'pay_amount': self.pay_amount,
+            'inactive': self.inactive
             }
         }

@@ -56,6 +56,7 @@ def init_facts(args):
                 load_from_csv(facts, PoliceReport, os.path.join(path,f), converters={
                     'date': pd.to_datetime,
                     'responsible_parties': lambda d: d.split(';') if d else [],
+                    'liability_percent': float
                 })
     return facts
 
@@ -88,7 +89,7 @@ if __name__ == "__main__":
     for result_fact in result_facts:
         if type(result_fact) in [Adj, Action]:
             print(json.dumps(result_fact.to_dict()))
-        elif type(result_fact) == Collector:
-            print(f"Collector({result_fact.group}, collection:{result_fact.collection})")
-        else:
-            print(result_fact)
+        # elif type(result_fact) == Collector:
+        #    print(f"Collector({result_fact.group}, collection:{result_fact.collection})")
+        # else:
+        #    print(result_fact)

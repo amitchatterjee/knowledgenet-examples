@@ -1,2 +1,2 @@
-id,policy,date,description,responsible_parties
-R1,P2,2019-01-01,Minor collision in parking lot,D2
+id,policy,date,description,responsible_parties,liability_percent
+R1,P2,2019-01-01,Minor collision in parking lot,D2;D5,0.5
