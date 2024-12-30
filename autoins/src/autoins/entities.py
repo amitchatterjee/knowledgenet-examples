@@ -113,12 +113,11 @@ class Adj:
         return hash(self.claim.id)
 
     def to_dict(self):
-        return {'Adj': {
+        return {
             'claim': str(self.claim),
             'policy': str(self.policy) if self.policy else None,
             'driver': str(self.driver) if self.driver else None,
             'police_report': str(self.police_report) if self.police_report else None
-            }
         }
 
 class Action:
@@ -148,7 +147,7 @@ class Action:
         return hash(self.id)
     
     def to_dict(self):
-        return {'Action':{
+        return {
             'id': self.id,
             'code': self.code,
             'claim': self.claim_id,
@@ -158,5 +157,7 @@ class Action:
             'pay_percent': self.pay_percent,
             'pay_amount': self.pay_amount,
             'inactive': self.inactive
-            }
         }
+    
+    def to_csv(self):
+        return f"{self.id},{self.code},{self.claim_id},{self.action},{self.explain},{self.rank},{self.pay_percent},{self.pay_amount},{self.inactive}"

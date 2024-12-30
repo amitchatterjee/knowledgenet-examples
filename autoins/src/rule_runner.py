@@ -1,6 +1,7 @@
 import argparse
 import os
 import sys
+import time
 import pandas as pd
 import json
 from knowledgenet import scanner
@@ -15,7 +16,8 @@ def argsparser():
     parser.add_argument('--rulesPaths', required=True, nargs='+', help='Full paths from where the rules are loaded')
     parser.add_argument('--repository', required=True, help='Repository name')
     parser.add_argument('--factsPaths', required=True, nargs='+', help='Full paths from where the facts are loaded')
-    parser.add_argument('--decision', required=True, help='Full path name where the decisions are written to')
+    parser.add_argument('--outputPath', required=True, help='Full path name of the directory where the actions are written to')
+    parser.add_argument('--cleanOutput', action='store_true', help='Clean the output directory before writing the actions')
     parser.add_argument('--trace', action='store_true', help='Enable tracing of rule execution')
     parser.add_argument('--log', help='Log severity level. The valid values are DEBUG, INFO, WARNING, ERROR, CRITICAL', default='INFO')
     return parser.parse_args()
@@ -78,6 +80,21 @@ def init_logging(args):
     handlers = [logging.StreamHandler(sys.stdout)]
     logging.basicConfig(level=getattr(logging, args.log.upper(), None), handlers=handlers)
 
+def write_result(args, result_facts):
+    if not os.path.exists(args.outputPath):
+        os.makedirs(args.outputPath)
+    
+    if args.cleanOutput:
+        files = subfiles(args.outputPath)
+        for f in files:
+            os.remove(os.path.join(args.outputPath, f))
+
+    df = pd.DataFrame(columns=['id','code','claim','action','explain','rank','pay_percent','pay_amount','inactive'])
+    for result_fact in result_facts:
+            if type(result_fact) == Action:
+                df = pd.concat([df, pd.DataFrame(result_fact.to_dict(), index=[0])], ignore_index=True)
+    df.to_csv(os.path.join(args.outputPath, f"{time.time()}.csv"), index=False)
+
 if __name__ == "__main__":
     args = argsparser()
 
@@ -85,11 +102,11 @@ if __name__ == "__main__":
 
     service, facts = init_knowledgebase(args)
     result_facts = service.execute(facts, tracer=sys.stdout if args.trace else None)
-    print("\n\nResult:")
-    for result_fact in result_facts:
-        if type(result_fact) in [Adj, Action]:
-            print(json.dumps(result_fact.to_dict()))
-        # elif type(result_fact) == Collector:
-        #    print(f"Collector({result_fact.group}, collection:{result_fact.collection})")
-        # else:
-        #    print(result_fact)
+
+    write_result(args, result_facts)
+
+    if logging.getLogger().isEnabledFor(logging.DEBUG):
+        logging.debug("\n\nResults:")
+        for result_fact in result_facts:
+            if type(result_fact) in [Adj, Action]:
+                logging.debug("\t%s: %s", result_fact.__class__.__name__, json.dumps(result_fact.to_dict()))
