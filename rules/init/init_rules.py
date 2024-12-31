@@ -49,12 +49,24 @@ def add_police_report_to_adj():
                         and assign(ctx, police_report=this))],
         then=add_police_report_to_adj)
 
+
+@ruledef
+def create_history_collector():
+    return Rule(id='create-history-collector', repository='autoclaims', ruleset=ruleset, order=1,
+        when=Condition(of_type=Adj, matches=lambda ctx,this: assign(ctx, adj=this)),
+        # TODO add date range to the filter based on claim.date
+        then=lambda ctx: insert(ctx, 
+                                Collector(of_type=Claim, group='history-collector', adj=ctx.adj,
+                                    value=lambda claim: claim.paid_amount,
+                                    filter=lambda this,claim: claim.status == 'approved'
+                                        and this.adj.policy
+                                        and this.adj.policy.id == claim.policy_id)))
+
 @ruledef
 def create_action_collector():
-    return Rule(id='create-action-collector', repository='autoclaims', ruleset=ruleset,
-                run_once=True, order=1,
+    return Rule(id='create-action-collector', repository='autoclaims', ruleset=ruleset, order=1,
         when=Condition(of_type=Adj, matches=lambda ctx,this: assign(ctx, adj=this)),
-        then=lambda ctx: insert(ctx, Collector(of_type=Action, group='action-collector', 
-                                    adj=ctx.adj, 
+        then=lambda ctx: insert(ctx, 
+                                Collector(of_type=Action, group='action-collector', adj=ctx.adj, 
                                     filter=lambda this,action: this.adj.claim.id == action.claim_id)))
 

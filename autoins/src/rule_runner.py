@@ -39,14 +39,15 @@ def init_facts(args):
                     'start_date': pd.to_datetime,
                     'end_date': pd.to_datetime,
                     'deductible': float,
-                    'coverage': float,
+                    'max_coverage': float,
                     'drivers': lambda d: d.split(';') if d else [],
                     'automobiles': lambda a: a.split(';') if a else []
                 })
             elif f.startswith('claims'):
                 load_from_csv(facts, Claim, os.path.join(path,f), converters={
                     'date': pd.to_datetime,
-                    'amount': float,
+                    'claimed_amount': float,
+                    'paid_amount': float,
                     'automobile': str,
                     'police_report': str
                 })
@@ -110,3 +111,8 @@ if __name__ == "__main__":
         for result_fact in result_facts:
             if type(result_fact) in [Adj, Action]:
                 logging.debug("\t%s: %s", result_fact.__class__.__name__, json.dumps(result_fact.to_dict()))
+            elif type(result_fact) == Collector:
+                logging.debug("\t%s: %s(%d)", result_fact.__class__.__name__, result_fact.group, 
+                              len(result_fact.collection))
+            else:
+                logging.debug("\t%s: %s", result_fact.__class__.__name__, result_fact)

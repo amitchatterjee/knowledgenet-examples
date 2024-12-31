@@ -1,6 +1,6 @@
 
 class Policy:
-    def __init__(self, id, policy_holder, start_date, end_date, drivers, automobiles, deductible, coverage):
+    def __init__(self, id, policy_holder, start_date, end_date, drivers, automobiles, deductible, max_coverage):
         self.id = id
         self.policy_holder = policy_holder
         self.start_date = start_date
@@ -8,7 +8,7 @@ class Policy:
         self.drivers = drivers
         self.automobiles = automobiles
         self.deductible = deductible
-        self.coverage = coverage
+        self.max_coverage = max_coverage
 
     def __str__(self) -> str:
         return f'Policy({self.id})'
@@ -47,11 +47,12 @@ class Driver:
         return hash(self.id)
 
 class Claim:
-    def __init__(self, id, policy_id, date, amount, automobile_id, driver_id, status, description, police_report):
+    def __init__(self, id, policy_id, date, claimed_amount, paid_amount, automobile_id, driver_id, status, description, police_report):
         self.id = id
         self.policy_id = policy_id
         self.date = date
-        self.amount = amount
+        self.claimed_amount = claimed_amount
+        self.paid_amount = paid_amount
         self.driver_id = driver_id
         self.status = status
         self.automobile = automobile_id
@@ -59,7 +60,7 @@ class Claim:
         self.police_report = police_report
 
     def __str__(self) -> str:
-        return f'Claim({self.id})'
+        return f'Claim({self.id}, policy={self.policy_id})'
     def __repr__(self) -> str:
         return self.__str__()
     def __eq__(self, obj):
