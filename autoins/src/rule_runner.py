@@ -13,8 +13,7 @@ import logging
 
 def argsparser():
     parser = argparse.ArgumentParser(description="Auto Insurance Payment Rules Service")
-    parser.add_argument('--rulesPaths', required=True, nargs='+', help='Full paths from where the rules are loaded')
-    parser.add_argument('--repository', required=True, help='Repository name')
+    parser.add_argument('--rulesPath', required=True, help='Full path of the location from where rules are loaded')
     parser.add_argument('--factsPaths', required=True, nargs='+', help='Full paths from where the facts are loaded')
     parser.add_argument('--outputPath', required=True, help='Full path name of the directory where the actions are written to')
     parser.add_argument('--cleanOutput', action='store_true', help='Clean the output directory before writing the actions')
@@ -65,12 +64,13 @@ def init_facts(args):
 
 def init_knowledgebase(args):
     rules_paths = []
-    for path in args.rulesPaths:
-        repo = subdirs(path)
-        for r in repo:
-            rules_paths.append(r)
+    repo = subdirs(args.rulesPath)
+    for r in repo:
+        rules_paths.append(r)
     scanner.load_rules_from_filepaths(rules_paths)
-    repository = scanner.lookup(args.repository)
+
+    rules_basename = os.path.basename(args.rulesPath)
+    repository = scanner.lookup(rules_basename)
     service = Service(repository)
     logging.info(f"Loaded {len(repository.rulesets)} rulesets")
     facts = init_facts(args)

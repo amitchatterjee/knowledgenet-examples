@@ -7,8 +7,6 @@ from knowledgenet.ftypes import Collector
 
 from autoins.entities import Action, Adj
 
-ruleset='004-finalization'
-
 @ruledef
 def select_action():
     def select(ctx):
@@ -26,7 +24,7 @@ def select_action():
             actions[0].inactive = False
             update(ctx, actions[0])
             return
-    return Rule(id='select-action', repository='autoclaims', ruleset=ruleset, run_once=True,
+    return Rule(run_once=True,
         when=Condition(of_type=Collector, group='action-collector', 
                     matches=lambda ctx,this: assign(ctx, actions=this.collection, adj=this.adj)),
         then=select)
@@ -40,7 +38,7 @@ def compute_payment():
         balance = max(ctx.adj.policy.max_coverage - ctx.history.sum(), 0.0) if ctx.adj.policy else 0.0
         ctx.action.pay_amount = min(balance, payable)
         update(ctx, ctx.action)
-    return Rule(id='compute-payment', repository='autoclaims', ruleset=ruleset, run_once=True, order=1,
+    return Rule(run_once=True, order=1,
         when=[Condition(of_type=Adj, matches=lambda ctx,this: assign(ctx, adj=this)),
             Condition(of_type=Collector, group='history-collector', 
                     matches=lambda ctx,this: this.adj == ctx.adj and assign(ctx, history=this)),  
