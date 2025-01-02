@@ -47,10 +47,10 @@ class Driver:
         return hash(self.id)
 
 class Claim:
-    def __init__(self, id, policy_id, date, claimed_amount, paid_amount, automobile_id, driver_id, status, description, police_report):
+    def __init__(self, id, policy_id, accident_date, claimed_amount, paid_amount, automobile_id, driver_id, status, description, police_report):
         self.id = id
         self.policy_id = policy_id
-        self.date = date
+        self.accident_date = accident_date
         self.claimed_amount = claimed_amount
         self.paid_amount = paid_amount
         self.driver_id = driver_id

@@ -1,2 +1,2 @@
-knowledgenet==0.0.1
+#knowledgenet==0.0.1
 pandas

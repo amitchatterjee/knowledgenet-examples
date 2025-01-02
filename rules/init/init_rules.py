@@ -54,15 +54,13 @@ def add_police_report_to_adj():
 def create_history_collector():
     return Rule(id='create-history-collector', repository='autoclaims', ruleset=ruleset, order=1,
         when=Condition(of_type=Adj, matches=lambda ctx,this: assign(ctx, adj=this)),
-        # TODO add date range to the filter based on claim.date
         then=lambda ctx: insert(ctx, 
                                 Collector(of_type=Claim, group='history-collector', adj=ctx.adj,
                                     value=lambda claim: claim.paid_amount,
                                     filter=lambda this,claim: claim.status == 'approved'
                                         and this.adj.policy
                                         and this.adj.policy.id == claim.policy_id
-                                        and this.adj.police_report
-                                        )))
+                                        and this.adj.claim.accident_date.year == claim.accident_date.year)))
 
 @ruledef
 def create_action_collector():

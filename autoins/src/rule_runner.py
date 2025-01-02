@@ -45,7 +45,7 @@ def init_facts(args):
                 })
             elif f.startswith('claims'):
                 load_from_csv(facts, Claim, os.path.join(path,f), converters={
-                    'date': pd.to_datetime,
+                    'accident_date': pd.to_datetime,
                     'claimed_amount': float,
                     'paid_amount': float,
                     'automobile': str,
@@ -109,10 +109,12 @@ if __name__ == "__main__":
     if logging.getLogger().isEnabledFor(logging.DEBUG):
         logging.debug("\n\nResults:")
         for result_fact in result_facts:
-            if type(result_fact) in [Adj, Action]:
+            if type(result_fact) == Action:
                 logging.debug("\t%s: %s", result_fact.__class__.__name__, json.dumps(result_fact.to_dict()))
-            elif type(result_fact) == Collector:
-                logging.debug("\t%s: %s(%d)", result_fact.__class__.__name__, result_fact.group, 
-                              len(result_fact.collection))
-            else:
-                logging.debug("\t%s: %s", result_fact.__class__.__name__, result_fact)
+            #elif type(result_fact) == Adj:
+            #    logging.debug("\t%s: %s", result_fact.__class__.__name__, json.dumps(result_fact.to_dict()))
+            #elif type(result_fact) == Collector:
+            #    logging.debug("\t%s: %s(%d)", result_fact.__class__.__name__, result_fact.group, 
+            #                  len(result_fact.collection))
+            #else:
+            #    logging.debug("\t%s: %s", result_fact.__class__.__name__, result_fact)

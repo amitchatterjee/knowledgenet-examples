@@ -13,16 +13,16 @@ ruleset='004-finalization'
 def select_action():
     def select(ctx):
         if len(ctx.actions) == 0:
-            insert(ctx, Action(str(uuid.uuid4()), 'NOCHG', ctx.adj.claim.id, 'p', 'pay', 
+            insert(ctx, Action(str(uuid.uuid4()), 'PAYC', ctx.adj.claim.id, 'p', 'pay', 
                                ctx.adj.police_report.liability_percent, inactive=False))
         else:
             '''
             select the best action and make it active
-                #1. sort actions by rank (asc) and pay_percent (asc)
+                #1. sort actions by rank (desc) and pay_percent (asc)
                 #2. pick the first action and make inactive = False
             '''
             actions = list(ctx.actions)
-            actions.sort(key=lambda a: (a.rank, a.pay_percent))
+            actions.sort(key=lambda a: (-a.rank, a.pay_percent))
             actions[0].inactive = False
             update(ctx, actions[0])
             return
@@ -35,8 +35,9 @@ def select_action():
 def compute_payment():
     def compute(ctx):
         # Compute payment based on the pay_percent, deductibles, and coverage
-        payable = max((ctx.adj.claim.claimed_amount * ctx.action.pay_percent) - ctx.adj.policy.deductible, 0.0)
-        balance = max(ctx.adj.policy.max_coverage - ctx.history.sum(), 0.0)
+        payable = max((ctx.adj.claim.claimed_amount * ctx.action.pay_percent) 
+                      - ctx.adj.policy.deductible if ctx.adj.policy else 0.0, 0.0)
+        balance = max(ctx.adj.policy.max_coverage - ctx.history.sum(), 0.0) if ctx.adj.policy else 0.0
         ctx.action.pay_amount = min(balance, payable)
         update(ctx, ctx.action)
     return Rule(id='compute-payment', repository='autoclaims', ruleset=ruleset, run_once=True, order=1,

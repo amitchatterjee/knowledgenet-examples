@@ -1,6 +1,6 @@
 id,policy_holder,start_date,end_date,drivers,automobiles,deductible,max_coverage
-P1,John Doe,2023-01-01,2023-12-31,D1;D3,,1200.50,10000.00
-P2,Jane Smith,2023-02-15,2024-02-14,D2;D4,,250.00,4000.00
+P1,John Doe,2023-01-01,2024-01-01,D1;D3,,1200.50,10000.00
+P2,Jane Smith,2023-01-01,2024-01-01,D2;D4,,250.00,4000.00
 P3,Emily Johnson,2023-03-10,2024-03-09,D5,,1100.00,10000.00
 P4,Michael Brown,2023-04-20,2024-04-19,,,1300.25,10000.00
 P5,Jessica Davis,2023-05-05,2024-05-04,,,1150.60,10000.00
