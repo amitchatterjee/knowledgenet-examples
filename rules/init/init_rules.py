@@ -60,7 +60,9 @@ def create_history_collector():
                                     value=lambda claim: claim.paid_amount,
                                     filter=lambda this,claim: claim.status == 'approved'
                                         and this.adj.policy
-                                        and this.adj.policy.id == claim.policy_id)))
+                                        and this.adj.policy.id == claim.policy_id
+                                        and this.adj.police_report
+                                        )))
 
 @ruledef
 def create_action_collector():
