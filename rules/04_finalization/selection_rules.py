@@ -1,6 +1,6 @@
 import uuid
 from knowledgenet.scanner import ruledef
-from knowledgenet.rule import Rule, Fact
+from knowledgenet.rule import Rule, Fact, Collection
 from knowledgenet.controls import insert, update
 from knowledgenet.helper import assign
 from knowledgenet.collector import Collector
@@ -25,7 +25,7 @@ def select_action():
             update(ctx, actions[0])
             return
     return Rule(run_once=True,
-        when=Fact(of_type=Collector, group='action-collector', 
+        when=Collection(group='action-collector', 
                     matches=lambda ctx,this: assign(ctx, actions=this.collection, adj=this.adj)),
         then=select)
 
@@ -39,9 +39,9 @@ def compute_payment():
         ctx.action.pay_amount = min(balance, payable)
         update(ctx, ctx.action)
     return Rule(run_once=True, order=1,
-        when=[Fact(of_type=Adj, matches=lambda ctx,this: assign(ctx, adj=this)),
-            Fact(of_type=Collector, group='history-collector', 
-                    matches=lambda ctx,this: this.adj == ctx.adj and assign(ctx, history=this)),  
-            Fact(of_type=Action, matches=lambda ctx,this: 
-                      not this.inactive and ctx.adj.claim.id == this.claim_id and assign(ctx, action=this))],
+        when=[Fact(of_type=Adj, var='adj'),
+            Collection(group='history-collector', var='history', 
+                        matches=lambda ctx,this: this.adj == ctx.adj),  
+            Fact(of_type=Action, var='action', 
+                    matches=lambda ctx,this: not this.inactive and ctx.adj.claim.id == this.claim_id)],
         then=compute)

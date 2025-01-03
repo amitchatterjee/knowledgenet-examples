@@ -8,8 +8,8 @@ from autoins.entities import Action, Adj, Claim, Driver, PoliceReport, Policy
 
 @ruledef
 def create_adj():    
-    return Rule(when=Fact(of_type=Claim, matches=lambda ctx,this: this.status == 'pending' 
-                       and assign(ctx, claim=this)),
+    return Rule(when=Fact(of_type=Claim, var='claim', 
+                matches=lambda ctx,this: this.status == 'pending'),
         then=lambda ctx: insert(ctx, Adj(ctx.claim)))
 
 @ruledef
@@ -18,9 +18,9 @@ def add_policy_to_adj():
         ctx.adj.policy = ctx.policy
         update(ctx, ctx.adj)
     return Rule(run_once=True,
-        when=[Fact(of_type=Adj, matches=lambda ctx,this: assign(ctx, adj=this)),
-              Fact(of_type=Policy, matches=lambda ctx,this: ctx.adj.claim.policy_id == this.id 
-                        and assign(ctx, policy=this))],
+        when=[Fact(of_type=Adj, var='adj'),
+              Fact(of_type=Policy, var='policy', 
+                    matches=lambda ctx,this: ctx.adj.claim.policy_id == this.id)],
         then=add_policy_to_adj_claim)
 
 @ruledef
@@ -29,9 +29,9 @@ def add_driver_to_adj():
         ctx.adj.driver = ctx.driver
         update(ctx, ctx.adj)
     return Rule(run_once=True,
-        when=[Fact(of_type=Adj, matches=lambda ctx,this: assign(ctx, adj=this)),
-              Fact(of_type=Driver, matches=lambda ctx,this: ctx.adj.claim.driver_id == this.id 
-                        and assign(ctx, driver=this))],
+        when=[Fact(of_type=Adj,  var='adj'),
+              Fact(of_type=Driver, var='driver', 
+                    matches=lambda ctx,this: ctx.adj.claim.driver_id == this.id)],
         then=add_driver_to_adj)
 
 @ruledef
@@ -40,11 +40,10 @@ def add_police_report_to_adj():
         ctx.adj.police_report = ctx.police_report
         update(ctx, ctx.adj)
     return Rule(run_once=True,
-        when=[Fact(of_type=Adj, matches=lambda ctx,this: assign(ctx, adj=this)),
-              Fact(of_type=PoliceReport, matches=lambda ctx,this: ctx.adj.claim.police_report== this.id 
-                        and assign(ctx, police_report=this))],
+        when=[Fact(of_type=Adj, var='adj'),
+              Fact(of_type=PoliceReport, var='police_report',
+                        matches=lambda ctx,this: ctx.adj.claim.police_report== this.id)],
         then=add_police_report_to_adj)
-
 
 @ruledef
 def create_history_collector():
@@ -61,7 +60,7 @@ def create_history_collector():
 @ruledef
 def create_action_collector():
     return Rule(order=1,
-        when=Fact(of_type=Adj, matches=lambda ctx,this: assign(ctx, adj=this)),
+        when=Fact(of_type=Adj, var='adj'),
         then=lambda ctx: insert(ctx, 
                                 Collector(of_type=Action, group='action-collector', adj=ctx.adj, 
                                     filter=lambda this,action: this.adj.claim.id == action.claim_id)))
