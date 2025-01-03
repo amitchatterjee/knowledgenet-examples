@@ -6,7 +6,7 @@ import pandas as pd
 import json
 from knowledgenet import scanner
 from knowledgenet.service import Service
-from knowledgenet.ftypes import Collector
+from knowledgenet.collector import Collector
 from autoins.entities import Action, Adj, Claim, Driver, PoliceReport, Policy
 from autoins.fact_loader import load_from_csv
 import logging
