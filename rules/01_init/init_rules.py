@@ -48,7 +48,7 @@ def add_police_report_to_adj():
 @ruledef
 def create_history_collector():
     return Rule(order=1,
-        when=Fact(of_type=Adj, matches=lambda ctx,this: assign(ctx, adj=this)),
+        when=Fact(of_type=Adj, var='adj'),
         then=lambda ctx: insert(ctx, 
                                 Collector(of_type=Claim, group='history-collector', adj=ctx.adj,
                                     value=lambda claim: claim.paid_amount,
