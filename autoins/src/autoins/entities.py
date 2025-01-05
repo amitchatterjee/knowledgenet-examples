@@ -122,7 +122,7 @@ class Adj:
         }
 
 class Action:
-    columns = ['id','code','claim','action','explain','rank','pay_percent','pay_amount','inactive']
+    columns = {'id':str,'code':str,'claim_id':str,'action':str,'explain':str,'rank':int,'pay_percent':float,'pay_amount':float,'inactive':bool}
 
     def __init__(self, id, code, claim_id, action, explain, pay_percent, rank=0, pay_amount=None, inactive=True):
         self.id = id
@@ -150,17 +150,8 @@ class Action:
         return hash(self.id)
 
     def to_dict(self):
-        return {
-            'id': self.id,
-            'code': self.code,
-            'claim': self.claim_id,
-            'action': self.action,
-            'explain': self.explain,
-            'rank': self.rank,
-            'pay_percent': self.pay_percent if self.pay_percent else 0.0,
-            'pay_amount': self.pay_amount if self.pay_amount else 0.0,
-            'inactive': self.inactive
-        }
+        return {key: 0.0 if typ in [int,float] and getattr(self, key) is None else getattr(self, key) 
+            for (key,typ) in self.columns.items()}
     
     def to_csv(self):
         return f"{self.id},{self.code},{self.claim_id},{self.action},{self.explain},{self.rank},{self.pay_percent},{self.pay_amount},{self.inactive}"
