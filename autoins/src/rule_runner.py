@@ -90,10 +90,11 @@ def write_result(args, result_facts):
         for f in files:
             os.remove(os.path.join(args.outputPath, f))
 
-    df = pd.DataFrame(columns=['id','code','claim','action','explain','rank','pay_percent','pay_amount','inactive'])
+    df = pd.DataFrame(columns=Action.columns)
     for result_fact in result_facts:
             if type(result_fact) == Action:
-                df = pd.concat([df, pd.DataFrame(result_fact.to_dict(), index=[0])], ignore_index=True)
+                frame = pd.DataFrame(result_fact.to_dict(), index=[0])
+                df = pd.concat([df if not df.empty else None, frame], ignore_index=True)
     df.to_csv(os.path.join(args.outputPath, f"{time.time()}.csv"), index=False)
 
 if __name__ == "__main__":
