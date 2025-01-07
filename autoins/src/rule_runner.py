@@ -91,10 +91,10 @@ def write_result(args, result_facts):
             os.remove(os.path.join(args.outputPath, f))
 
     df = pd.DataFrame(columns=Action.columns)
+    #df.set_index(Action.key, inplace=True)
     for result_fact in result_facts:
-            if type(result_fact) == Action:
-                frame = pd.DataFrame(result_fact.to_dict(), index=[0])
-                df = pd.concat([df if not df.empty else None, frame], ignore_index=True)
+        if type(result_fact) == Action:
+            df = pd.concat([df if not df.empty else None, pd.DataFrame(result_fact.to_dict(), index=[0])])
     df.to_csv(os.path.join(args.outputPath, f"{time.time()}.csv"), index=False)
 
 if __name__ == "__main__":

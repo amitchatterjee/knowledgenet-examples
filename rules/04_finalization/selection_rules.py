@@ -3,7 +3,6 @@ from knowledgenet.scanner import ruledef
 from knowledgenet.rule import Rule, Fact, Collection
 from knowledgenet.controls import insert, update
 from knowledgenet.helper import assign
-from knowledgenet.collector import Collector
 
 from autoins.entities import Action, Adj
 

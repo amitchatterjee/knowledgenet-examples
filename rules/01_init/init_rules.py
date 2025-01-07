@@ -1,7 +1,6 @@
 from knowledgenet.scanner import ruledef
 from knowledgenet.rule import Rule, Fact
 from knowledgenet.controls import insert, update, delete
-from knowledgenet.helper import assign
 from knowledgenet.collector import Collector
 
 from autoins.entities import Action, Adj, Claim, Driver, PoliceReport, Policy
@@ -52,11 +51,9 @@ def create_history_collector():
         then=lambda ctx: insert(ctx, 
                                 Collector(of_type=Claim, group='history-collector', adj=ctx.adj,
                                     value=lambda claim: claim.paid_amount,
-                                    filter=lambda this,claim: claim.status == 'approved'
-                                        and this.adj.policy
-                                        and this.adj.policy.id == claim.policy_id
-                                        and this.adj.claim.accident_date.year == claim.accident_date.year)))
-
+                                    filter=[lambda this,claim: claim.status == 'approved',
+                                            lambda this,claim: this.adj.policy and this.adj.policy.id == claim.policy_id,
+                                            lambda this,claim: this.adj.claim.accident_date.year == claim.accident_date.year])))
 @ruledef
 def create_action_collector():
     return Rule(order=1,
