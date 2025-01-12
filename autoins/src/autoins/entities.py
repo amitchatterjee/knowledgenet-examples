@@ -88,6 +88,28 @@ class PoliceReport:
         return False
     def __hash__(self):
         return hash(self.id)
+    
+class Estimate:
+    def __init__(self, id, claim, date, amount, description):
+        self.id = id
+        self.claim = claim
+        self.date = date
+        self.amount = amount
+        self.description = description
+
+    def __str__(self) -> str:
+        return f'Estimate({self.id}, claim={self.claim})'
+
+    def __repr__(self) -> str:
+        return self.__str__()
+
+    def __eq__(self, obj):
+        if isinstance(obj, Estimate):
+            return self.id == obj.id
+        return False
+
+    def __hash__(self):
+        return hash(self.id)
 
 class Adj:
     '''

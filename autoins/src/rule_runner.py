@@ -7,7 +7,7 @@ import json
 from knowledgenet import scanner
 from knowledgenet.service import Service
 from knowledgenet.collector import Collector
-from autoins.entities import Action, Adj, Claim, Driver, PoliceReport, Policy
+from autoins.entities import Action, Adj, Claim, Driver, PoliceReport, Policy, Estimate
 from autoins.fact_loader import load_from_csv
 import logging
 
@@ -59,6 +59,11 @@ def init_facts(args):
                     'date': pd.to_datetime,
                     'responsible_parties': lambda d: d.split(';') if d else [],
                     'liability_percent': float
+                })
+            elif f.startswith('estimates'):
+                load_from_csv(facts, Estimate, os.path.join(path,f), converters={
+                    'date': pd.to_datetime,
+                    'amount': float
                 })
     return facts
 
