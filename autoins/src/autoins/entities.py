@@ -58,6 +58,7 @@ class Claim:
         self.automobile = automobile_id
         self.description = description
         self.police_report = police_report
+        self.history = None
 
     def __str__(self) -> str:
         return f'Claim({self.id}, policy={self.policy_id})'
@@ -111,6 +112,16 @@ class Estimate:
     def __hash__(self):
         return hash(self.id)
 
+class Anchor:
+    '''
+    An object that is added so that any rule can always match on it.
+    '''
+    def __str__(self) -> str:
+        return f'Anchor:()'
+
+    def __repr__(self) -> str:
+        return self.__str__()
+
 class Adj:
     '''
     The primary purpose of the Adj class is to reduce combinatorial explosion of facts. It also makes audit rules easier to write.
@@ -120,6 +131,7 @@ class Adj:
         self.policy = None
         self.driver = None
         self.police_report = None
+        self.bypass = set()
 
     def __str__(self) -> str:
         return f'Adj:({self.claim.id})'

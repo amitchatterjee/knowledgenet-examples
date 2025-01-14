@@ -7,7 +7,7 @@ import json
 from knowledgenet import scanner
 from knowledgenet.service import Service
 from knowledgenet.collector import Collector
-from autoins.entities import Action, Adj, Claim, Driver, PoliceReport, Policy, Estimate
+from autoins.entities import Action, Adj, Claim, Driver, PoliceReport, Policy, Estimate, Anchor
 from autoins.fact_loader import load_from_csv
 import logging
 
@@ -108,7 +108,15 @@ if __name__ == "__main__":
     init_logging(args)
 
     service, facts = init_knowledgebase(args)
-    result_facts = service.execute(facts, tracer=sys.stdout if args.trace else None)
+    facts.add(Anchor())
+
+    try:
+        start_time = time.time()
+        result_facts = service.execute(facts, tracer=sys.stdout if args.trace else None)
+    finally:
+        end_time = time.time()
+        execution_time_ms = (end_time - start_time) * 1000
+        logging.info("Execution time: %s ms", execution_time_ms)
 
     write_result(args, result_facts)
 

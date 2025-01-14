@@ -7,7 +7,7 @@ from knowledgenet.helper import assign
 from autoins.entities import Action, Adj
 
 @ruledef
-def pay_action():
+def pay_on_no_action():
     '''
     When a claim has no actions associated with it, pay the claim.
     '''
@@ -25,7 +25,7 @@ def select_action():
         #1. sort actions by rank (desc) and pay_percent (asc)
         #2. pick the first action and make inactive = False
     '''
-    def select(ctx):
+    def select_action_rhs(ctx):
         actions = list(ctx.actions)
         actions.sort(key=lambda a: (-a.rank, a.pay_percent))
         actions[0].inactive = False
@@ -33,23 +33,22 @@ def select_action():
     return Rule(run_once=True, order=1,
         when=Collection(group='action-collector', 
                     matches=lambda ctx,this: assign(ctx, actions=this.collection, adj=this.adj)),
-        then=select)
+        then=select_action_rhs)
 
 @ruledef
 def compute_payment():
     '''
     Compute payment based on the pay_percent, deductibles, and coverage
     '''
-    def compute(ctx):
+    def compute_payment_rhs(ctx):
         payable = max((ctx.adj.claim.claimed_amount * ctx.action.pay_percent) 
-                      - ctx.adj.policy.deductible if ctx.adj.policy else 0.0, 0.0)
-        balance = max(ctx.adj.policy.max_coverage - ctx.history.sum(), 0.0) if ctx.adj.policy else 0.0
+                      - ctx.adj.policy.deductible if ctx.adj.policy else 0.0, 0.0)          
+        balance = max(ctx.adj.policy.max_coverage - sum([each.paid_amount for each in ctx.adj.history]), 0.0) \
+            if ctx.adj.policy else 0.0
         ctx.action.pay_amount = min(balance, payable)
         update(ctx, ctx.action)
     return Rule(run_once=True, order=2,
-        when=[Fact(of_type=Adj, var='adj'),
-            Collection(group='history-collector', var='history', 
-                        matches=lambda ctx,this: this.adj == ctx.adj),  
+        when=[Fact(of_type=Adj, var='adj'), 
             Fact(of_type=Action, var='action', 
                     matches=lambda ctx,this: not this.inactive and ctx.adj.claim.id == this.claim_id)],
-        then=compute)
+        then=compute_payment_rhs)
