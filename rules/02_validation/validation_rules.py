@@ -22,6 +22,13 @@ def no_police_report():
                                             'd', 'no police report', 0.00, rank=999)))
 
 @ruledef
+def no_driver():
+    return Rule(when=Fact(of_type=Adj, var='adj', 
+                    matches=lambda ctx,this: not this.driver),
+                    then=lambda ctx: insert(ctx, Action(str(uuid.uuid4()), 'NODRV', ctx.adj.claim.id, 
+                                            'd', 'no driver', 0.00, rank=998)))
+
+@ruledef
 def bypass_rules_with_validation_error():
     def bypass_rules_with_validation_error_rhs(ctx):
         ctx.adj.bypass.add('all')
@@ -30,5 +37,5 @@ def bypass_rules_with_validation_error():
             Fact(of_type=Adj, var='adj'),
             Collection(group='action-collector', 
                     matches=[lambda ctx,this: this.adj == ctx.adj,  
-                            lambda ctx,this: len(this.collection) >= 0])], 
+                            lambda ctx,this: len(this.collection) > 0])], 
         then=bypass_rules_with_validation_error_rhs)

@@ -19,11 +19,32 @@ def create_adj():
         then=lambda ctx: insert(ctx, Adj(ctx.claim)))
 
 @ruledef
+def join_facts():
+    def join_facts_rhs(ctx):
+        ctx.adj.driver = ctx.driver
+        ctx.adj.police_report = ctx.police_report
+        ctx.adj.policy = ctx.policy
+        update(ctx, ctx.adj)
+    return Rule(run_once=True,
+        when=[Fact(of_type=Adj, var='adj'),
+            Fact(of_type=Policy, var='policy', 
+                matches=lambda ctx,this: ctx.adj.claim.policy_id == this.id),
+            Fact(of_type=Driver, var='driver', 
+                matches=lambda ctx,this: ctx.adj.claim.driver_id == this.id),
+            Fact(of_type=PoliceReport, var='police_report', 
+                matches=lambda ctx,this: ctx.adj.claim.police_report_id == this.id)],
+        then=join_facts_rhs)
+
+# #########################################################################
+# Rule order: 1
+# Add collectos
+# ##########################################################################
+@ruledef
 def create_history_collector():
     '''
     Create a collector that collects history (past) claims for any adjudcated claims. We are interested in the paid amount
     '''
-    return Rule(run_once=True,
+    return Rule(run_once=True, order=1,
         when=Fact(of_type=Adj, var='adj'),
         then=lambda ctx: 
             insert(ctx, 
@@ -31,45 +52,6 @@ def create_history_collector():
                         filter=[lambda this,claim: claim.status == 'approved',
                                 lambda this,claim: this.adj.policy and this.adj.policy.id == claim.policy_id,
                                 lambda this,claim: this.adj.claim.accident_date.year == claim.accident_date.year])))
-
-@ruledef
-def add_policy_to_adj():
-    def add_policy_to_adj_claim_rhs(ctx):
-        ctx.adj.policy = ctx.policy
-        update(ctx, ctx.adj)
-    return Rule(run_once=True,
-        when=[Fact(of_type=Adj, var='adj'),
-              Fact(of_type=Policy, var='policy', 
-                    matches=lambda ctx,this: ctx.adj.claim.policy_id == this.id)],
-        then=add_policy_to_adj_claim_rhs)
-
-@ruledef
-def add_driver_to_adj():
-    def add_driver_to_adj_rhs(ctx):
-        ctx.adj.driver = ctx.driver
-        update(ctx, ctx.adj)
-    return Rule(run_once=True,
-        when=[Fact(of_type=Adj,  var='adj'),
-              Fact(of_type=Driver, var='driver', 
-                    matches=lambda ctx,this: ctx.adj.claim.driver_id == this.id)],
-        then=add_driver_to_adj_rhs)
-
-@ruledef
-def add_police_report_to_adj():
-    def add_police_report_to_adj_rhs(ctx):
-        ctx.adj.police_report = ctx.police_report
-        update(ctx, ctx.adj)
-    return Rule(run_once=True,
-        when=[Fact(of_type=Adj, var='adj'),
-              Fact(of_type=PoliceReport, var='police_report',
-                        matches=lambda ctx,this: ctx.adj.claim.police_report== this.id)],
-        then=add_police_report_to_adj_rhs)
-
-# #########################################################################
-# Rule order: 1
-# Set of rules that adds history to the adj objects and cleans up
-# ########################################################################## 
-
 @ruledef
 def add_history_to_adj():
     '''

@@ -42,7 +42,7 @@ def compute_payment():
     '''
     def compute_payment_rhs(ctx):
         payable = max((ctx.adj.claim.claimed_amount * ctx.action.pay_percent) 
-                      - ctx.adj.policy.deductible if ctx.adj.policy else 0.0, 0.0)          
+                      - ctx.adj.policy.deductible if ctx.adj.policy else 0.0, 0.0)
         balance = max(ctx.adj.policy.max_coverage - sum([each.paid_amount for each in ctx.adj.history]), 0.0) \
             if ctx.adj.policy else 0.0
         ctx.action.pay_amount = min(balance, payable)
@@ -50,5 +50,5 @@ def compute_payment():
     return Rule(run_once=True, order=2,
         when=[Fact(of_type=Adj, var='adj'), 
             Fact(of_type=Action, var='action', 
-                    matches=lambda ctx,this: not this.inactive and ctx.adj.claim.id == this.claim_id)],
+                    matches=lambda ctx,this: not this.inactive and this.pay_percent > 0 and ctx.adj.claim.id == this.claim_id)],
         then=compute_payment_rhs)
