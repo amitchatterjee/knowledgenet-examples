@@ -1,10 +1,17 @@
+import logging
 import uuid
 from knowledgenet.scanner import ruledef
-from knowledgenet.rule import Rule, Fact, Collection
+from knowledgenet.rule import Rule, Fact, Collection, Event
 from knowledgenet.controls import insert, update
 from knowledgenet.helper import assign
 
 from autoins.entities import Action, Adj
+from autoins.util import record_action_event
+
+@ruledef
+def create_action_event_handler():
+    return Rule(when=Event(on_types=Action, var='event'),
+                then=lambda ctx: record_action_event(ctx.event))
 
 @ruledef
 def pay_on_no_action():

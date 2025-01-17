@@ -7,7 +7,8 @@ import json
 from knowledgenet import scanner
 from knowledgenet.service import Service
 from knowledgenet.collector import Collector
-from autoins.entities import Action, Adj, Claim, Driver, PoliceReport, Policy, Estimate, Anchor
+from knowledgenet.ftypes import EventFact
+from autoins.entities import Action, Adj, Claim, Driver, PoliceReport, Policy, Estimate
 from autoins.fact_loader import load_from_csv
 import logging
 
@@ -108,7 +109,7 @@ if __name__ == "__main__":
     init_logging(args)
 
     service, facts = init_knowledgebase(args)
-    facts.add(Anchor())
+    facts.add(EventFact(on_types=Action))
 
     try:
         start_time = time.time()

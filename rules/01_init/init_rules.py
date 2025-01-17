@@ -1,10 +1,11 @@
+import logging
+
 from knowledgenet.scanner import ruledef
-from knowledgenet.rule import Rule, Fact, Collection
+from knowledgenet.rule import Rule, Fact, Collection, Event
 from knowledgenet.controls import insert, update, delete
 from knowledgenet.collector import Collector
-from knowledgenet.ftypes import EventFact
 
-from autoins.entities import Action, Adj, Claim, Driver, PoliceReport, Policy, Anchor
+from autoins.entities import Action, Adj, Claim, Driver, PoliceReport, Policy
 
 # #########################################################################
 # Rule order: 0
@@ -89,8 +90,3 @@ def create_action_collector():
         then=lambda ctx: insert(ctx, 
                                 Collector(of_type=Action, group='action-collector', adj=ctx.adj, 
                                     filter=lambda this,action: this.adj.claim.id == action.claim_id)))
-@ruledef
-def create_event_listener():
-    return Rule(order=2, run_once=True,
-        when=Fact(of_type=Anchor),
-                then=lambda ctx: insert(ctx, EventFact(on_types=[Adj,Action])))

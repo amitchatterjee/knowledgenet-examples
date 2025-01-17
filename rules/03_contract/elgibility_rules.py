@@ -1,13 +1,20 @@
+import logging
 import uuid
 from knowledgenet.scanner import ruledef
-from knowledgenet.rule import Rule, Fact
+from knowledgenet.rule import Rule, Fact, Event
 from knowledgenet.controls import insert, update, delete
 from knowledgenet.helper import assign
 
 from autoins.entities import Adj, Action
+from autoins.util import record_action_event
 
 def bypass(ctx, this):
     return 'all' in this.bypass or 'contract' in this.bypass
+
+@ruledef
+def create_action_event_handler():
+    return Rule(when=Event(on_types=Action, var='event'),
+                then=lambda ctx: record_action_event(ctx.event))
 
 @ruledef
 def inactive_policy():

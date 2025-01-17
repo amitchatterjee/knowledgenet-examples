@@ -111,16 +111,6 @@ class Estimate:
     def __hash__(self):
         return hash(self.id)
 
-class Anchor:
-    '''
-    An object that is added so that any rule can always match on it.
-    '''
-    def __str__(self) -> str:
-        return f'Anchor:()'
-
-    def __repr__(self) -> str:
-        return self.__str__()
-
 class Adj:
     '''
     The primary purpose of the Adj class is to reduce combinatorial explosion of facts. It also makes audit rules easier to write.
