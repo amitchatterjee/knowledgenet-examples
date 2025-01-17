@@ -1,9 +1,9 @@
 import uuid
 from knowledgenet.scanner import ruledef
-from knowledgenet.rule import Rule, Fact, Evaluator, Collection
+from knowledgenet.rule import Rule, Fact, Event, Collection
 from knowledgenet.controls import insert, update, delete
 from knowledgenet.helper import assign, factset, node
-from knowledgenet.ftypes import Eval
+from knowledgenet.ftypes import EventFact
 
 from autoins.entities import Adj, Action
 

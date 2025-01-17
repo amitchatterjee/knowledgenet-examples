@@ -2,7 +2,7 @@ from knowledgenet.scanner import ruledef
 from knowledgenet.rule import Rule, Fact, Collection
 from knowledgenet.controls import insert, update, delete
 from knowledgenet.collector import Collector
-from knowledgenet.ftypes import Eval
+from knowledgenet.ftypes import EventFact
 
 from autoins.entities import Action, Adj, Claim, Driver, PoliceReport, Policy, Anchor
 
@@ -108,7 +108,7 @@ def create_action_collector():
                                 Collector(of_type=Action, group='action-collector', adj=ctx.adj, 
                                     filter=lambda this,action: this.adj.claim.id == action.claim_id)))
 @ruledef
-def create_eval():
+def create_event_listener():
     return Rule(order=2, run_once=True,
         when=Fact(of_type=Anchor),
-                then=lambda ctx: insert(ctx, Eval(of_types=[Adj,Action])))
+                then=lambda ctx: insert(ctx, EventFact(on_types=[Adj,Action])))
