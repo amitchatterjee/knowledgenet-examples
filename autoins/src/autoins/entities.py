@@ -47,7 +47,7 @@ class Driver:
         return hash(self.id)
 
 class Claim:
-    def __init__(self, id, policy_id, accident_date, claimed_amount, paid_amount, automobile_id, driver_id, status, description, police_report):
+    def __init__(self, id, policy_id, accident_date, claimed_amount, paid_amount, automobile_id, driver_id, status, description, police_report_id):
         self.id = id
         self.policy_id = policy_id
         self.accident_date = accident_date
@@ -57,8 +57,7 @@ class Claim:
         self.status = status
         self.automobile = automobile_id
         self.description = description
-        self.police_report = police_report
-        self.history = None
+        self.police_report_id = police_report_id
 
     def __str__(self) -> str:
         return f'Claim({self.id}, policy={self.policy_id})'
@@ -131,6 +130,7 @@ class Adj:
         self.policy = None
         self.driver = None
         self.police_report = None
+        self.history = None
         self.bypass = set()
 
     def __str__(self) -> str:

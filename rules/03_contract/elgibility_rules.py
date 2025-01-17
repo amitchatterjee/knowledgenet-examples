@@ -6,13 +6,13 @@ from knowledgenet.helper import assign
 
 from autoins.entities import Adj, Action
 
-def bypass(ctx,this):
-    return 'all' not in this.bypass and 'contract' not in this.bypass
+def bypass(ctx, this):
+    return 'all' in this.bypass or 'contract' in this.bypass
 
 @ruledef
 def inactive_policy():
     return Rule(when=Fact(of_type=Adj, var='adj', 
-                    matches=[bypass,
+                    matches=[lambda ctx,this: not bypass(ctx,this),
                         lambda ctx,this: 
                             not this.policy.start_date <= this.claim.accident_date <= this.policy.end_date]),
         then=lambda ctx: insert(ctx, Action(str(uuid.uuid4()), 'NOACT', ctx.adj.claim.id, 
