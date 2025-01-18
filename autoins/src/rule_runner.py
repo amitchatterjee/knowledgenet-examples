@@ -6,9 +6,8 @@ import pandas as pd
 import json
 from knowledgenet import scanner
 from knowledgenet.service import Service
-from knowledgenet.collector import Collector
 from knowledgenet.ftypes import EventFact
-from autoins.entities import Action, Adj, Claim, Driver, PoliceReport, Policy, Estimate
+from autoins.entities import Action, Adj, Claim, Driver, IncidenceReport, Policy, Estimate
 from autoins.fact_loader import load_from_csv
 import logging
 
@@ -49,14 +48,14 @@ def init_facts(args):
                     'claimed_amount': float,
                     'paid_amount': float,
                     'automobile': str,
-                    'police_report': str
+                    'incidence_report': str
                 })
             elif f.startswith('drivers'):
                 load_from_csv(facts, Driver, os.path.join(path,f), converters={
                     'dob': pd.to_datetime
                 })
-            elif f.startswith('police_reports'):
-                load_from_csv(facts, PoliceReport, os.path.join(path,f), converters={
+            elif f.startswith('incidence_reports'):
+                load_from_csv(facts, IncidenceReport, os.path.join(path,f), converters={
                     'date': pd.to_datetime,
                     'responsible_parties': lambda d: d.split(';') if d else [],
                     'liability_percent': float

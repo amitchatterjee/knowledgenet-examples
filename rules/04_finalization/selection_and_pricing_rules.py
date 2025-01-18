@@ -23,7 +23,7 @@ def pay_on_no_action():
                     matches=[lambda ctx,this: not len(this.collection),  
                             lambda ctx,this: assign(ctx, adj=this.adj)]),
         then=lambda ctx: insert(ctx, Action(str(uuid.uuid4()), 'PAYC', ctx.adj.claim.id, 'p', 'pay', 
-                            ctx.adj.police_report.liability_percent, inactive=False)))
+                            ctx.adj.incidence_report.liability_percent, inactive=False)))
 
 @ruledef
 def select_action():

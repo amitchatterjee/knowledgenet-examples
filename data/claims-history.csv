@@ -1,4 +1,4 @@
-id,policy_id,accident_date,claimed_amount,paid_amount,automobile_id,driver_id,status,description,police_report_id
+id,policy_id,accident_date,claimed_amount,paid_amount,automobile_id,driver_id,status,description,incidence_report_id
 H1,P1,2023-01-15,5000,3000,201,D1,approved,Accident on highway,
 H2,P2,2023-01-15,5000,3000,201,D2,approved,Accident on highway,
 H3,P4,2023-04-05,2500,1200,204,,rejected,Hit a tree,

@@ -47,7 +47,7 @@ class Driver:
         return hash(self.id)
 
 class Claim:
-    def __init__(self, id, policy_id, accident_date, claimed_amount, paid_amount, automobile_id, driver_id, status, description, police_report_id):
+    def __init__(self, id, policy_id, accident_date, claimed_amount, paid_amount, automobile_id, driver_id, status, description, incidence_report_id):
         self.id = id
         self.policy_id = policy_id
         self.accident_date = accident_date
@@ -57,7 +57,7 @@ class Claim:
         self.status = status
         self.automobile = automobile_id
         self.description = description
-        self.police_report_id = police_report_id
+        self.incidence_report_id = incidence_report_id
 
     def __str__(self) -> str:
         return f'Claim({self.id}, policy={self.policy_id})'
@@ -70,20 +70,21 @@ class Claim:
     def __hash__(self):
         return hash(self.id)
 
-class PoliceReport:
-    def __init__(self, id, policy, date, description, responsible_parties, liability_percent):
+class IncidenceReport:
+    def __init__(self, id, source, policy, date, description, responsible_parties, liability_percent):
         self.id = id
+        self.source = source
         self.policy = policy
         self.date = date
         self.description = description
         self.responsible_parties = responsible_parties
         self.liability_percent = liability_percent
     def __str__(self) -> str:
-        return f'PoliceReport({self.id})'
+        return f'IncidenceReport({self.id})'
     def __repr__(self) -> str:
         return self.__str__()
     def __eq__(self, obj):
-        if isinstance(obj, PoliceReport):
+        if isinstance(obj, IncidenceReport):
             return self.id == obj.id
         return False
     def __hash__(self):
@@ -119,7 +120,7 @@ class Adj:
         self.claim = claim
         self.policy = None
         self.driver = None
-        self.police_report = None
+        self.incidence_report = None
         self.history = None
         self.bypass = set()
 
@@ -142,7 +143,7 @@ class Adj:
             'claim': str(self.claim),
             'policy': str(self.policy) if self.policy else None,
             'driver': str(self.driver) if self.driver else None,
-            'police_report': str(self.police_report) if self.police_report else None
+            'incidence_report': str(self.incidence_report) if self.incidence_report else None
         }
 
 class Action:

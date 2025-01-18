@@ -1,4 +1,4 @@
-id,policy_id,accident_date,claimed_amount,paid_amount,automobile_id,driver_id,status,description,police_report_id
+id,policy_id,accident_date,claimed_amount,paid_amount,automobile_id,driver_id,status,description,incidence_report_id
 C1,P2,2023-02-20,3000,0,202,D2,pending,Minor collision in parking lot,R1
 C2,NOTEXISTS,2023-03-10,7000,0,203,D5,pending,Rear-ended at traffic light,
 C3,P1,2024-02-20,3000,0,202,D1,pending,Fender bender,R2

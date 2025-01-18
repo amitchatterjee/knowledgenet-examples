@@ -20,11 +20,11 @@ def no_policy():
                                             'd', 'no policy found', 0.00, rank=1000)))
 
 @ruledef
-def no_police_report():
+def no_incidence_report():
     return Rule(run_once=True, when=Fact(of_type=Adj, var='adj', 
-                    matches=lambda ctx,this: not this.police_report),
+                    matches=lambda ctx,this: not this.incidence_report),
                     then=lambda ctx: insert(ctx, Action(str(uuid.uuid4()), 'NOPLR', ctx.adj.claim.id, 
-                                            'd', 'no police report', 0.00, rank=999)))
+                                            'd', 'no incidence report', 0.00, rank=999)))
 
 @ruledef
 def no_driver():

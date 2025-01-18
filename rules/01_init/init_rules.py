@@ -1,11 +1,9 @@
-import logging
-
 from knowledgenet.scanner import ruledef
 from knowledgenet.rule import Rule, Fact, Collection, Event
 from knowledgenet.controls import insert, update, delete
-from knowledgenet.collector import Collector
+from knowledgenet.container import Collector
 
-from autoins.entities import Action, Adj, Claim, Driver, PoliceReport, Policy
+from autoins.entities import Action, Adj, Claim, Driver, IncidenceReport, Policy
 
 # #########################################################################
 # Rule order: 0
@@ -23,7 +21,7 @@ def create_adj():
 def join_facts():
     def join_facts_rhs(ctx):
         ctx.adj.driver = ctx.driver
-        ctx.adj.police_report = ctx.police_report
+        ctx.adj.incidence_report = ctx.incidence_report
         ctx.adj.policy = ctx.policy
         update(ctx, ctx.adj)
     return Rule(run_once=True,
@@ -32,8 +30,8 @@ def join_facts():
                 matches=lambda ctx,this: ctx.adj.claim.policy_id == this.id),
             Fact(of_type=Driver, var='driver', 
                 matches=lambda ctx,this: ctx.adj.claim.driver_id == this.id),
-            Fact(of_type=PoliceReport, var='police_report', 
-                matches=lambda ctx,this: ctx.adj.claim.police_report_id == this.id)],
+            Fact(of_type=IncidenceReport, var='incidence_report', 
+                matches=lambda ctx,this: ctx.adj.claim.incidence_report_id == this.id)],
         then=join_facts_rhs)
 
 # #########################################################################
