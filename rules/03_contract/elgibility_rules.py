@@ -13,7 +13,7 @@ def bypass(ctx, this):
 
 @ruledef
 def create_action_event_handler():
-    return Rule(when=Event(on_types=Action, var='event'),
+    return Rule(when=Event(group='onAction', var='event'),
                 then=lambda ctx: record_action_event(ctx.event))
 
 @ruledef

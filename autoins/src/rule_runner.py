@@ -109,7 +109,7 @@ if __name__ == "__main__":
     init_logging(args)
 
     service, facts = init_knowledgebase(args)
-    facts.add(EventFact(on_types=Action))
+    facts.add(EventFact(group='onAction', on_types=Action))
 
     try:
         start_time = time.time()
