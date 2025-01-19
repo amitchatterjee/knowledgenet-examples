@@ -91,8 +91,10 @@ class IncidenceReport:
         return hash(self.id)
     
 class Estimate:
-    def __init__(self, id, claim, date, amount, description):
+    def __init__(self, id, estimator_id, approved_vendor, claim, date, amount, description):
         self.id = id
+        self.estimator_id = estimator_id
+        self.approved_vendor = approved_vendor
         self.claim = claim
         self.date = date
         self.amount = amount
@@ -122,6 +124,7 @@ class Adj:
         self.driver = None
         self.incidence_report = None
         self.history = None
+        self.estimates = None
         self.bypass = set()
 
     def __str__(self) -> str:

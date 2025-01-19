@@ -8,7 +8,7 @@ from knowledgenet import scanner
 from knowledgenet.service import Service
 from knowledgenet.ftypes import EventFact
 from autoins.entities import Action, Adj, Claim, Driver, IncidenceReport, Policy, Estimate
-from autoins.fact_loader import load_from_csv
+from autoins.util import load_from_csv, to_bool
 import logging
 
 def argsparser():
@@ -62,6 +62,7 @@ def init_facts(args):
                 })
             elif f.startswith('estimates'):
                 load_from_csv(facts, Estimate, os.path.join(path,f), converters={
+                    'approved_vendor': to_bool,
                     'date': pd.to_datetime,
                     'amount': float
                 })

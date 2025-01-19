@@ -9,11 +9,6 @@ from autoins.entities import Action, Adj
 from autoins.util import record_action_event
 
 @ruledef
-def create_action_event_handler():
-    return Rule(when=Event(group='onAction', var='event'),
-                then=lambda ctx: record_action_event(ctx.event))
-
-@ruledef
 def pay_on_no_action():
     '''
     When a claim has no actions associated with it, pay the claim.
@@ -22,7 +17,7 @@ def pay_on_no_action():
         when=Collection(group='action-collector', 
                     matches=[lambda ctx,this: not len(this.collection),  
                             lambda ctx,this: assign(ctx, adj=this.adj)]),
-        then=lambda ctx: insert(ctx, Action(str(uuid.uuid4()), 'PAYC', ctx.adj.claim.id, 'p', 'pay', 
+        then=lambda ctx: insert(ctx, Action(str(uuid.uuid4()), 'PAYCL', ctx.adj.claim.id, 'p', 'pay', 
                             ctx.adj.incidence_report.liability_percent, inactive=False)))
 
 @ruledef
@@ -59,3 +54,8 @@ def compute_payment():
             Fact(of_type=Action, var='action', 
                     matches=lambda ctx,this: not this.inactive and this.pay_percent > 0 and ctx.adj.claim.id == this.claim_id)],
         then=compute_payment_rhs)
+
+@ruledef
+def create_action_event_handler():
+    return Rule(order=1, when=Event(group='onAction', var='event'),
+                then=lambda ctx: record_action_event(ctx, ctx.event))

@@ -1,9 +1,10 @@
+import logging
 from knowledgenet.scanner import ruledef
 from knowledgenet.rule import Rule, Fact, Collection, Event
 from knowledgenet.controls import insert, update, delete
 from knowledgenet.container import Collector
 
-from autoins.entities import Action, Adj, Claim, Driver, IncidenceReport, Policy
+from autoins.entities import Action, Adj, Claim, Driver, Estimate, IncidenceReport, Policy
 
 # #########################################################################
 # Rule order: 0
@@ -36,12 +37,12 @@ def join_facts():
 
 # #########################################################################
 # Rule order: 1
-# Add collectos
+# Add collectors
 # ##########################################################################
 @ruledef
 def create_history_collector():
     '''
-    Create a collector that collects history (past) claims for any adjudcated claims. We are interested in the paid amount
+    Create a collector that collects history (past) claims for any adjudicated claims. We are interested in the paid amount
     '''
     return Rule(run_once=True, order=1,
         when=Fact(of_type=Adj, var='adj'),
@@ -51,6 +52,23 @@ def create_history_collector():
                         filter=[lambda this,claim: claim.status == 'approved',
                                 lambda this,claim: this.adj.policy and this.adj.policy.id == claim.policy_id,
                                 lambda this,claim: this.adj.claim.accident_date.year == claim.accident_date.year])))
+
+@ruledef
+def create_estimate_collector():
+    '''
+    Create a collector that collects all estimates for a given claim
+    '''
+    return Rule(run_once=True, order=1,
+        when=Fact(of_type=Adj, var='adj'),
+        then=lambda ctx: 
+            insert(ctx, 
+                    Collector(of_type=Estimate, group='estimate-collector', adj=ctx.adj,
+                        filter=lambda this,estimate: estimate.claim == ctx.adj.claim.id)))
+
+# #########################################################################
+# Rule order: 2
+# Enrich Adj with collected data
+# ########################################################################## 
 @ruledef
 def add_history_to_adj():
     '''
@@ -59,13 +77,26 @@ def add_history_to_adj():
     def add_history_to_adj_rhs(ctx):
         ctx.adj.history = ctx.hist.collection
         update(ctx, ctx.adj)
-    return Rule(order=1, run_once=True,
+    return Rule(order=2, run_once=True,
         when=(Fact(of_type=Adj, var='adj'),
                 Collection(group='history-collector', var='hist', matches=lambda ctx,this: ctx.adj == this.adj)),
         then=add_history_to_adj_rhs)
 
+@ruledef
+def add_estimates_to_adj():
+    '''
+    Add all estimates to the adj so that other rulesets can get estimates from the adj object itself
+    '''
+    def add_estimates_to_adj_rhs(ctx):
+        ctx.adj.estimates = ctx.estimate.collection
+        update(ctx, ctx.adj)
+    return Rule(order=2, run_once=True,
+        when=(Fact(of_type=Adj, var='adj'),
+                Collection(group='estimate-collector', var='estimate', matches=lambda ctx,this: ctx.adj == this.adj)),
+        then=add_estimates_to_adj_rhs)
+
 # #########################################################################
-# Rule order: 2
+# Rule order: 3
 # Prepares for the next ruleset to run by cleaning up uneeded objects,
 # adding new collectors, etc.
 # ########################################################################## 
@@ -74,16 +105,25 @@ def del_history_collector():
     '''
     The work of the history collector is done 
     '''
-    return Rule(order=2,
+    return Rule(order=3,
             when=Collection(group='history-collector', var='hist'),
             then=lambda ctx: delete(ctx, ctx.hist))
+
+@ruledef 
+def del_estimate_collector():
+    '''
+    The work of the estimate collector is done 
+    '''
+    return Rule(order=3,
+            when=Collection(group='estimate-collector', var='estimate'),
+            then=lambda ctx: delete(ctx, ctx.estimate))
 
 @ruledef
 def create_action_collector():
     '''
     Create a collection that collects all the actions for a claim being adjudicated
     '''
-    return Rule(order=2,
+    return Rule(order=3,
         when=Fact(of_type=Adj, var='adj'),
         then=lambda ctx: insert(ctx, 
                                 Collector(of_type=Action, group='action-collector', adj=ctx.adj, 

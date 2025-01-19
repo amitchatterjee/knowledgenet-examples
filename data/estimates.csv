@@ -1,6 +1,6 @@
-id,claim,date,amount,description
-E1,C1,2023-01-15,1000.00,Initial estimate
-E2,C2,2023-02-20,1500.50,Revised estimate
-E3,C3,2023-03-10,2000.75,Final estimate
-E4,C4,2023-04-05,2500.00,Initial estimate
-E5,C5,2023-05-25,3000.25,Revised estimate
+id,estimator_id,approved_vendor,claim,date,amount,description
+E1,W1,yes,C1,2023-01-15,1000.00,Initial estimate
+E2,W2,yes,C2,2023-02-20,1500.50,Revised estimate
+E3,W3,yes,C3,2023-03-10,2000.75,Final estimate
+E4,W4,yes,C4,2023-04-05,2500.00,Initial estimate
+E5,W5,yes,C5,2023-05-25,3000.25,Revised estimate
