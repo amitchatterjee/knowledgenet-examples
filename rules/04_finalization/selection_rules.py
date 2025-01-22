@@ -1,7 +1,6 @@
-import logging
 import uuid
 from knowledgenet.scanner import ruledef
-from knowledgenet.rule import Rule, Fact, Collection, Event
+from knowledgenet.rule import Rule, Collection, Event
 from knowledgenet.controls import insert, update
 from knowledgenet.helper import assign
 
@@ -36,24 +35,6 @@ def select_action():
         when=Collection(group='action-collector', 
                     matches=lambda ctx,this: assign(ctx, actions=this.collection, adj=this.adj)),
         then=select_action_rhs)
-
-@ruledef
-def compute_payment():
-    '''
-    Compute payment based on the pay_percent, deductibles, and coverage
-    '''
-    def compute_payment_rhs(ctx):
-        payable = max((ctx.adj.claim.claimed_amount * ctx.action.pay_percent) 
-                      - ctx.adj.policy.deductible if ctx.adj.policy else 0.0, 0.0)
-        balance = max(ctx.adj.policy.max_coverage - sum([each.paid_amount for each in ctx.adj.history]), 0.0) \
-            if ctx.adj.policy else 0.0
-        ctx.action.pay_amount = min(balance, payable)
-        update(ctx, ctx.action)
-    return Rule(run_once=True, order=2,
-        when=[Fact(of_type=Adj, var='adj'), 
-            Fact(of_type=Action, var='action', 
-                    matches=lambda ctx,this: not this.inactive and this.pay_percent > 0 and ctx.adj.claim.id == this.claim_id)],
-        then=compute_payment_rhs)
 
 @ruledef
 def create_action_event_handler():

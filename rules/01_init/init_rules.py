@@ -40,47 +40,75 @@ def join_facts():
 # Add collectors
 # ##########################################################################
 @ruledef
-def create_history_collector():
+def create_collision_history_collector():
     '''
-    Create a collector that collects history (past) claims for any adjudicated claims. We are interested in the paid amount
+    Create collectors that collect history (past) of claims of type, collision, for an adjudicated claim. We are interested in the paid amount
     '''
     return Rule(run_once=True, order=1,
         when=Fact(of_type=Adj, var='adj'),
         then=lambda ctx: 
             insert(ctx, 
-                    Collector(of_type=Claim, group='history-collector', adj=ctx.adj,
+                    Collector(of_type=Claim, group='collision-history-collector', adj=ctx.adj,
                         filter=[lambda this,claim: claim.status == 'approved',
                                 lambda this,claim: this.adj.policy and this.adj.policy.id == claim.policy_id,
-                                lambda this,claim: this.adj.claim.accident_date.year == claim.accident_date.year])))
+                                lambda this,claim: this.adj.claim.filing_date.year == claim.filing_date.year])))
+
+@ruledef
+def create_liability_history_collector():
+    '''
+    Create collectors that collect history (past) of claims of type, liability, for an adjudicated claim. We are interested in the paid amount
+    '''
+    return Rule(run_once=True, order=1,
+        when=Fact(of_type=Adj, var='adj'),
+        then=lambda ctx: 
+            insert(ctx, 
+                    Collector(of_type=Claim, group='liability-history-collector', adj=ctx.adj,
+                        filter=[lambda this,claim: claim.status == 'approved',
+                                lambda this,claim: claim.type == 'liability',
+                                lambda this,claim: this.adj.policy and this.adj.policy.id == claim.policy_id,
+                                lambda this,claim: this.adj.claim.filing_date.year == claim.filing_date.year])))
 
 @ruledef
 def create_estimate_collector():
     '''
-    Create a collector that collects all estimates for a given claim
+    Create collectors that collect all estimates for an adjudicated claim
     '''
     return Rule(run_once=True, order=1,
         when=Fact(of_type=Adj, var='adj'),
         then=lambda ctx: 
             insert(ctx, 
                     Collector(of_type=Estimate, group='estimate-collector', adj=ctx.adj,
-                        filter=lambda this,estimate: estimate.claim == ctx.adj.claim.id)))
+                        filter=lambda this,estimate: estimate.claim_id == ctx.adj.claim.id)))
 
 # #########################################################################
 # Rule order: 2
 # Enrich Adj with collected data
 # ########################################################################## 
 @ruledef
-def add_history_to_adj():
+def add_collision_history_to_adj():
     '''
     Add all history records to the adj so that other rulesets can get the history information from the adj object itself
     '''
-    def add_history_to_adj_rhs(ctx):
-        ctx.adj.history = ctx.hist.collection
+    def add_collision_history_to_adj_rhs(ctx):
+        ctx.adj.collision_history = ctx.hist.collection
         update(ctx, ctx.adj)
     return Rule(order=2, run_once=True,
         when=(Fact(of_type=Adj, var='adj'),
-                Collection(group='history-collector', var='hist', matches=lambda ctx,this: ctx.adj == this.adj)),
-        then=add_history_to_adj_rhs)
+                Collection(group='collision-history-collector', var='hist', matches=lambda ctx,this: ctx.adj == this.adj)),
+        then=add_collision_history_to_adj_rhs)
+
+@ruledef
+def add_liability_history_to_adj():
+    '''
+    Add all liability history records to the adj so that other rulesets can get the history information from the adj object itself
+    '''
+    def add_liability_history_to_adj_rhs(ctx):
+        ctx.adj.liability_history = ctx.hist.collection
+        update(ctx, ctx.adj)
+    return Rule(order=2, run_once=True,
+        when=(Fact(of_type=Adj, var='adj'),
+                Collection(group='liability-history-collector', var='hist', matches=lambda ctx,this: ctx.adj == this.adj)),
+        then=add_liability_history_to_adj_rhs)
 
 @ruledef
 def add_estimates_to_adj():
@@ -101,18 +129,27 @@ def add_estimates_to_adj():
 # adding new collectors, etc.
 # ########################################################################## 
 @ruledef 
-def del_history_collector():
+def del_collision_history_collector():
     '''
-    The work of the history collector is done 
+    The work of the collision history collectors are done 
     '''
     return Rule(order=3,
-            when=Collection(group='history-collector', var='hist'),
+            when=Collection(group='collision-history-collector', var='hist'),
+            then=lambda ctx: delete(ctx, ctx.hist))
+
+@ruledef 
+def del_liability_history_collector():
+    '''
+    The work of the liability history collectors are done 
+    '''
+    return Rule(order=3,
+            when=Collection(group='liability-history-collector', var='hist'),
             then=lambda ctx: delete(ctx, ctx.hist))
 
 @ruledef 
 def del_estimate_collector():
     '''
-    The work of the estimate collector is done 
+    The work of the estimate collectors are done 
     '''
     return Rule(order=3,
             when=Collection(group='estimate-collector', var='estimate'),

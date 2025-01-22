@@ -1,14 +1,15 @@
 
 class Policy:
-    def __init__(self, id, policy_holder, start_date, end_date, drivers, automobiles, deductible, max_coverage):
+    def __init__(self, id, policy_holder, start_date, end_date, drivers, automobiles, collision_deductible, collision_coverage, liability_covergae):
         self.id = id
         self.policy_holder = policy_holder
         self.start_date = start_date
         self.end_date = end_date
         self.drivers = drivers
         self.automobiles = automobiles
-        self.deductible = deductible
-        self.max_coverage = max_coverage
+        self.collision_deductible = collision_deductible
+        self.collision_coverage = collision_coverage
+        self.liability_coverage = liability_covergae
 
     def __str__(self) -> str:
         return f'Policy({self.id})'
@@ -47,10 +48,11 @@ class Driver:
         return hash(self.id)
 
 class Claim:
-    def __init__(self, id, policy_id, accident_date, claimed_amount, paid_amount, automobile_id, driver_id, status, description, incidence_report_id):
+    def __init__(self, id, type, policy_id, filing_date, claimed_amount, paid_amount, automobile_id, driver_id, status, description, incidence_report_id):
         self.id = id
+        self.type = type
         self.policy_id = policy_id
-        self.accident_date = accident_date
+        self.filing_date = filing_date
         self.claimed_amount = claimed_amount
         self.paid_amount = paid_amount
         self.driver_id = driver_id
@@ -71,11 +73,11 @@ class Claim:
         return hash(self.id)
 
 class IncidenceReport:
-    def __init__(self, id, source, policy, date, description, responsible_parties, liability_percent):
+    def __init__(self, id, source, policy, accident_date, description, responsible_parties, liability_percent):
         self.id = id
         self.source = source
         self.policy = policy
-        self.date = date
+        self.accident_date = accident_date
         self.description = description
         self.responsible_parties = responsible_parties
         self.liability_percent = liability_percent
@@ -91,17 +93,17 @@ class IncidenceReport:
         return hash(self.id)
     
 class Estimate:
-    def __init__(self, id, estimator_id, approved_vendor, claim, date, amount, description):
+    def __init__(self, id, estimator_id, approved_vendor, claim_id, date, amount, description):
         self.id = id
         self.estimator_id = estimator_id
         self.approved_vendor = approved_vendor
-        self.claim = claim
+        self.claim_id = claim_id
         self.date = date
         self.amount = amount
         self.description = description
 
     def __str__(self) -> str:
-        return f'Estimate({self.id}, claim={self.claim})'
+        return f'Estimate({self.id}, claim={self.claim_id})'
 
     def __repr__(self) -> str:
         return self.__str__()
@@ -123,7 +125,8 @@ class Adj:
         self.policy = None
         self.driver = None
         self.incidence_report = None
-        self.history = None
+        self.collision_history = None
+        self.liability_history = None
         self.estimates = None
         self.bypass = set()
 

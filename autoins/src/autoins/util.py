@@ -3,6 +3,9 @@ import pandas as pd
 
 from knowledgenet.helper import session
 
+def bypass(ctx, adj):
+    return 'all' in adj.bypass or session(ctx).ruleset.id.split('_')[0] in adj.bypass
+
 def record_action_event(ctx, event):
     logging.debug("Action event on %s: added: %s, updated: %s, deleted: %s",
                     session(ctx).ruleset,

@@ -37,18 +37,17 @@ def init_facts(args):
                 load_from_csv(facts, Policy, os.path.join(path,f), converters={
                     'start_date': pd.to_datetime,
                     'end_date': pd.to_datetime,
-                    'deductible': float,
-                    'max_coverage': float,
+                    'collision_deductible': float,
+                    'collision_coverage': float,
+                    'liability_coverage': float,
                     'drivers': lambda d: d.split(';') if d else [],
                     'automobiles': lambda a: a.split(';') if a else []
                 })
             elif f.startswith('claims'):
                 load_from_csv(facts, Claim, os.path.join(path,f), converters={
-                    'accident_date': pd.to_datetime,
+                    'filing_date': pd.to_datetime,
                     'claimed_amount': float,
-                    'paid_amount': float,
-                    'automobile': str,
-                    'incidence_report': str
+                    'paid_amount': float
                 })
             elif f.startswith('drivers'):
                 load_from_csv(facts, Driver, os.path.join(path,f), converters={
@@ -56,7 +55,7 @@ def init_facts(args):
                 })
             elif f.startswith('incidence_reports'):
                 load_from_csv(facts, IncidenceReport, os.path.join(path,f), converters={
-                    'date': pd.to_datetime,
+                    'accident_date': pd.to_datetime,
                     'responsible_parties': lambda d: d.split(';') if d else [],
                     'liability_percent': float
                 })
