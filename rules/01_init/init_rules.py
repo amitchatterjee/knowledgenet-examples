@@ -1,17 +1,15 @@
-import logging
 from knowledgenet.scanner import ruledef
-from knowledgenet.rule import Rule, Fact, Collection, Event
+from knowledgenet.rule import Rule, Fact, Collection
 from knowledgenet.controls import insert, update, delete
 from knowledgenet.container import Collector
 
-from autoins.entities import Action, Adj, Claim, Driver, Estimate, IncidenceReport, Policy
+from autoins.entities import Action, Adj, Automobile, Claim, Driver, Estimate, IncidenceReport, Policy
 
 # #########################################################################
 # Rule order: 0
 # Set of rules that builds the Adj object for each claim that is pending 
 # including collecting historical claims
 # ##########################################################################
-
 @ruledef
 def create_adj():    
     return Rule(when=Fact(of_type=Claim, var='claim', 
@@ -19,21 +17,48 @@ def create_adj():
         then=lambda ctx: insert(ctx, Adj(ctx.claim)))
 
 @ruledef
-def join_facts():
-    def join_facts_rhs(ctx):
-        ctx.adj.driver = ctx.driver
-        ctx.adj.incidence_report = ctx.incidence_report
+def join_adj_with_policy():
+    def join_adj_with_policy_rhs(ctx):
         ctx.adj.policy = ctx.policy
         update(ctx, ctx.adj)
     return Rule(run_once=True,
         when=[Fact(of_type=Adj, var='adj'),
-            Fact(of_type=Policy, var='policy', 
-                matches=lambda ctx,this: ctx.adj.claim.policy_id == this.id),
-            Fact(of_type=Driver, var='driver', 
-                matches=lambda ctx,this: ctx.adj.claim.driver_id == this.id),
-            Fact(of_type=IncidenceReport, var='incidence_report', 
-                matches=lambda ctx,this: ctx.adj.claim.incidence_report_id == this.id)],
-        then=join_facts_rhs)
+                Fact(of_type=Policy, var='policy', 
+                    matches=lambda ctx, this: ctx.adj.claim.policy_id == this.id)],
+        then=join_adj_with_policy_rhs)
+
+@ruledef
+def join_adj_with_driver():
+    def join_adj_with_driver_rhs(ctx):
+        ctx.adj.driver = ctx.driver
+        update(ctx, ctx.adj)
+    return Rule(run_once=True,
+        when=[Fact(of_type=Adj, var='adj'),
+                Fact(of_type=Driver, var='driver', 
+                    matches=lambda ctx, this: ctx.adj.claim.driver_id == this.id)],
+        then=join_adj_with_driver_rhs)
+
+@ruledef
+def join_adj_with_automobile():
+    def join_adj_with_automobile_rhs(ctx):
+        ctx.adj.automobile = ctx.automobile
+        update(ctx, ctx.adj)
+    return Rule(run_once=True,
+        when=[Fact(of_type=Adj, var='adj'),
+                Fact(of_type=Automobile, var='automobile', 
+                    matches=lambda ctx, this: ctx.adj.claim.automobile_id == this.id)],
+        then=join_adj_with_automobile_rhs)
+
+@ruledef
+def join_adj_with_incidence_report():
+    def join_adj_with_incidence_report_rhs(ctx):
+        ctx.adj.incidence_report = ctx.incidence_report
+        update(ctx, ctx.adj)
+    return Rule(run_once=True,
+        when=[Fact(of_type=Adj, var='adj'),
+                Fact(of_type=IncidenceReport, var='incidence_report', 
+                    matches=lambda ctx, this: ctx.adj.claim.incidence_report_id == this.id)],
+        then=join_adj_with_incidence_report_rhs)
 
 # #########################################################################
 # Rule order: 1

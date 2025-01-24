@@ -1,8 +1,7 @@
 import uuid
 from knowledgenet.scanner import ruledef
 from knowledgenet.rule import Rule, Fact, Event, Collection
-from knowledgenet.controls import insert, update, delete
-from knowledgenet.helper import assign, factset, node
+from knowledgenet.controls import insert, update
 
 from autoins.entities import Adj, Action
 from autoins.util import record_action_event
@@ -30,6 +29,14 @@ def no_driver():
                     matches=lambda ctx,this: not this.driver),
                 then=lambda ctx: insert(ctx, Action(str(uuid.uuid4()), 'NODRV', ctx.adj.claim.id, 
                                         'v', 'no driver found', 0.00, rank=998)))
+
+@ruledef
+def no_automobile():
+    return Rule(run_once=True, 
+                when=Fact(of_type=Adj, var='adj', 
+                    matches=lambda ctx,this: not this.automobile),
+                then=lambda ctx: insert(ctx, Action(str(uuid.uuid4()), 'NOAUT', ctx.adj.claim.id, 
+                                        'v', 'no automobile found', 0.00, rank=997)))
 
 @ruledef 
 def insufficent_estimates():

@@ -23,7 +23,8 @@ class Policy:
         return hash(self.id)
 
 class Automobile:
-    def __init__(self, make, model, year, vin):
+    def __init__(self, id, make, model, year, vin):
+        self.id = id
         self.make = make
         self.model = model
         self.year = year
@@ -48,7 +49,8 @@ class Driver:
         return hash(self.id)
 
 class Claim:
-    def __init__(self, id, type, policy_id, filing_date, claimed_amount, paid_amount, automobile_id, driver_id, status, description, incidence_report_id):
+    def __init__(self, id, type, policy_id, filing_date, claimed_amount, paid_amount, 
+                 automobile_id, driver_id, status, description, incidence_report_id):
         self.id = id
         self.type = type
         self.policy_id = policy_id
@@ -57,7 +59,7 @@ class Claim:
         self.paid_amount = paid_amount
         self.driver_id = driver_id
         self.status = status
-        self.automobile = automobile_id
+        self.automobile_id = automobile_id
         self.description = description
         self.incidence_report_id = incidence_report_id
 
@@ -73,13 +75,15 @@ class Claim:
         return hash(self.id)
 
 class IncidenceReport:
-    def __init__(self, id, source, policy, accident_date, description, responsible_parties, liability_percent):
+    def __init__(self, id, source, policy, accident_date, description, license_number, license_state, vin, liability_percent):
         self.id = id
         self.source = source
         self.policy = policy
         self.accident_date = accident_date
         self.description = description
-        self.responsible_parties = responsible_parties
+        self.license_number = license_number
+        self.license_state = license_state
+        self.vin = vin
         self.liability_percent = liability_percent
     def __str__(self) -> str:
         return f'IncidenceReport({self.id})'
@@ -124,6 +128,7 @@ class Adj:
         self.claim = claim
         self.policy = None
         self.driver = None
+        self.automobile = None
         self.incidence_report = None
         self.collision_history = None
         self.liability_history = None

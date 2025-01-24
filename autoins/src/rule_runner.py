@@ -7,7 +7,7 @@ import json
 from knowledgenet import scanner
 from knowledgenet.service import Service
 from knowledgenet.ftypes import EventFact
-from autoins.entities import Action, Adj, Claim, Driver, IncidenceReport, Policy, Estimate
+from autoins.entities import Action, Adj, Automobile, Claim, Driver, IncidenceReport, Policy, Estimate
 from autoins.util import load_from_csv, to_bool
 import logging
 
@@ -27,7 +27,7 @@ def subdirs(parent):
 def subfiles(parent):
     return [name for name in os.listdir(parent) if os.path.isfile(os.path.join(parent, name))]
 
-def init_facts(args):
+def load_facts(args):
     facts = set()
     for path in args.factsPaths:
         files = subfiles(path)
@@ -56,7 +56,6 @@ def init_facts(args):
             elif f.startswith('incidence_reports'):
                 load_from_csv(facts, IncidenceReport, os.path.join(path,f), converters={
                     'accident_date': pd.to_datetime,
-                    'responsible_parties': lambda d: d.split(';') if d else [],
                     'liability_percent': float
                 })
             elif f.startswith('estimates'):
@@ -65,6 +64,8 @@ def init_facts(args):
                     'date': pd.to_datetime,
                     'amount': float
                 })
+            elif f.startswith('automobiles'):
+                 load_from_csv(facts, Automobile, os.path.join(path,f))
     return facts
 
 def init_knowledgebase(args):
@@ -78,7 +79,7 @@ def init_knowledgebase(args):
     repository = scanner.lookup(rules_basename)
     service = Service(repository)
     logging.info(f"Loaded {len(repository.rulesets)} rulesets")
-    facts = init_facts(args)
+    facts = load_facts(args)
     logging.info(f"Loaded {len(facts)} facts")
     return service,facts
 

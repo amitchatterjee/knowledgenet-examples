@@ -1,5 +1,5 @@
 id,type,policy_id,filing_date,claimed_amount,paid_amount,automobile_id,driver_id,status,description,incidence_report_id
-C1,collision,P2,2023-02-20,4000,0,202,D2,pending,Minor collision in parking lot,R1
-C2,collision,NOTEXISTS,2023-03-10,7000,0,203,D5,pending,Rear-ended at traffic light,
-C3,collision,P1,2024-02-20,3000,0,202,D1,pending,Fender bender,R2
-C4,liability,P6,2023-08-12,7000,0,207,D4,pending,Hit a pedestrian,R3
+C1,collision,P2,2023-02-20,4000,0,A1,D2,pending,Minor collision in parking lot,R1
+C2,collision,NOTEXISTS,2023-03-10,7000,0,NOTEXISTS,NOTEXISTS,pending,Rear-ended at traffic light,NOTEXISTS
+C3,collision,P1,2024-02-20,3000,0,A3,D1,pending,Fender bender,R2
+C4,liability,P6,2023-08-12,7000,0,A4,D4,pending,Hit a pedestrian,R3
