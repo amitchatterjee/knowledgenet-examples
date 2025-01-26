@@ -23,12 +23,21 @@ class Policy:
         return hash(self.id)
 
 class Automobile:
-    def __init__(self, id, make, model, year, vin):
-        self.id = id
+    def __init__(self, vin, make, model, year):
+        self.vin = vin
         self.make = make
         self.model = model
         self.year = year
-        self.vin = vin
+    def __str__(self) -> str:
+        return f'Automobile({self.vin})'
+    def __repr__(self) -> str:
+        return self.__str__()
+    def __eq__(self, obj):
+        if isinstance(obj, Automobile):
+            return self.vin == obj.vin
+        return False
+    def __hash__(self):
+        return hash(self.vin)
 
 class Driver:
     def __init__(self, id, name, dob, license_number, license_state):
@@ -50,7 +59,7 @@ class Driver:
 
 class Claim:
     def __init__(self, id, type, policy_id, filing_date, claimed_amount, paid_amount, 
-                 automobile_id, driver_id, status, description, incidence_report_id):
+                 vin, driver_id, status, description, incidence_report_id):
         self.id = id
         self.type = type
         self.policy_id = policy_id
@@ -59,7 +68,7 @@ class Claim:
         self.paid_amount = paid_amount
         self.driver_id = driver_id
         self.status = status
-        self.automobile_id = automobile_id
+        self.vin = vin
         self.description = description
         self.incidence_report_id = incidence_report_id
 
@@ -97,10 +106,11 @@ class IncidenceReport:
         return hash(self.id)
     
 class Estimate:
-    def __init__(self, id, estimator_id, approved_vendor, claim_id, date, amount, description):
+    def __init__(self, id, estimator_id, approved_vendor, vin, claim_id, date, amount, description):
         self.id = id
         self.estimator_id = estimator_id
         self.approved_vendor = approved_vendor
+        self.vin = vin
         self.claim_id = claim_id
         self.date = date
         self.amount = amount
@@ -114,7 +124,7 @@ class Estimate:
 
     def __eq__(self, obj):
         if isinstance(obj, Estimate):
-            return self.id == obj.id
+            return self.vin == obj.vin
         return False
 
     def __hash__(self):

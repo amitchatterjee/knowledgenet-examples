@@ -1,6 +1,6 @@
-id,make,model,year,vin
-A1,Toyota,Corolla,2020,A
-A2,Honda,Civic,2019,B
-A3,Ford,Mustang,2018,C
-A4,Chevrolet,Malibu,2021,D
-A5,Nissan,Altima,2022,E
+vin,make,model,year
+A1,Toyota,Corolla,2020
+A2,Honda,Civic,2019
+A3,Ford,Mustang,2018
+A4,Chevrolet,Malibu,2021
+A5,Nissan,Altima,2022

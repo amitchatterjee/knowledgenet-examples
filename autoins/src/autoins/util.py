@@ -1,7 +1,11 @@
 import logging
+import os
 import pandas as pd
 
 from knowledgenet.helper import session
+
+def subfiles(parent):
+    return [name for name in os.listdir(parent) if os.path.isfile(os.path.join(parent, name))]
 
 def bypass(ctx, adj):
     return 'all' in adj.bypass or session(ctx).ruleset.id.split('_')[0] in adj.bypass
@@ -13,7 +17,7 @@ def record_action_event(ctx, event):
     event.reset()
 
 def load_from_csv(facts, of_type, file_path, converters=None):
-    df = pd.read_csv(file_path, converters=converters).to_dict(orient='records')
+    df = pd.read_csv(file_path, converters=converters, comment='#').to_dict(orient='records')
     for row in df:
         fact = of_type(**row)
         facts.add(fact)
@@ -25,3 +29,7 @@ def to_bool(txt):
         return False
     else:
         raise ValueError(f"Cannot convert {txt} to boolean")
+
+
+def subdirs(parent):
+    return [os.path.join(parent, name) for name in os.listdir(parent) if os.path.isdir(os.path.join(parent, name))]

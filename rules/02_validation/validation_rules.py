@@ -50,6 +50,7 @@ def insufficent_estimates():
                 then=lambda ctx: insert(ctx, Action(str(uuid.uuid4()), 'NEEST', ctx.adj.claim.id, 
                                     'v', 'insufficient number of estimates', 0.00, rank=997)))
 
+
 @ruledef
 def bypass_rules_with_validation_error():
     def bypass_rules_with_validation_error_rhs(ctx):

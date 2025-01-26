@@ -23,7 +23,17 @@ def late_filing():
                     matches=[lambda ctx,this: not bypass(ctx,this),
                          lambda ctx,this: (this.claim.filing_date - this.incidence_report.accident_date).days > 90]),
                 then=lambda ctx: insert(ctx, Action(str(uuid.uuid4()), 'LATFL', ctx.adj.claim.id, 
-                                            'd', 'late filing', 0.00)))
+                                                    'd', 'late filing', 0.00)))
+
+# AI-genrated rule: Create a @ruledef function like above that inserts an Action when the vin on the Adj.claim object does not match the vin on the Adj.incidence_report object
+@ruledef
+def vin_mismatch():
+    return Rule(when=Fact(of_type=Adj, var='adj',
+                    matches=[lambda ctx,this: not bypass(ctx,this),
+                            lambda ctx,this: this.claim.vin != this.incidence_report.vin]),
+                then=lambda ctx: insert(ctx, Action(str(uuid.uuid4()), 'VINMIS', ctx.adj.claim.id, 
+                                    'd', 'claim/incidence-report vin mismatch', 0.00)))
+                    
 @ruledef
 def create_action_event_handler():
     return Rule(order=1, when=Event(group='onAction', var='event'),

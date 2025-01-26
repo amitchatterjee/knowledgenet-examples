@@ -46,7 +46,7 @@ def join_adj_with_automobile():
     return Rule(run_once=True,
         when=[Fact(of_type=Adj, var='adj'),
                 Fact(of_type=Automobile, var='automobile', 
-                    matches=lambda ctx, this: ctx.adj.claim.automobile_id == this.id)],
+                    matches=lambda ctx, this: ctx.adj.claim.vin == this.vin)],
         then=join_adj_with_automobile_rhs)
 
 @ruledef
