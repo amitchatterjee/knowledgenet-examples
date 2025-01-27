@@ -11,7 +11,7 @@ def bypass(ctx, adj):
     return 'all' in adj.bypass or session(ctx).ruleset.id.split('_')[0] in adj.bypass
 
 def record_action_event(ctx, event):
-    logging.debug("Action event on %s: added: %s, updated: %s, deleted: %s",
+    logging.info("Action event on %s: added: %s, updated: %s, deleted: %s",
                     session(ctx).ruleset,
                     event.added, event.updated, event.deleted)
     event.reset()
