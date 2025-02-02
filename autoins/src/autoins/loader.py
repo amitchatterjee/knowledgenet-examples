@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 
+from autoins.bluebook import BlueBook
 from autoins.entities import Automobile, Claim, Driver, Estimate, IncidenceReport, Policy
 from autoins.util import load_from_csv, subfiles, to_bool
 
@@ -42,5 +43,7 @@ def load_facts(args):
                     'amount': float
                 })
             elif f.startswith('automobiles'):
-                 load_from_csv(facts, Automobile, os.path.join(path,f))
+                load_from_csv(facts, Automobile, os.path.join(path,f))
+            elif f == 'blues.csv':
+                facts.add(BlueBook(os.path.join(path,f)))
     return facts
