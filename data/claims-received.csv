@@ -1,0 +1,9 @@
+id,type,policy_id,filing_date,claimed_amount,paid_amount,vin,driver_id,status,description,incidence_report_id
+# Collision claim with pay action
+C1,collision,P2,2023-02-20,4000,0,A1,D2,received,Minor collision in parking lot,R1
+# Multiple required data missing
+C2,collision,NOTEXISTS,2023-03-10,7000,0,NOTEXISTS,NOTEXISTS,received,Rear-ended at traffic light,NOTEXISTS
+# Colision claim on inactive policy
+C3,collision,P1,2024-02-20,3000,0,A2,D1,received,Fender bender,R2
+# Liability claim with pay action
+C4,liability,P6,2023-08-12,7000,0,A3,D4,received,Hit a pedestrian,R3

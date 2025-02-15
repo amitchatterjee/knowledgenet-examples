@@ -7,13 +7,13 @@ from autoins.entities import Action, Adj, Automobile, Claim, Driver, Estimate, I
 
 # #########################################################################
 # Rule order: 0
-# Set of rules that builds the Adj object for each claim that is pending 
+# Set of rules that builds the Adj object for each claim that has been received 
 # including collecting historical claims
 # ##########################################################################
 @ruledef
 def create_adj():    
     return Rule(when=Fact(of_type=Claim, var='claim', 
-                matches=lambda ctx,this: this.status == 'pending'),
+                matches=lambda ctx,this: this.status == 'received'),
         then=lambda ctx: insert(ctx, Adj(ctx.claim)))
 
 @ruledef

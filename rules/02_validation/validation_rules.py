@@ -12,7 +12,7 @@ def no_policy():
                 when=Fact(of_type=Adj, var='adj',
                     matches=lambda ctx,this: not this.policy),
                     then=lambda ctx: insert(ctx, Action(str(uuid.uuid4()), 'NOPLY', ctx.adj.claim.id, 
-                                        'v', 'no policy found', 0.00, rank=1000)))
+                                        'incomplete', 'no policy found', 0.00, rank=1000)))
 
 @ruledef
 def no_incidence_report():
@@ -20,7 +20,7 @@ def no_incidence_report():
                 when=Fact(of_type=Adj, var='adj', 
                     matches=lambda ctx,this: not this.incidence_report),
                     then=lambda ctx: insert(ctx, Action(str(uuid.uuid4()), 'NOINR', ctx.adj.claim.id, 
-                                        'v', 'no incidence report found', 0.00, rank=999)))
+                                        'incomplete', 'no incidence report found', 0.00, rank=999)))
 
 @ruledef
 def no_driver():
@@ -28,7 +28,7 @@ def no_driver():
                 when=Fact(of_type=Adj, var='adj', 
                     matches=lambda ctx,this: not this.driver),
                 then=lambda ctx: insert(ctx, Action(str(uuid.uuid4()), 'NODRV', ctx.adj.claim.id, 
-                                        'v', 'no driver found', 0.00, rank=998)))
+                                        'incomplete', 'no driver found', 0.00, rank=998)))
 
 @ruledef
 def no_automobile():
@@ -36,7 +36,7 @@ def no_automobile():
                 when=Fact(of_type=Adj, var='adj', 
                     matches=lambda ctx,this: not this.automobile),
                 then=lambda ctx: insert(ctx, Action(str(uuid.uuid4()), 'NOAUT', ctx.adj.claim.id, 
-                                        'v', 'no automobile found', 0.00, rank=997)))
+                                        'incomplete', 'no automobile found', 0.00, rank=997)))
 
 @ruledef 
 def insufficent_estimates():
@@ -48,7 +48,7 @@ def insufficent_estimates():
                         matches=[lambda ctx,this: len(this.estimates) < 3,
                                 lambda ctx,this: len([e for e in this.estimates if e.approved_vendor]) == 0]),
                 then=lambda ctx: insert(ctx, Action(str(uuid.uuid4()), 'NEEST', ctx.adj.claim.id, 
-                                    'v', 'insufficient number of estimates', 0.00, rank=997)))
+                                    'incomplete', 'insufficient number of estimates', 0.00, rank=997)))
 
 
 @ruledef

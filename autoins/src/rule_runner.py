@@ -1,5 +1,6 @@
 import argparse
 import os
+import io
 import sys
 import time
 import pandas as pd
@@ -20,7 +21,7 @@ def argsparser():
     parser.add_argument('--factsPaths', required=True, nargs='+', help='Full paths from where the facts are loaded')
     parser.add_argument('--outputPath', required=True, help='Full path name of the directory where the actions are written to')
     parser.add_argument('--cleanOutput', action='store_true', help='Clean the output directory before writing the actions')
-    parser.add_argument('--trace', action='store_true', help='Enable tracing of rule execution')
+    parser.add_argument('--trace', help='location where the trace is stored. if "log" is specified, the trace is output as an INFO log')
     parser.add_argument('--log', help='Log severity level. The valid values are DEBUG, INFO, WARNING, ERROR, CRITICAL', default='INFO')
     return parser.parse_args()
 
@@ -69,7 +70,10 @@ if __name__ == "__main__":
 
     try:
         start_time = time.time()
-        result_facts = service.execute(facts, tracer=sys.stdout if args.trace else None)
+        with (io.StringIO() if not args.trace or args.trace == 'log' else open(args.trace, 'w')) as trace_stream:
+            result_facts = service.execute(facts, tracer=None if not args.trace else trace_stream)
+            if 'log' == args.trace:
+                logging.info("Trace from the rules execution: \n%s", trace_stream.getvalue())
     finally:
         end_time = time.time()
         execution_time_ms = (end_time - start_time) * 1000
