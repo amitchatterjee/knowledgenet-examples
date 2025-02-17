@@ -86,7 +86,7 @@ if __name__ == "__main__":
         for result_fact in result_facts:
             if type(result_fact) == Action:
                 logging.debug("\t%s: %s", result_fact.__class__.__name__, json.dumps(result_fact.to_dict()))
-            #elif type(result_fact) == Adj:
+            #elif type(result_fact) == ClaimContext:
             #    logging.debug("\t%s: %s", result_fact.__class__.__name__, json.dumps(result_fact.to_dict()))
             #elif type(result_fact) == Collector:
             #    logging.debug("\t%s: %s(%d)", result_fact.__class__.__name__, result_fact.group, 

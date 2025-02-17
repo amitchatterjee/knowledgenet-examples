@@ -130,9 +130,9 @@ class Estimate:
     def __hash__(self):
         return hash(self.id)
 
-class Adj:
+class ClaimContext:
     '''
-    The primary purpose of the Adj class is to reduce combinatorial explosion of facts. It also makes audit rules easier to write.
+    The primary purpose of the ClaimContext class is to reduce combinatorial explosion of facts. It also makes audit rules easier to write.
     '''
     def __init__(self, claim: Claim):
         self.claim = claim
@@ -146,13 +146,13 @@ class Adj:
         self.bypass = set()
 
     def __str__(self) -> str:
-        return f'Adj:({self.claim.id})'
+        return f'ClaimContext:({self.claim.id})'
 
     def __repr__(self) -> str:
         return self.__str__()
 
     def __eq__(self, obj):
-        if isinstance(obj, Adj):
+        if isinstance(obj, ClaimContext):
             return self.claim.id == obj.claim.id
         return False
 

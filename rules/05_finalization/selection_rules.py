@@ -4,7 +4,7 @@ from knowledgenet.rule import Rule, Collection, Event
 from knowledgenet.controls import insert, update
 from knowledgenet.helper import assign
 
-from autoins.entities import Action, Adj
+from autoins.entities import Action, ClaimContext
 from autoins.util import record_action_event
 
 @ruledef
@@ -15,9 +15,10 @@ def pay_on_no_action():
     return Rule(run_once=True,
         when=Collection(group='action-collector', 
                     matches=[lambda ctx,this: not len(this.collection),  
-                            lambda ctx,this: assign(ctx, adj=this.adj)]),
-        then=lambda ctx: insert(ctx, Action(str(uuid.uuid4()), 'PAYCL', ctx.adj.claim.id, 'pay', 'pay', 
-                            ctx.adj.incidence_report.liability_percent, inactive=False)))
+                            lambda ctx,this: assign(ctx, claim_context=this.claim_context)]),
+        then=lambda ctx: insert(ctx, Action(str(uuid.uuid4()), 'PAYCL', 
+                                            ctx.claim_context.claim.id, 'pay', 'pay', 
+                                            ctx.claim_context.incidence_report.liability_percent, inactive=False)))
 
 @ruledef
 def select_action():
@@ -33,7 +34,7 @@ def select_action():
         update(ctx, actions[0])
     return Rule(run_once=True, order=1,
         when=Collection(group='action-collector', 
-                    matches=lambda ctx,this: assign(ctx, actions=this.collection, adj=this.adj)),
+                    matches=lambda ctx,this: assign(ctx, actions=this.collection)),
         then=select_action_rhs)
 
 @ruledef

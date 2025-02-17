@@ -3,62 +3,62 @@ from knowledgenet.rule import Rule, Fact, Collection
 from knowledgenet.controls import insert, update, delete
 from knowledgenet.container import Collector
 
-from autoins.entities import Action, Adj, Automobile, Claim, Driver, Estimate, IncidenceReport, Policy
+from autoins.entities import Action, ClaimContext, Automobile, Claim, Driver, Estimate, IncidenceReport, Policy
 
 # #########################################################################
 # Rule order: 0
-# Set of rules that builds the Adj object for each claim that has been received 
+# Set of rules that builds the ClaimContext object for each claim that has been received 
 # including collecting historical claims
 # ##########################################################################
 @ruledef
-def create_adj():    
+def create_claim_context():    
     return Rule(when=Fact(of_type=Claim, var='claim', 
                 matches=lambda ctx,this: this.status == 'received'),
-        then=lambda ctx: insert(ctx, Adj(ctx.claim)))
+        then=lambda ctx: insert(ctx, ClaimContext(ctx.claim)))
 
 @ruledef
-def join_adj_with_policy():
-    def join_adj_with_policy_rhs(ctx):
-        ctx.adj.policy = ctx.policy
-        update(ctx, ctx.adj)
+def join_claim_context_with_policy():
+    def join_claim_context_with_policy_rhs(ctx):
+        ctx.claim_context.policy = ctx.policy
+        update(ctx, ctx.claim_context)
     return Rule(run_once=True,
-        when=[Fact(of_type=Adj, var='adj'),
+        when=[Fact(of_type=ClaimContext, var='claim_context'),
                 Fact(of_type=Policy, var='policy', 
-                    matches=lambda ctx, this: ctx.adj.claim.policy_id == this.id)],
-        then=join_adj_with_policy_rhs)
+                    matches=lambda ctx, this: ctx.claim_context.claim.policy_id == this.id)],
+        then=join_claim_context_with_policy_rhs)
 
 @ruledef
-def join_adj_with_driver():
-    def join_adj_with_driver_rhs(ctx):
-        ctx.adj.driver = ctx.driver
-        update(ctx, ctx.adj)
+def join_claim_context_with_driver():
+    def join_claim_context_with_driver_rhs(ctx):
+        ctx.claim_context.driver = ctx.driver
+        update(ctx, ctx.claim_context)
     return Rule(run_once=True,
-        when=[Fact(of_type=Adj, var='adj'),
+        when=[Fact(of_type=ClaimContext, var='claim_context'),
                 Fact(of_type=Driver, var='driver', 
-                    matches=lambda ctx, this: ctx.adj.claim.driver_id == this.id)],
-        then=join_adj_with_driver_rhs)
+                    matches=lambda ctx, this: ctx.claim_context.claim.driver_id == this.id)],
+        then=join_claim_context_with_driver_rhs)
 
 @ruledef
-def join_adj_with_automobile():
-    def join_adj_with_automobile_rhs(ctx):
-        ctx.adj.automobile = ctx.automobile
-        update(ctx, ctx.adj)
+def join_claim_context_with_automobile():
+    def join_claim_context_with_automobile_rhs(ctx):
+        ctx.claim_context.automobile = ctx.automobile
+        update(ctx, ctx.claim_context)
     return Rule(run_once=True,
-        when=[Fact(of_type=Adj, var='adj'),
+        when=[Fact(of_type=ClaimContext, var='claim_context'),
                 Fact(of_type=Automobile, var='automobile', 
-                    matches=lambda ctx, this: ctx.adj.claim.vin == this.vin)],
-        then=join_adj_with_automobile_rhs)
+                    matches=lambda ctx, this: ctx.claim_context.claim.vin == this.vin)],
+        then=join_claim_context_with_automobile_rhs)
 
 @ruledef
-def join_adj_with_incidence_report():
-    def join_adj_with_incidence_report_rhs(ctx):
-        ctx.adj.incidence_report = ctx.incidence_report
-        update(ctx, ctx.adj)
+def join_claim_context_with_incidence_report():
+    def join_claim_context_with_incidence_report_rhs(ctx):
+        ctx.claim_context.incidence_report = ctx.incidence_report
+        update(ctx, ctx.claim_context)
     return Rule(run_once=True,
-        when=[Fact(of_type=Adj, var='adj'),
+        when=[Fact(of_type=ClaimContext, var='claim_context'),
                 Fact(of_type=IncidenceReport, var='incidence_report', 
-                    matches=lambda ctx, this: ctx.adj.claim.incidence_report_id == this.id)],
-        then=join_adj_with_incidence_report_rhs)
+                    matches=lambda ctx, this: ctx.claim_context.claim.incidence_report_id == this.id)],
+        then=join_claim_context_with_incidence_report_rhs)
 
 # #########################################################################
 # Rule order: 1
@@ -67,86 +67,86 @@ def join_adj_with_incidence_report():
 @ruledef
 def create_collision_history_collector():
     '''
-    Create collectors that collect history (past) of claims of type, collision, for an adjudicated claim. We are interested in the paid amount
+    Create collectors that collect history (past) of claims of type, collision, for each claim being processed. We are interested in the paid amount
     '''
     return Rule(run_once=True, order=1,
-        when=Fact(of_type=Adj, var='adj'),
+        when=Fact(of_type=ClaimContext, var='claim_context'),
         then=lambda ctx: 
             insert(ctx, 
-                    Collector(of_type=Claim, group='collision-history-collector', adj=ctx.adj,
+                    Collector(of_type=Claim, group='collision-history-collector', claim_context=ctx.claim_context,
                         filter=[lambda this,claim: claim.status == 'approved',
-                                lambda this,claim: this.adj.policy and this.adj.policy.id == claim.policy_id,
-                                lambda this,claim: this.adj.claim.filing_date.year == claim.filing_date.year])))
+                                lambda this,claim: this.claim_context.policy and this.claim_context.policy.id == claim.policy_id,
+                                lambda this,claim: this.claim_context.claim.filing_date.year == claim.filing_date.year])))
 
 @ruledef
 def create_liability_history_collector():
     '''
-    Create collectors that collect history (past) of claims of type, liability, for an adjudicated claim. We are interested in the paid amount
+    Create collectors that collect history (past) of claims of type, liability, for each claim being processed. We are interested in the paid amount
     '''
     return Rule(run_once=True, order=1,
-        when=Fact(of_type=Adj, var='adj'),
+        when=Fact(of_type=ClaimContext, var='claim_context'),
         then=lambda ctx: 
             insert(ctx, 
-                    Collector(of_type=Claim, group='liability-history-collector', adj=ctx.adj,
+                    Collector(of_type=Claim, group='liability-history-collector', claim_context=ctx.claim_context,
                         filter=[lambda this,claim: claim.status == 'approved',
                                 lambda this,claim: claim.type == 'liability',
-                                lambda this,claim: this.adj.policy and this.adj.policy.id == claim.policy_id,
-                                lambda this,claim: this.adj.claim.filing_date.year == claim.filing_date.year])))
+                                lambda this,claim: this.claim_context.policy and this.claim_context.policy.id == claim.policy_id,
+                                lambda this,claim: this.claim_context.claim.filing_date.year == claim.filing_date.year])))
 
 @ruledef
 def create_estimate_collector():
     '''
-    Create collectors that collect all estimates for an adjudicated claim
+    Create collectors that collect all estimates for a claim being processed
     '''
     return Rule(run_once=True, order=1,
-        when=Fact(of_type=Adj, var='adj'),
+        when=Fact(of_type=ClaimContext, var='claim_context'),
         then=lambda ctx: 
             insert(ctx, 
-                    Collector(of_type=Estimate, group='estimate-collector', adj=ctx.adj,
-                        filter=lambda this,estimate: estimate.claim_id == ctx.adj.claim.id)))
+                    Collector(of_type=Estimate, group='estimate-collector', claim_context=ctx.claim_context,
+                        filter=lambda this,estimate: estimate.claim_id == ctx.claim_context.claim.id)))
 
 # #########################################################################
 # Rule order: 2
-# Enrich Adj with collected data
+# Enrich ClaimContext with collected data
 # ########################################################################## 
 @ruledef
-def add_collision_history_to_adj():
+def add_collision_history_to_claim_context():
     '''
-    Add all history records to the adj so that other rulesets can get the history information from the adj object itself
+    Add all history records to the claim_context so that other rulesets can get the history information from the claim_context object itself
     '''
-    def add_collision_history_to_adj_rhs(ctx):
-        ctx.adj.collision_history = ctx.hist.collection
-        update(ctx, ctx.adj)
+    def add_collision_history_to_claim_context_rhs(ctx):
+        ctx.claim_context.collision_history = ctx.hist.collection
+        update(ctx, ctx.claim_context)
     return Rule(order=2, run_once=True,
-        when=(Fact(of_type=Adj, var='adj'),
-                Collection(group='collision-history-collector', var='hist', matches=lambda ctx,this: ctx.adj == this.adj)),
-        then=add_collision_history_to_adj_rhs)
+        when=(Fact(of_type=ClaimContext, var='claim_context'),
+                Collection(group='collision-history-collector', var='hist', matches=lambda ctx,this: ctx.claim_context == this.claim_context)),
+        then=add_collision_history_to_claim_context_rhs)
 
 @ruledef
-def add_liability_history_to_adj():
+def add_liability_history_to_claim_context():
     '''
-    Add all liability history records to the adj so that other rulesets can get the history information from the adj object itself
+    Add all liability history records to the claim_context so that other rulesets can get the history information from the claim_context object itself
     '''
-    def add_liability_history_to_adj_rhs(ctx):
-        ctx.adj.liability_history = ctx.hist.collection
-        update(ctx, ctx.adj)
+    def add_liability_history_to_claim_context_rhs(ctx):
+        ctx.claim_context.liability_history = ctx.hist.collection
+        update(ctx, ctx.claim_context)
     return Rule(order=2, run_once=True,
-        when=(Fact(of_type=Adj, var='adj'),
-                Collection(group='liability-history-collector', var='hist', matches=lambda ctx,this: ctx.adj == this.adj)),
-        then=add_liability_history_to_adj_rhs)
+        when=(Fact(of_type=ClaimContext, var='claim_context'),
+                Collection(group='liability-history-collector', var='hist', matches=lambda ctx,this: ctx.claim_context == this.claim_context)),
+        then=add_liability_history_to_claim_context_rhs)
 
 @ruledef
-def add_estimates_to_adj():
+def add_estimates_to_claim_context():
     '''
-    Add all estimates to the adj so that other rulesets can get estimates from the adj object itself
+    Add all estimates to the claim_context so that other rulesets can get estimates from the claim_context object itself
     '''
-    def add_estimates_to_adj_rhs(ctx):
-        ctx.adj.estimates = ctx.estimate.collection
-        update(ctx, ctx.adj)
+    def add_estimates_to_claim_context_rhs(ctx):
+        ctx.claim_context.estimates = ctx.estimate.collection
+        update(ctx, ctx.claim_context)
     return Rule(order=2, run_once=True,
-        when=(Fact(of_type=Adj, var='adj'),
-                Collection(group='estimate-collector', var='estimate', matches=lambda ctx,this: ctx.adj == this.adj)),
-        then=add_estimates_to_adj_rhs)
+        when=(Fact(of_type=ClaimContext, var='claim_context'),
+                Collection(group='estimate-collector', var='estimate', matches=lambda ctx,this: ctx.claim_context == this.claim_context)),
+        then=add_estimates_to_claim_context_rhs)
 
 # #########################################################################
 # Rule order: 3
@@ -183,10 +183,11 @@ def del_estimate_collector():
 @ruledef
 def create_action_collector():
     '''
-    Create a collection that collects all the actions for a claim being adjudicated
+    Create a collection that collects all the actions for each claim being processed
     '''
     return Rule(order=3,
-        when=Fact(of_type=Adj, var='adj'),
+        when=Fact(of_type=ClaimContext, var='claim_context'),
         then=lambda ctx: insert(ctx, 
-                                Collector(of_type=Action, group='action-collector', adj=ctx.adj, 
-                                    filter=lambda this,action: this.adj.claim.id == action.claim_id)))
+                                Collector(of_type=Action, group='action-collector', 
+                                        claim_context=ctx.claim_context, 
+                                        filter=lambda this,action: this.claim_context.claim.id == action.claim_id)))

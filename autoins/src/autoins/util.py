@@ -7,8 +7,8 @@ from knowledgenet.helper import session
 def subfiles(parent):
     return [name for name in os.listdir(parent) if os.path.isfile(os.path.join(parent, name))]
 
-def bypass(ctx, adj):
-    return 'all' in adj.bypass or session(ctx).ruleset.id.split('_')[0] in adj.bypass
+def bypass(ctx, claim_ctx):
+    return 'all' in claim_ctx.bypass or session(ctx).ruleset.id.split('_')[0] in claim_ctx.bypass
 
 def record_action_event(ctx, event):
     logging.info("Action event on %s: added: %s, updated: %s, deleted: %s",
