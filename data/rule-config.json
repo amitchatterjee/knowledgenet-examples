@@ -1,0 +1,100 @@
+{
+    "validation": {
+        "enabled": true,
+        "rules": {
+            "no_policy": {
+                "enabled": true,
+                "action": "incomplete",
+                "reason": "NOPLY",
+                "explain": "no policy found",
+                "rank": 1000,
+                "percent": 0.0
+            },
+            "no_incidence_report": {
+                "enabled": true,
+                "action": "incomplete",
+                "reason": "NOINR",
+                "explain": "no incidence report found",
+                "rank": 999,
+                "percent": 0.0
+            },
+            "no_driver": {
+                "enabled": true,
+                "action": "incomplete",
+                "reason": "NODRV",
+                "explain": "no driver found",
+                "rank": 998,
+                "percent": 0.0
+            },
+            "no_automobile": {
+                "enabled": true,
+                "action": "incomplete",
+                "reason": "NOAUT",
+                "explain": "no automobile found",
+                "rank": 997,
+                "percent": 0.0
+            },
+            "insufficent_estimates": {
+                "enabled": true,
+                "action": "incomplete",
+                "reason": "NEEST",
+                "explain": "insufficient number of estimates",
+                "rank": 996,
+                "percent": 0.0
+            }
+        }
+    },
+    "contract": {
+        "enabled": true,
+        "rules": {
+            "inactive_policy": {
+                "enabled": true,
+                "action": "deny",
+                "reason": "NOACT",
+                "explain": "policy inactive",
+                "rank": 1000,
+                "percent": 0.0
+            },
+            "late_filing": {
+                "enabled": true,
+                "action": "deny",
+                "reason": "LATFL",
+                "explain": "late filing",
+                "rank": 1000,
+                "percent": 0.0,
+
+                "within": 90
+            },
+
+            "vin_mismatch": {
+                "enabled": true,
+                "action": "deny",
+                "reason": "AUTMIS",
+                "explain": "automobile not registred in policy",
+                "rank": 1000,
+                "percent": 0.0
+            }
+        }
+    },
+    "fraud": {
+        "enabled": true,
+        "rules": {
+            "vin_mismatch_claim_incidence_report": {
+                "enabled": true,
+                "action": "deny",
+                "reason": "VINCI",
+                "explain": "claim/incidence-report vin mismatch",
+                "rank": 1000,
+                "percent": 0.0
+            },
+            "vin_mismatch_claim_estimates": {
+                "enabled": true,
+                "action": "deny",
+                "reason": "VINCE",
+                "explain": "claim/estimates vin mismatch",
+                "rank": 1000,
+                "percent": 0.0
+            }
+        }
+    }
+}

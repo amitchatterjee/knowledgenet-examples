@@ -1,47 +1,42 @@
-import uuid
 from knowledgenet.scanner import ruledef
 from knowledgenet.rule import Rule, Fact, Event, Collection
 from knowledgenet.controls import insert, update
+from knowledgenet.helper import assign
 
-from autoins.entities import ClaimContext, Action
-from autoins.util import record_action_event
+from autoins.entities import ClaimContext
+from autoins.util import create_action, record_action_event
 
 @ruledef
 def no_policy():
     return Rule(run_once=True, 
-                when=Fact(of_type=ClaimContext, var='claim_context',
-                    matches=lambda ctx,this: not this.policy),
-                    then=lambda ctx: insert(ctx, Action(str(uuid.uuid4()), 'NOPLY', 
-                                                        ctx.claim_context.claim.id, 
-                                                        'incomplete', 
-                                                        'no policy found', 0.00, rank=1000)))
+                when=[Fact(of_type='validation-ruleset', var='ruleset_context'),
+                      Fact(of_type=ClaimContext, var='claim_context',
+                        matches=lambda ctx,this: not this.policy)],
+                    then=lambda ctx: insert(ctx, create_action(ctx, ctx.ruleset_context, ctx.claim_context)))
 
 @ruledef
 def no_incidence_report():
     return Rule(run_once=True, 
-                when=Fact(of_type=ClaimContext, var='claim_context', 
-                    matches=lambda ctx,this: not this.incidence_report),
-                    then=lambda ctx: insert(ctx, Action(str(uuid.uuid4()), 'NOINR', 
-                                                        ctx.claim_context.claim.id, 
-                                                        'incomplete', 'no incidence report found', 0.00, rank=999)))
+                when=[Fact(of_type='validation-ruleset', var='ruleset_context'),
+                    Fact(of_type=ClaimContext, var='claim_context', 
+                    matches=lambda ctx,this: not this.incidence_report)],
+                    then=lambda ctx: insert(ctx, create_action(ctx, ctx.ruleset_context, ctx.claim_context)))
 
 @ruledef
 def no_driver():
     return Rule(run_once=True, 
-                when=Fact(of_type=ClaimContext, var='claim_context', 
-                    matches=lambda ctx,this: not this.driver),
-                then=lambda ctx: insert(ctx, Action(str(uuid.uuid4()), 'NODRV', 
-                                                    ctx.claim_context.claim.id, 
-                                                    'incomplete', 'no driver found', 0.00, rank=998)))
+                when=[Fact(of_type='validation-ruleset', var='ruleset_context'),
+                    Fact(of_type=ClaimContext, var='claim_context', 
+                    matches=lambda ctx,this: not this.driver)],
+                then=lambda ctx: insert(ctx, create_action(ctx, ctx.ruleset_context, ctx.claim_context)))
 
 @ruledef
 def no_automobile():
     return Rule(run_once=True, 
-                when=Fact(of_type=ClaimContext, var='claim_context', 
-                    matches=lambda ctx,this: not this.automobile),
-                then=lambda ctx: insert(ctx, Action(str(uuid.uuid4()), 'NOAUT', 
-                                                    ctx.claim_context.claim.id, 
-                                                    'incomplete', 'no automobile found', 0.00, rank=997)))
+                when=[Fact(of_type='validation-ruleset', var='ruleset_context'),
+                      Fact(of_type=ClaimContext, var='claim_context', 
+                    matches=lambda ctx,this: not this.automobile)],
+                then=lambda ctx: insert(ctx, create_action(ctx, ctx.ruleset_context, ctx.claim_context)))
 
 @ruledef 
 def insufficent_estimates():
@@ -49,12 +44,11 @@ def insufficent_estimates():
     For non-approved vendors, at least three estimates are required, for approved vendors, at least one estimate is required
     '''
     return Rule(run_once=True, 
-                when=Fact(of_type=ClaimContext, var='claim_context', 
+                when=[Fact(of_type='validation-ruleset', var='ruleset_context'),
+                      Fact(of_type=ClaimContext, var='claim_context', 
                         matches=[lambda ctx,this: len(this.estimates) < 3,
-                                lambda ctx,this: len([e for e in this.estimates if e.approved_vendor]) == 0]),
-                then=lambda ctx: insert(ctx, Action(str(uuid.uuid4()), 'NEEST', 
-                                                    ctx.claim_context.claim.id, 
-                                                    'incomplete', 'insufficient number of estimates', 0.00, rank=997)))
+                                lambda ctx,this: len([e for e in this.estimates if e.approved_vendor]) == 0])],
+                then=lambda ctx: insert(ctx, create_action(ctx, ctx.ruleset_context, ctx.claim_context)))
 
 @ruledef
 def bypass_rules_with_validation_error():
