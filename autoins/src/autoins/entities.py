@@ -1,18 +1,33 @@
-
 class Policy:
-    def __init__(self, id, policy_holder, start_date, end_date, drivers, automobiles, collision_deductible, collision_coverage, liability_covergae):
+    def __init__(self, id, group_id, policy_holder, start_date, end_date, drivers, automobiles):
         self.id = id
+        self.group_id = group_id
         self.policy_holder = policy_holder
         self.start_date = start_date
         self.end_date = end_date
         self.drivers = drivers
         self.automobiles = automobiles
+
+    def __str__(self) -> str:
+        return f'Policy({self.id})'
+    def __repr__(self) -> str:
+        return self.__str__()
+    def __eq__(self, obj):
+        if isinstance(obj, Policy):
+            return self.id == obj.id
+        return False
+    def __hash__(self):
+        return hash(self.id)
+    
+class Group:
+    def __init__(self, id, collision_deductible, collision_coverage, liability_covergae):
+        self.id = id
         self.collision_deductible = collision_deductible
         self.collision_coverage = collision_coverage
         self.liability_coverage = liability_covergae
 
     def __str__(self) -> str:
-        return f'Policy({self.id})'
+        return f'Group({self.id})'
     def __repr__(self) -> str:
         return self.__str__()
     def __eq__(self, obj):
@@ -132,11 +147,12 @@ class Estimate:
 
 class ClaimContext:
     '''
-    The primary purpose of the ClaimContext class is to reduce combinatorial explosion of facts. It also makes audit rules easier to write.
+    The primary purpose of the ClaimContext class is to reduce combinatorial explosion of facts because everything is in one place. It also makes rules authoring easier.
     '''
     def __init__(self, claim: Claim):
         self.claim = claim
         self.policy = None
+        self.group = None
         self.driver = None
         self.automobile = None
         self.incidence_report = None

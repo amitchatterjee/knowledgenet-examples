@@ -3,12 +3,12 @@ from knowledgenet.rule import Rule, Fact, Collection
 from knowledgenet.controls import insert, update, delete
 from knowledgenet.container import Collector
 
-from autoins.entities import Action, ClaimContext, Automobile, Claim, Driver, Estimate, IncidenceReport, Policy
+from autoins.entities import Action, ClaimContext, Automobile, Claim, Driver, Estimate, Group, IncidenceReport, Policy
 
 # #########################################################################
 # Rule order: 0
-# Set of rules that builds the ClaimContext object for each claim that has been received 
-# including collecting historical claims
+# Set of rules that builds the ClaimContext object for each claim that has 
+# been received and joins with the policy 
 # ##########################################################################
 @ruledef
 def create_claim_context():    
@@ -27,12 +27,27 @@ def join_claim_context_with_policy():
                     matches=lambda ctx, this: ctx.claim_context.claim.policy_id == this.id)],
         then=join_claim_context_with_policy_rhs)
 
+# #########################################################################
+# Rule order: 1
+# Set of rules that builds the ClaimContext object for each claim that has been received 
+# ##########################################################################
+@ruledef
+def join_claim_context_with_group():
+    def join_claim_context_with_group_rhs(ctx):
+        ctx.claim_context.group = ctx.group
+        update(ctx, ctx.claim_context)
+    return Rule(run_once=True, order=1,
+        when=[Fact(of_type=ClaimContext, var='claim_context'),
+              Fact(of_type=Group, var='group', 
+                   matches=lambda ctx,this: ctx.claim_context.policy and ctx.claim_context.policy.group_id == this.id)],
+        then=join_claim_context_with_group_rhs)
+
 @ruledef
 def join_claim_context_with_driver():
     def join_claim_context_with_driver_rhs(ctx):
         ctx.claim_context.driver = ctx.driver
         update(ctx, ctx.claim_context)
-    return Rule(run_once=True,
+    return Rule(run_once=True, order=1,
         when=[Fact(of_type=ClaimContext, var='claim_context'),
                 Fact(of_type=Driver, var='driver', 
                     matches=lambda ctx, this: ctx.claim_context.claim.driver_id == this.id)],
@@ -43,7 +58,7 @@ def join_claim_context_with_automobile():
     def join_claim_context_with_automobile_rhs(ctx):
         ctx.claim_context.automobile = ctx.automobile
         update(ctx, ctx.claim_context)
-    return Rule(run_once=True,
+    return Rule(run_once=True, order=1,
         when=[Fact(of_type=ClaimContext, var='claim_context'),
                 Fact(of_type=Automobile, var='automobile', 
                     matches=lambda ctx, this: ctx.claim_context.claim.vin == this.vin)],
@@ -54,14 +69,14 @@ def join_claim_context_with_incidence_report():
     def join_claim_context_with_incidence_report_rhs(ctx):
         ctx.claim_context.incidence_report = ctx.incidence_report
         update(ctx, ctx.claim_context)
-    return Rule(run_once=True,
+    return Rule(run_once=True, order=1,
         when=[Fact(of_type=ClaimContext, var='claim_context'),
                 Fact(of_type=IncidenceReport, var='incidence_report', 
                     matches=lambda ctx, this: ctx.claim_context.claim.incidence_report_id == this.id)],
         then=join_claim_context_with_incidence_report_rhs)
 
 # #########################################################################
-# Rule order: 1
+# Rule order: 2
 # Add collectors
 # ##########################################################################
 @ruledef
@@ -69,7 +84,7 @@ def create_collision_history_collector():
     '''
     Create collectors that collect history (past) of claims of type, collision, for each claim being processed. We are interested in the paid amount
     '''
-    return Rule(run_once=True, order=1,
+    return Rule(run_once=True, order=2,
         when=Fact(of_type=ClaimContext, var='claim_context'),
         then=lambda ctx: 
             insert(ctx, 
@@ -83,7 +98,7 @@ def create_liability_history_collector():
     '''
     Create collectors that collect history (past) of claims of type, liability, for each claim being processed. We are interested in the paid amount
     '''
-    return Rule(run_once=True, order=1,
+    return Rule(run_once=True, order=2,
         when=Fact(of_type=ClaimContext, var='claim_context'),
         then=lambda ctx: 
             insert(ctx, 
@@ -98,7 +113,7 @@ def create_estimate_collector():
     '''
     Create collectors that collect all estimates for a claim being processed
     '''
-    return Rule(run_once=True, order=1,
+    return Rule(run_once=True, order=2,
         when=Fact(of_type=ClaimContext, var='claim_context'),
         then=lambda ctx: 
             insert(ctx, 
@@ -106,7 +121,7 @@ def create_estimate_collector():
                         filter=lambda this,estimate: estimate.claim_id == ctx.claim_context.claim.id)))
 
 # #########################################################################
-# Rule order: 2
+# Rule order: 3
 # Enrich ClaimContext with collected data
 # ########################################################################## 
 @ruledef
@@ -117,7 +132,7 @@ def add_collision_history_to_claim_context():
     def add_collision_history_to_claim_context_rhs(ctx):
         ctx.claim_context.collision_history = ctx.hist.collection
         update(ctx, ctx.claim_context)
-    return Rule(order=2, run_once=True,
+    return Rule(order=3, run_once=True,
         when=(Fact(of_type=ClaimContext, var='claim_context'),
                 Collection(group='collision-history-collector', var='hist', matches=lambda ctx,this: ctx.claim_context == this.claim_context)),
         then=add_collision_history_to_claim_context_rhs)
@@ -130,7 +145,7 @@ def add_liability_history_to_claim_context():
     def add_liability_history_to_claim_context_rhs(ctx):
         ctx.claim_context.liability_history = ctx.hist.collection
         update(ctx, ctx.claim_context)
-    return Rule(order=2, run_once=True,
+    return Rule(order=3, run_once=True,
         when=(Fact(of_type=ClaimContext, var='claim_context'),
                 Collection(group='liability-history-collector', var='hist', matches=lambda ctx,this: ctx.claim_context == this.claim_context)),
         then=add_liability_history_to_claim_context_rhs)
@@ -143,13 +158,13 @@ def add_estimates_to_claim_context():
     def add_estimates_to_claim_context_rhs(ctx):
         ctx.claim_context.estimates = ctx.estimate.collection
         update(ctx, ctx.claim_context)
-    return Rule(order=2, run_once=True,
+    return Rule(order=3, run_once=True,
         when=(Fact(of_type=ClaimContext, var='claim_context'),
                 Collection(group='estimate-collector', var='estimate', matches=lambda ctx,this: ctx.claim_context == this.claim_context)),
         then=add_estimates_to_claim_context_rhs)
 
 # #########################################################################
-# Rule order: 3
+# Rule order: 4
 # Prepares for the next ruleset to run by cleaning up uneeded objects,
 # adding new collectors, etc.
 # ########################################################################## 
@@ -158,7 +173,7 @@ def del_collision_history_collector():
     '''
     The work of the collision history collectors are done 
     '''
-    return Rule(order=3,
+    return Rule(order=4,
             when=Collection(group='collision-history-collector', var='hist'),
             then=lambda ctx: delete(ctx, ctx.hist))
 
@@ -167,7 +182,7 @@ def del_liability_history_collector():
     '''
     The work of the liability history collectors are done 
     '''
-    return Rule(order=3,
+    return Rule(order=4,
             when=Collection(group='liability-history-collector', var='hist'),
             then=lambda ctx: delete(ctx, ctx.hist))
 
@@ -176,7 +191,7 @@ def del_estimate_collector():
     '''
     The work of the estimate collectors are done 
     '''
-    return Rule(order=3,
+    return Rule(order=4,
             when=Collection(group='estimate-collector', var='estimate'),
             then=lambda ctx: delete(ctx, ctx.estimate))
 
@@ -185,7 +200,7 @@ def create_action_collector():
     '''
     Create a collection that collects all the actions for each claim being processed
     '''
-    return Rule(order=3,
+    return Rule(order=4,
         when=Fact(of_type=ClaimContext, var='claim_context'),
         then=lambda ctx: insert(ctx, 
                                 Collector(of_type=Action, group='action-collector', 

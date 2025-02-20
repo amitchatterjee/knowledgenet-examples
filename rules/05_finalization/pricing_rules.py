@@ -8,7 +8,6 @@ from knowledgenet.helper import assign
 from autoins.bluebook import BlueBook
 from autoins.entities import Action, ClaimContext
 
-
 @ruledef
 def compute_collision_payment():
     '''
@@ -19,9 +18,9 @@ def compute_collision_payment():
         est_automobile_value = ctx.bluebook_value if ctx.bluebook_value is not None else 1000000.00
         lowest_amount = min(lowest_estimate.amount, est_automobile_value)
         payable = max((lowest_amount * ctx.action.pay_percent) 
-                      - ctx.claim_context.policy.collision_deductible if ctx.claim_context.policy else 0.0, 0.0)
-        balance = max(ctx.claim_context.policy.collision_coverage - sum([each.paid_amount for each in ctx.claim_context.collision_history]), 0.0) \
-            if ctx.claim_context.policy else 0.0
+                      - ctx.claim_context.group.collision_deductible if ctx.claim_context.group else 0.0, 0.0)
+        balance = max(ctx.claim_context.group.collision_coverage - sum([each.paid_amount for each in ctx.claim_context.collision_history]), 0.0) \
+            if ctx.claim_context.group else 0.0
         ctx.action.pay_amount = min(balance, payable)
         update(ctx, ctx.action)
     return Rule(run_once=True, order=2,
@@ -42,8 +41,8 @@ def compute_liability_payment():
         est_automobile_value = ctx.bluebook_value if ctx.bluebook_value is not None else 1000000.00
         lowest_amount = min(lowest_estimate.amount, est_automobile_value)
         payable = max((lowest_amount * (1.0 - ctx.action.pay_percent)), 0.0)
-        balance = max(ctx.claim_context.policy.liability_coverage - sum([each.paid_amount for each in ctx.claim_context.liability_history]), 0.0) \
-            if ctx.claim_context.policy else 0.0
+        balance = max(ctx.claim_context.group.liability_coverage - sum([each.paid_amount for each in ctx.claim_context.liability_history]), 0.0) \
+            if ctx.claim_context.group else 0.0
         ctx.action.pay_amount = min(balance, payable)
         update(ctx, ctx.action)
     return Rule(run_once=True, order=2,
