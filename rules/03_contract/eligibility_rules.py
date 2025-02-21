@@ -20,7 +20,7 @@ def late_filing():
     return Rule(when=[Fact(of_type='contract-ruleset', var='ruleset_context'),
                       Fact(of_type=ClaimContext, var='claim_context',
                             matches=[lambda ctx,this: execute(ctx,ctx.ruleset_context,this),
-                                    lambda ctx,this: (this.claim.filing_date - this.incidence_report.accident_date).days > rule_config(ctx, ctx.ruleset_context)['within']])],
+                                    lambda ctx,this: (this.claim.filing_date - this.incidence_report.accident_date).days > rule_config(ctx, ctx.ruleset_context, ctx.claim_context)['within']])],
                 then=lambda ctx: insert(ctx, create_action(ctx, ctx.ruleset_context, ctx.claim_context)))
 
 # AI-generated rule: Create a rule function that inserts an Action object when and ClaimContext.claim of type, collision, has a vin that does not match the vins in the ClaimContext.policy.automobiles object 

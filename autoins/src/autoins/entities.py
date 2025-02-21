@@ -20,11 +20,11 @@ class Policy:
         return hash(self.id)
     
 class Group:
-    def __init__(self, id, collision_deductible, collision_coverage, liability_covergae):
+    def __init__(self, id, collision_deductible, collision_coverage, liability_coverage):
         self.id = id
         self.collision_deductible = collision_deductible
         self.collision_coverage = collision_coverage
-        self.liability_coverage = liability_covergae
+        self.liability_coverage = liability_coverage
 
     def __str__(self) -> str:
         return f'Group({self.id})'
