@@ -20,8 +20,8 @@ export PYTHONPATH=$KNOWLEDGENET_EX_HOME/autoins/src
 cd $PYTHONPATH
 
 # Run the rule_runner.py script with specified arguments
-python rule_runner.py --rulesPath $KNOWLEDGENET_EX_HOME/rules --factsPaths $KNOWLEDGENET_EX_HOME/data --log debug --outputPath $KNOWLEDGENET_EX_HOME/target/results --cleanOutput
+python rule_runner.py --rulesPath $KNOWLEDGENET_EX_HOME/autoins/rules --factsPaths $KNOWLEDGENET_EX_HOME/autoins/data --log debug --outputPath $KNOWLEDGENET_EX_HOME/target/results --cleanOutput
 
 # Run the rule_runner.py script with tracing
-python rule_runner.py --rulesPath $KNOWLEDGENET_EX_HOME/rules --factsPaths $KNOWLEDGENET_EX_HOME/data --log info --outputPath $KNOWLEDGENET_EX_HOME/target/results --cleanOutput --trace $KNOWLEDGENET_EX_HOME/target/trace.json
+python rule_runner.py --rulesPath $KNOWLEDGENET_EX_HOME/autoins/rules --factsPaths $KNOWLEDGENET_EX_HOME/autoins/data --log info --outputPath $KNOWLEDGENET_EX_HOME/target/results --cleanOutput --trace $KNOWLEDGENET_EX_HOME/target/trace.json
 ```
