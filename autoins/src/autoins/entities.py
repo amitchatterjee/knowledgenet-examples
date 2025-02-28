@@ -145,9 +145,9 @@ class Estimate:
     def __hash__(self):
         return hash(self.id)
 
-class ClaimContext:
+class ExecutionContext:
     '''
-    The primary purpose of the ClaimContext class is to reduce combinatorial explosion of facts because everything is in one place. It also makes rules authoring easier.
+    The primary purpose of the ExecutionContext class is to reduce combinatorial explosion of facts because everything is in one place. It also makes rules authoring easier.
     '''
     def __init__(self, claim: Claim):
         self.claim = claim
@@ -162,13 +162,13 @@ class ClaimContext:
         self.bypass = set()
 
     def __str__(self) -> str:
-        return f'ClaimContext:({self.claim.id})'
+        return f'ExecutionContext:({self.claim.id})'
 
     def __repr__(self) -> str:
         return self.__str__()
 
     def __eq__(self, obj):
-        if isinstance(obj, ClaimContext):
+        if isinstance(obj, ExecutionContext):
             return self.claim.id == obj.claim.id
         return False
 

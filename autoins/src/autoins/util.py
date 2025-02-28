@@ -10,28 +10,28 @@ from autoins.entities import Action
 def subfiles(parent):
     return [name for name in os.listdir(parent) if os.path.isfile(os.path.join(parent, name))]
 
-def bypass(ctx, claim_context):
-    return 'all' in claim_context.bypass or session(ctx).ruleset.id.split('_')[0] in claim_context.bypass
+def bypass(ctx, exec_context):
+    return 'all' in exec_context.bypass or session(ctx).ruleset.id.split('_')[0] in exec_context.bypass
 
-def execute(ctx, rs_context, claim_context):
-    rule_context = rule_config(ctx, rs_context, claim_context)
-    group_id = claim_context.group.id if claim_context.group else "default"
+def execute(ctx, rs_context, exec_context):
+    rule_context = rule_config(ctx, rs_context, exec_context)
+    group_id = exec_context.group.id if exec_context.group else "default"
     rs_enabled = rs_context.config.get(group_id, rs_context.config['default'])['enabled']
-    return rs_enabled and rule_context['enabled'] and not bypass(ctx, claim_context)
+    return rs_enabled and rule_context['enabled'] and not bypass(ctx, exec_context)
 
-def create_action(ctx, rs_context, claim_context):
-    rule_context = rule_config(ctx, rs_context, claim_context)
+def create_action(ctx, rs_context, exec_context):
+    rule_context = rule_config(ctx, rs_context, exec_context)
     return Action(str(uuid.uuid4()), 
             rule_context['reason'], 
-            claim_context.claim.id,
+            exec_context.claim.id,
             rule_context['action'],
             rule_context['explain'], 
             rule_context['percent'], 
             rank=rule_context['rank'])
 
-def rule_config(ctx, rs_context, claim_context):
+def rule_config(ctx, rs_context, exec_context):
     rule_id=ctx._node.rule.id
-    group_id = claim_context.group.id if claim_context.group else "default"
+    group_id = exec_context.group.id if exec_context.group else "default"
     rule_ctx = rs_context.config.get(group_id, rs_context.config['default']).get('rules', rs_context.config['default']['rules']).get(rule_id, rs_context.config['default']['rules'][rule_id])
     return rule_ctx
  

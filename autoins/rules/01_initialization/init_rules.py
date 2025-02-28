@@ -3,77 +3,77 @@ from knowledgenet.rule import Rule, Fact, Collection
 from knowledgenet.controls import insert, update, delete
 from knowledgenet.container import Collector
 
-from autoins.entities import Action, ClaimContext, Automobile, Claim, Driver, Estimate, Group, IncidenceReport, Policy
+from autoins.entities import Action, ExecutionContext, Automobile, Claim, Driver, Estimate, Group, IncidenceReport, Policy
 
 # #########################################################################
 # Rule order: 0
-# Set of rules that builds the ClaimContext object for each claim that has 
+# Set of rules that builds the ExecutionContext object for each claim that has 
 # been received and joins with the policy 
 # ##########################################################################
 @ruledef
-def create_claim_context():    
+def create_exec_context():    
     return Rule(when=Fact(of_type=Claim, var='claim', 
                 matches=lambda ctx,this: this.status == 'received'),
-        then=lambda ctx: insert(ctx, ClaimContext(ctx.claim)))
+        then=lambda ctx: insert(ctx, ExecutionContext(ctx.claim)))
 
 @ruledef
-def join_claim_context_with_policy():
-    def join_claim_context_with_policy_rhs(ctx):
-        ctx.claim_context.policy = ctx.policy
-        update(ctx, ctx.claim_context)
+def join_exec_context_with_policy():
+    def join_exec_context_with_policy_rhs(ctx):
+        ctx.exec_context.policy = ctx.policy
+        update(ctx, ctx.exec_context)
     return Rule(run_once=True,
-        when=[Fact(of_type=ClaimContext, var='claim_context'),
+        when=[Fact(of_type=ExecutionContext, var='exec_context'),
                 Fact(of_type=Policy, var='policy', 
-                    matches=lambda ctx, this: ctx.claim_context.claim.policy_id == this.id)],
-        then=join_claim_context_with_policy_rhs)
+                    matches=lambda ctx, this: ctx.exec_context.claim.policy_id == this.id)],
+        then=join_exec_context_with_policy_rhs)
 
 # #########################################################################
 # Rule order: 1
-# Set of rules that builds the ClaimContext object for each claim that has been received 
+# Set of rules that builds the ExecutionContext object for each claim that has been received 
 # ##########################################################################
 @ruledef
-def join_claim_context_with_group():
-    def join_claim_context_with_group_rhs(ctx):
-        ctx.claim_context.group = ctx.group
-        update(ctx, ctx.claim_context)
+def join_exec_context_with_group():
+    def join_exec_context_with_group_rhs(ctx):
+        ctx.exec_context.group = ctx.group
+        update(ctx, ctx.exec_context)
     return Rule(run_once=True, order=1,
-        when=[Fact(of_type=ClaimContext, var='claim_context'),
+        when=[Fact(of_type=ExecutionContext, var='exec_context'),
               Fact(of_type=Group, var='group', 
-                   matches=lambda ctx,this: ctx.claim_context.policy and ctx.claim_context.policy.group_id == this.id)],
-        then=join_claim_context_with_group_rhs)
+                   matches=lambda ctx,this: ctx.exec_context.policy and ctx.exec_context.policy.group_id == this.id)],
+        then=join_exec_context_with_group_rhs)
 
 @ruledef
-def join_claim_context_with_driver():
-    def join_claim_context_with_driver_rhs(ctx):
-        ctx.claim_context.driver = ctx.driver
-        update(ctx, ctx.claim_context)
+def join_exec_context_with_driver():
+    def join_exec_context_with_driver_rhs(ctx):
+        ctx.exec_context.driver = ctx.driver
+        update(ctx, ctx.exec_context)
     return Rule(run_once=True, order=1,
-        when=[Fact(of_type=ClaimContext, var='claim_context'),
+        when=[Fact(of_type=ExecutionContext, var='exec_context'),
                 Fact(of_type=Driver, var='driver', 
-                    matches=lambda ctx, this: ctx.claim_context.claim.driver_id == this.id)],
-        then=join_claim_context_with_driver_rhs)
+                    matches=lambda ctx, this: ctx.exec_context.claim.driver_id == this.id)],
+        then=join_exec_context_with_driver_rhs)
 
 @ruledef
-def join_claim_context_with_automobile():
-    def join_claim_context_with_automobile_rhs(ctx):
-        ctx.claim_context.automobile = ctx.automobile
-        update(ctx, ctx.claim_context)
+def join_exec_context_with_automobile():
+    def join_exec_context_with_automobile_rhs(ctx):
+        ctx.exec_context.automobile = ctx.automobile
+        update(ctx, ctx.exec_context)
     return Rule(run_once=True, order=1,
-        when=[Fact(of_type=ClaimContext, var='claim_context'),
+        when=[Fact(of_type=ExecutionContext, var='exec_context'),
                 Fact(of_type=Automobile, var='automobile', 
-                    matches=lambda ctx, this: ctx.claim_context.claim.vin == this.vin)],
-        then=join_claim_context_with_automobile_rhs)
+                    matches=lambda ctx, this: ctx.exec_context.claim.vin == this.vin)],
+        then=join_exec_context_with_automobile_rhs)
 
 @ruledef
-def join_claim_context_with_incidence_report():
-    def join_claim_context_with_incidence_report_rhs(ctx):
-        ctx.claim_context.incidence_report = ctx.incidence_report
-        update(ctx, ctx.claim_context)
+def join_exec_context_with_incidence_report():
+    def join_exec_context_with_incidence_report_rhs(ctx):
+        ctx.exec_context.incidence_report = ctx.incidence_report
+        update(ctx, ctx.exec_context)
     return Rule(run_once=True, order=1,
-        when=[Fact(of_type=ClaimContext, var='claim_context'),
+        when=[Fact(of_type=ExecutionContext, var='exec_context'),
                 Fact(of_type=IncidenceReport, var='incidence_report', 
-                    matches=lambda ctx, this: ctx.claim_context.claim.incidence_report_id == this.id)],
-        then=join_claim_context_with_incidence_report_rhs)
+                    matches=lambda ctx, this: ctx.exec_context.claim.incidence_report_id == this.id)],
+        then=join_exec_context_with_incidence_report_rhs)
 
 # #########################################################################
 # Rule order: 2
@@ -85,13 +85,13 @@ def create_collision_history_collector():
     Create collectors that collect history (past) of claims of type, collision, for each claim being processed. We are interested in the paid amount
     '''
     return Rule(run_once=True, order=2,
-        when=Fact(of_type=ClaimContext, var='claim_context'),
+        when=Fact(of_type=ExecutionContext, var='exec_context'),
         then=lambda ctx: 
             insert(ctx, 
-                    Collector(of_type=Claim, group='collision-history-collector', claim_context=ctx.claim_context,
+                    Collector(of_type=Claim, group='collision-history-collector', exec_context=ctx.exec_context,
                         filter=[lambda this,claim: claim.status == 'approved',
-                                lambda this,claim: this.claim_context.policy and this.claim_context.policy.id == claim.policy_id,
-                                lambda this,claim: this.claim_context.claim.filing_date.year == claim.filing_date.year])))
+                                lambda this,claim: this.exec_context.policy and this.exec_context.policy.id == claim.policy_id,
+                                lambda this,claim: this.exec_context.claim.filing_date.year == claim.filing_date.year])))
 
 @ruledef
 def create_liability_history_collector():
@@ -99,14 +99,14 @@ def create_liability_history_collector():
     Create collectors that collect history (past) of claims of type, liability, for each claim being processed. We are interested in the paid amount
     '''
     return Rule(run_once=True, order=2,
-        when=Fact(of_type=ClaimContext, var='claim_context'),
+        when=Fact(of_type=ExecutionContext, var='exec_context'),
         then=lambda ctx: 
             insert(ctx, 
-                    Collector(of_type=Claim, group='liability-history-collector', claim_context=ctx.claim_context,
+                    Collector(of_type=Claim, group='liability-history-collector', exec_context=ctx.exec_context,
                         filter=[lambda this,claim: claim.status == 'approved',
                                 lambda this,claim: claim.type == 'liability',
-                                lambda this,claim: this.claim_context.policy and this.claim_context.policy.id == claim.policy_id,
-                                lambda this,claim: this.claim_context.claim.filing_date.year == claim.filing_date.year])))
+                                lambda this,claim: this.exec_context.policy and this.exec_context.policy.id == claim.policy_id,
+                                lambda this,claim: this.exec_context.claim.filing_date.year == claim.filing_date.year])))
 
 @ruledef
 def create_estimate_collector():
@@ -114,54 +114,54 @@ def create_estimate_collector():
     Create collectors that collect all estimates for a claim being processed
     '''
     return Rule(run_once=True, order=2,
-        when=Fact(of_type=ClaimContext, var='claim_context'),
+        when=Fact(of_type=ExecutionContext, var='exec_context'),
         then=lambda ctx: 
             insert(ctx, 
-                    Collector(of_type=Estimate, group='estimate-collector', claim_context=ctx.claim_context,
-                        filter=lambda this,estimate: estimate.claim_id == ctx.claim_context.claim.id)))
+                    Collector(of_type=Estimate, group='estimate-collector', exec_context=ctx.exec_context,
+                        filter=lambda this,estimate: estimate.claim_id == ctx.exec_context.claim.id)))
 
 # #########################################################################
 # Rule order: 3
-# Enrich ClaimContext with collected data
+# Enrich ExecutionContext with collected data
 # ########################################################################## 
 @ruledef
-def add_collision_history_to_claim_context():
+def add_collision_history_to_exec_context():
     '''
-    Add all history records to the claim_context so that other rulesets can get the history information from the claim_context object itself
+    Add all history records to the exec_context so that other rulesets can get the history information from the exec_context object itself
     '''
-    def add_collision_history_to_claim_context_rhs(ctx):
-        ctx.claim_context.collision_history = ctx.hist.collection
-        update(ctx, ctx.claim_context)
+    def add_collision_history_to_exec_context_rhs(ctx):
+        ctx.exec_context.collision_history = ctx.hist.collection
+        update(ctx, ctx.exec_context)
     return Rule(order=3, run_once=True,
-        when=(Fact(of_type=ClaimContext, var='claim_context'),
-                Collection(group='collision-history-collector', var='hist', matches=lambda ctx,this: ctx.claim_context == this.claim_context)),
-        then=add_collision_history_to_claim_context_rhs)
+        when=(Fact(of_type=ExecutionContext, var='exec_context'),
+                Collection(group='collision-history-collector', var='hist', matches=lambda ctx,this: ctx.exec_context == this.exec_context)),
+        then=add_collision_history_to_exec_context_rhs)
 
 @ruledef
-def add_liability_history_to_claim_context():
+def add_liability_history_to_exec_context():
     '''
-    Add all liability history records to the claim_context so that other rulesets can get the history information from the claim_context object itself
+    Add all liability history records to the exec_context so that other rulesets can get the history information from the exec_context object itself
     '''
-    def add_liability_history_to_claim_context_rhs(ctx):
-        ctx.claim_context.liability_history = ctx.hist.collection
-        update(ctx, ctx.claim_context)
+    def add_liability_history_to_exec_context_rhs(ctx):
+        ctx.exec_context.liability_history = ctx.hist.collection
+        update(ctx, ctx.exec_context)
     return Rule(order=3, run_once=True,
-        when=(Fact(of_type=ClaimContext, var='claim_context'),
-                Collection(group='liability-history-collector', var='hist', matches=lambda ctx,this: ctx.claim_context == this.claim_context)),
-        then=add_liability_history_to_claim_context_rhs)
+        when=(Fact(of_type=ExecutionContext, var='exec_context'),
+                Collection(group='liability-history-collector', var='hist', matches=lambda ctx,this: ctx.exec_context == this.exec_context)),
+        then=add_liability_history_to_exec_context_rhs)
 
 @ruledef
-def add_estimates_to_claim_context():
+def add_estimates_to_exec_context():
     '''
-    Add all estimates to the claim_context so that other rulesets can get estimates from the claim_context object itself
+    Add all estimates to the exec_context so that other rulesets can get estimates from the exec_context object itself
     '''
-    def add_estimates_to_claim_context_rhs(ctx):
-        ctx.claim_context.estimates = ctx.estimate.collection
-        update(ctx, ctx.claim_context)
+    def add_estimates_to_exec_context_rhs(ctx):
+        ctx.exec_context.estimates = ctx.estimate.collection
+        update(ctx, ctx.exec_context)
     return Rule(order=3, run_once=True,
-        when=(Fact(of_type=ClaimContext, var='claim_context'),
-                Collection(group='estimate-collector', var='estimate', matches=lambda ctx,this: ctx.claim_context == this.claim_context)),
-        then=add_estimates_to_claim_context_rhs)
+        when=(Fact(of_type=ExecutionContext, var='exec_context'),
+                Collection(group='estimate-collector', var='estimate', matches=lambda ctx,this: ctx.exec_context == this.exec_context)),
+        then=add_estimates_to_exec_context_rhs)
 
 # #########################################################################
 # Rule order: 4
@@ -201,8 +201,8 @@ def create_action_collector():
     Create a collection that collects all the actions for each claim being processed
     '''
     return Rule(order=4,
-        when=Fact(of_type=ClaimContext, var='claim_context'),
+        when=Fact(of_type=ExecutionContext, var='exec_context'),
         then=lambda ctx: insert(ctx, 
                                 Collector(of_type=Action, group='action-collector', 
-                                        claim_context=ctx.claim_context, 
-                                        filter=lambda this,action: this.claim_context.claim.id == action.claim_id)))
+                                        exec_context=ctx.exec_context, 
+                                        filter=lambda this,action: this.exec_context.claim.id == action.claim_id)))
