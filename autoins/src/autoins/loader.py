@@ -8,9 +8,9 @@ from autoins.util import load_from_csv, subfiles, to_bool
 
 from knowledgenet.ftypes import Wrapper
 
-def load_facts(args):
+def load_facts(factsPaths):
     facts = set()
-    for path in args.factsPaths:
+    for path in factsPaths:
         files = subfiles(path)
         for f in files:
             converters = None

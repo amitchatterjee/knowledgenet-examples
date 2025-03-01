@@ -9,4 +9,4 @@ Here is some context. The file: trace.json contains a trace from the knowledgene
 @workspace please refer to the documents in the project - knowledgenet. Also refer to the tests in the project - knowledgenet, for usage examples. Explain the software function
 
 --------------------
-@workspace Using the knowledgenet-examples/autoins/data as reference, can you generate similar data that can test all the rules in 03_contract folder?
+@workspace Using the csv files under autoins/data for the project knowledgenet-examples as example, can you generate similar data that can be used test all the rules in 02_validation folder? 
