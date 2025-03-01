@@ -1,0 +1,7 @@
+id,source,policy,accident_date,description,license_number,license_state,vin,liability_percent
+R1,police,P1,2024-02-20,Valid report,D1,CA,A1,0.5
+R2,INVALID_SOURCE,P2,2024-03-15,Invalid source,D2,NY,A2,0.75
+R3,police,INVALID_POLICY,2024-04-01,Invalid policy reference,D3,TX,A3,1.0
+R4,insurance,P4,2024-04-01,Invalid date,D4,FL,A4,0.25
+R5,police,P5,2024-05-01,,D5,WA,A5,-0.5
+R6,insurance,P6,2024-06-01,Invalid percent,D6,CA,A6,1.5
