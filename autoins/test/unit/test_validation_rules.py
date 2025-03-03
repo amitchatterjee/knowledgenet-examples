@@ -9,7 +9,7 @@ def test_sanity():
 
 
 def test_validation_rules():
-    result_facts = execute('rules', ['test/data/validation-rules'], '../target/results')
+    result_facts = execute('rules', ['test/data/validation-rules'], '../target/test-results')
     assert result_facts is not None
     for result_fact in result_facts:
             if type(result_fact) == Action:
