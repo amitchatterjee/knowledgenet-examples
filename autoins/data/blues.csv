@@ -1,4 +1,4 @@
-# AI-generated code: Create rows from the following data with columns - make, model, year, value:
+# 
 #2025 Toyota models 2025 Toyota Corolla: The starting price is $23,460, but KBB suggests paying less depending on the #trim and equipment. 2025 Toyota RAV4: The starting price is $30,245, but KBB suggests paying less depending on the #trim and equipment. 2025 Toyota Tacoma: The starting price for the Xtracab is $33,085, and the Double Cab is $35,285. #2025 Toyota Sienna: The starting price is $40,635. 2025 Toyota Highlander: The starting price is $40,970. 2025 Toyota #4Runner: The starting price is $42,220. 2025 Toyota GR Corolla: The starting price is $39,995. 2025 Toyota Crown: The #starting price is $42,535. 2025 Toyota GR Supra: The starting price is $57,345. 2025 Toyota Land Cruiser: The #starting price is $58,150.
 make,model,year,value
 Toyota,Corolla,2025,23460
@@ -12,7 +12,7 @@ Toyota,GR Corolla,2025,39995
 Toyota,Crown,2025,42535
 Toyota,GR Supra,2025,57345
 Toyota,Land Cruiser,2025,58150
-# AI-generated code: Add records from automobiles.csv to blues.csv
+# 
 Toyota,Corolla,2020,20460
 Honda,Civic,2019,21000
 Chevrolet,Malibu,2021,17000

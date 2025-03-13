@@ -10,3 +10,5 @@ Here is some context. The file: trace.json contains a trace from the knowledgene
 
 --------------------
 @workspace Using the csv files under autoins/data for the project knowledgenet-examples as example, can you generate similar data that can be used test all the rules in 02_validation folder? 
+
+@workspace Using the csv files under autoins/data for the project knowledgenet-examples as example, generate similar data files that can be used test all the rules in 03_contract folder. Place the folders under knowledgenet-examples/autoins/test/data/contract-rules folder

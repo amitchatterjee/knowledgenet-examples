@@ -14,7 +14,7 @@ def pay_on_no_action():
     '''
     return Rule(run_once=True,
         when=Collection(group='action-collector', 
-                    matches=[lambda ctx,this: not len(this.collection),  
+                    matches=[lambda ctx,this: this.empty(),  
                             lambda ctx,this: assign(ctx, exec_context=this.exec_context)]),
         then=lambda ctx: insert(ctx, Action(str(uuid.uuid4()), 'PAYCL', 
                                             ctx.exec_context.claim.id, 'pay', 'pay', 

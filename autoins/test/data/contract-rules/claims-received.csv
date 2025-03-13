@@ -1,0 +1,5 @@
+id,type,policy_id,filing_date,claimed_amount,paid_amount,vin,driver_id,status,description,incidence_report_id
+C1,collision,P2,2023-02-20,4000,0,A1,D2,received,Minor collision in parking lot,R1
+C2,collision,P3,2023-03-10,7000,0,A3,D5,received,Rear-ended at traffic light,R3
+C3,collision,P1,2024-02-20,3000,0,A2,D1,received,Fender bender,R2
+C4,liability,P6,2023-08-12,7000,0,A3,D4,received,Hit a pedestrian,R3

@@ -60,7 +60,7 @@ def bypass_rules_with_validation_error():
             Fact(of_type=ExecutionContext, var='exec_context'),
             Collection(group='action-collector', 
                     matches=[lambda ctx,this: this.exec_context == ctx.exec_context,  
-                            lambda ctx,this: len(this.collection) > 0])], 
+                            lambda ctx,this: this.size() > 0])], 
         then=bypass_rules_with_validation_error_rhs)
 
 @ruledef

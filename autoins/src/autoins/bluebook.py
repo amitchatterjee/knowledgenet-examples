@@ -12,6 +12,6 @@ class BlueBook:
             key = (row['make'], row['model'], row['year'])
             self.data[key] = row['value']
     
-    # AI-generated code: Define a function with params - make, model and year to lookup the value from self.data
+    # 
     def lookup(self, make, model, year):
         return self.data.get((make, model, year), None)

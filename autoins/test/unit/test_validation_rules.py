@@ -8,10 +8,5 @@ def test_sanity():
 def test_validation_rules():
     result_facts = execute('rules', ['test/data/validation-rules'], '../target/test-results')
     assert result_facts is not None
-    dump_result(result_facts)
-
-def test_validation_rules():
-    result_facts = execute('rules', ['test/data/validation-rules'], '../target/test-results')
-    assert result_facts is not None
     assert_result_matches(result_facts, 'test/expected/validation-rules/expected.csv')
 
