@@ -4,10 +4,19 @@ import hashlib
 import json
 import logging
 
-from rule_runner import execute_service, init_knowledgebase, write_result
+from autoins.loader import load_facts
+from rule_runner import execute_service, init_knowledgebase, init_rules, write_result
+import pytest
 
-def execute(rules_path, facts_paths, output_path):
-    service, facts = init_knowledgebase(rules_path, facts_paths)
+@pytest.fixture(autouse=True, scope="session")
+def service():
+    if not hasattr(service, "_instance"):
+        logging.info("Initializing rules from the rules folder")
+        service._instance = init_rules("rules")
+    return service._instance
+
+def execute(service, facts_paths, output_path):
+    facts = load_facts(facts_paths)
     result_facts = execute_service(service, facts, False, None)
     write_result(output_path, True, result_facts)
     return result_facts

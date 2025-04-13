@@ -1,0 +1,5 @@
+id,code,claim_id,action,explain,rank,pay_percent,pay_amount,inactive
+b90fd4e6-32a3-4be9-83a1-c50c907ffd9b,PAYCL,C4,pay,pay,0,0.75,0.0,False
+b7022372-6d5b-4c70-8c25-5942324adeb5,PAYCL,C1,pay,pay,0,0.5,0.0,False
+3bd28adc-3327-430a-aeb1-f00bf228f7d0,PAYCL,C2,pay,pay,0,0.75,0.0,False
+a0a51952-298a-4f35-a492-d73d6185ba4e,PAYCL,C3,pay,pay,0,1.0,0.0,False

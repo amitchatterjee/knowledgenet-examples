@@ -1,15 +1,9 @@
 id,code,claim_id,action,explain,rank,pay_percent,pay_amount,inactive
-dac5ba2c-1ac4-4caa-b0c2-97fdfc84bef1,NODRV,C4,incomplete,no driver found,998,0.0,0.0,True
-d48743e7-37f9-4dd3-82e3-53aea0d33aa7,NEEST,C2,incomplete,insufficient number of estimates,996,0.0,0.0,True
-3c8c3d16-bd20-471b-9d17-fcc902aed4eb,NEEST,C2,incomplete,insufficient number of estimates,996,0.0,0.0,True
-b337cf39-7b51-4195-bb2d-a9726011ca78,NOAUT,C2,incomplete,no automobile found,997,0.0,0.0,True
-d2379589-7a02-4245-a23f-74938115f7bb,NOAUT,C1,incomplete,no automobile found,997,0.0,0.0,True
-1fc6bf33-f46a-4e1a-a548-3d4e65cd962f,NOAUT,C2,incomplete,no automobile found,997,0.0,0.0,False
-7a01a27b-3a53-44d8-85d7-4b6073637fe7,NOAUT,C5,incomplete,no automobile found,997,0.0,0.0,False
-9b06f26d-01a9-4457-a311-f45a91a07df4,NODRV,C4,incomplete,no driver found,998,0.0,0.0,False
-811a6351-0c4d-489a-80ba-8f558fb447b6,NOINR,C1,incomplete,no incidence report found,999,0.0,0.0,True
-6f1bbe5b-0104-430f-a2e6-f8762b40d65e,NOAUT,C5,incomplete,no automobile found,997,0.0,0.0,True
-f1afd66a-c589-4d7d-9f12-e75fb1aaefd1,NOAUT,C4,incomplete,no automobile found,997,0.0,0.0,True
-5b8be24e-300c-448f-a59d-0acee39cbc7f,NOAUT,C4,incomplete,no automobile found,997,0.0,0.0,True
-eba32667-3316-4d2f-912d-d44e3c104c88,NOINR,C1,incomplete,no incidence report found,999,0.0,0.0,False
-41e59482-eaae-4793-90a1-037dbd03a0d6,NOAUT,C1,incomplete,no automobile found,997,0.0,0.0,True
+6de35dd8-411a-4e66-bf01-10f26178bf38,NODRV,C4,incomplete,no driver found,998,0.0,0.0,False
+0820516e-81ff-43ad-a6ac-beefac89dee8,NEEST,C2,incomplete,insufficient number of estimates,996,0.0,0.0,True
+e0a47359-3570-44b9-a2cd-a479cc376f43,NOAUT,C4,incomplete,no automobile found,997,0.0,0.0,True
+5e017faf-4904-49ab-8911-c47536b7f90b,NOINR,C1,incomplete,no incidence report found,999,0.0,0.0,False
+201b7c96-0612-442e-b6ed-f33f6d438ad7,NOAUT,C1,incomplete,no automobile found,997,0.0,0.0,True
+eeec1d88-c4b7-41d7-a6b0-10be48ce93d4,NOAUT,C5,incomplete,no automobile found,997,0.0,0.0,False
+c2b76105-014f-448c-81d0-b0206774f781,NOAUT,C2,incomplete,no automobile found,997,0.0,0.0,False
+

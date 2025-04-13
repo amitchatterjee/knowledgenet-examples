@@ -26,6 +26,13 @@ def argsparser():
     return parser.parse_args()
 
 def init_knowledgebase(rules_root, facts_path):
+    service = init_rules(rules_root)
+
+    facts = load_facts(facts_path)
+    logging.info(f"Loaded {len(facts)} facts")
+    return service,facts
+
+def init_rules(rules_root):
     rules_paths = []
     repo = subdirs(rules_root)
     for r in repo:
@@ -36,9 +43,7 @@ def init_knowledgebase(rules_root, facts_path):
     repository = scanner.lookup(rules_basename)
     service = Service(repository)
     logging.info(f"Loaded {len(repository.rulesets)} rulesets")
-    facts = load_facts(facts_path)
-    logging.info(f"Loaded {len(facts)} facts")
-    return service,facts
+    return service
 
 def init_logging(log):
     handlers = [logging.StreamHandler(sys.stdout)]

@@ -1,9 +1,10 @@
 from autoins.entities import Action
-from util import execute, assert_result_matches, dump_result
+from util import execute, assert_result_matches, dump_result, service
 
-def test_contract_rules():
-    result_facts = execute('rules', ['test/data/contract-rules'], '../target/test-results')
+def test_contract_rules(service):
+    result_facts = execute(service, ['test/data/contract-rules'], '../target/test-results/contract-rules')
     assert result_facts is not None
     dump_result(result_facts)
-    #assert_result_matches(result_facts, 'test/expected/validation-rules/expected.csv')
+    assert_result_matches(result_facts, 'test/expected/contract-rules/expected.csv')
+
 
