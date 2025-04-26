@@ -1,17 +1,14 @@
-import logging
-import pandas as pd
+import csv
 
 class BlueBook:
     # AI-generated code
     def __init__(self, file_path):
         self.data = {}
-        df = pd.read_csv(file_path, comment='#', converters={
-                    'value': float
-                })
-        for _, row in df.iterrows():
-            key = (row['make'], row['model'], row['year'])
-            self.data[key] = row['value']
+        with open(file_path, 'r') as csvfile:
+            reader = csv.DictReader((row for row in csvfile if not row.startswith('#')))
+            for row in reader:
+                key = (row['make'], row['model'], row['year'])
+                self.data[key] = float(row['value'])        
     
-    # 
     def lookup(self, make, model, year):
         return self.data.get((make, model, year), None)

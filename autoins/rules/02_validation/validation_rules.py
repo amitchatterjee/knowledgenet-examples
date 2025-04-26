@@ -9,7 +9,7 @@ from autoins.util import create_action, record_action_event
 @ruledef
 def no_policy():
     return Rule(run_once=True, 
-                when=[Fact(of_type='validation-ruleset', var='ruleset_context'),
+                when=[Fact(named='validation-ruleset', var='ruleset_context'),
                       Fact(of_type=ExecutionContext, var='exec_context',
                         matches=lambda ctx,this: not this.policy)],
                     then=lambda ctx: insert(ctx, create_action(ctx, ctx.ruleset_context, ctx.exec_context)))
@@ -17,7 +17,7 @@ def no_policy():
 @ruledef
 def no_incidence_report():
     return Rule(run_once=True, 
-                when=[Fact(of_type='validation-ruleset', var='ruleset_context'),
+                when=[Fact(named='validation-ruleset', var='ruleset_context'),
                     Fact(of_type=ExecutionContext, var='exec_context', 
                     matches=lambda ctx,this: not this.incidence_report)],
                     then=lambda ctx: insert(ctx, create_action(ctx, ctx.ruleset_context, ctx.exec_context)))
@@ -25,7 +25,7 @@ def no_incidence_report():
 @ruledef
 def no_driver():
     return Rule(run_once=True, 
-                when=[Fact(of_type='validation-ruleset', var='ruleset_context'),
+                when=[Fact(named='validation-ruleset', var='ruleset_context'),
                     Fact(of_type=ExecutionContext, var='exec_context', 
                     matches=lambda ctx,this: not this.driver)],
                 then=lambda ctx: insert(ctx, create_action(ctx, ctx.ruleset_context, ctx.exec_context)))
@@ -33,7 +33,7 @@ def no_driver():
 @ruledef
 def no_automobile():
     return Rule(run_once=True, 
-                when=[Fact(of_type='validation-ruleset', var='ruleset_context'),
+                when=[Fact(named='validation-ruleset', var='ruleset_context'),
                       Fact(of_type=ExecutionContext, var='exec_context', 
                     matches=lambda ctx,this: not this.automobile)],
                 then=lambda ctx: insert(ctx, create_action(ctx, ctx.ruleset_context, ctx.exec_context)))
@@ -44,7 +44,7 @@ def insufficent_estimates():
     For non-approved vendors, at least three estimates are required, for approved vendors, at least one estimate is required
     '''
     return Rule(run_once=True, 
-                when=[Fact(of_type='validation-ruleset', var='ruleset_context'),
+                when=[Fact(named='validation-ruleset', var='ruleset_context'),
                       Fact(of_type=ExecutionContext, var='exec_context', 
                         matches=[lambda ctx,this: len(this.estimates) < 3,
                                 lambda ctx,this: len([e for e in this.estimates if e.approved_vendor]) == 0])],

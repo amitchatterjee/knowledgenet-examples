@@ -10,4 +10,3 @@ def test_validation_rules(service):
     result_facts = execute(service, ['test/data/validation-rules'], '../target/test-results/validation-rules')
     assert result_facts is not None
     assert_result_matches(result_facts, 'test/expected/validation-rules/expected.csv')
-

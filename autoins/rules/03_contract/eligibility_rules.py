@@ -8,7 +8,7 @@ from autoins.util import create_action, execute, record_action_event, rule_confi
 
 @ruledef
 def inactive_policy():
-    return Rule(when=[Fact(of_type='contract-ruleset', var='ruleset_context'),
+    return Rule(when=[Fact(named='contract-ruleset', var='ruleset_context'),
                       Fact(of_type=ExecutionContext, var='exec_context', 
                             matches=[lambda ctx,this: execute(ctx,ctx.ruleset_context,this),
                                 lambda ctx,this: 
@@ -17,7 +17,7 @@ def inactive_policy():
 
 @ruledef
 def late_filing():
-    return Rule(when=[Fact(of_type='contract-ruleset', var='ruleset_context'),
+    return Rule(when=[Fact(named='contract-ruleset', var='ruleset_context'),
                       Fact(of_type=ExecutionContext, var='exec_context',
                             matches=[lambda ctx,this: execute(ctx,ctx.ruleset_context,this),
                                     lambda ctx,this: (this.claim.filing_date - this.incidence_report.accident_date).days > rule_config(ctx, ctx.ruleset_context, ctx.exec_context)['within']])],
@@ -26,7 +26,7 @@ def late_filing():
 # AI-generated rule: Create a rule function that inserts an Action object when and ExecutionContext.claim of type, collision, has a vin that does not match the vins in the ExecutionContext.policy.automobiles object 
 @ruledef
 def vin_mismatch():
-    return Rule(when=[Fact(of_type='contract-ruleset', var='ruleset_context'),
+    return Rule(when=[Fact(named='contract-ruleset', var='ruleset_context'),
                       Fact(of_type=ExecutionContext, var='exec_context',
                             matches=[lambda ctx,this: execute(ctx,ctx.ruleset_context,this),
                                     lambda ctx,this: this.claim.type == 'collision',

@@ -1,9 +1,9 @@
 import argparse
+import csv
 import os
 import io
 import sys
 import time
-import pandas as pd
 import json
 from knowledgenet import scanner
 from knowledgenet.service import Service
@@ -58,12 +58,15 @@ def write_result(output_path, clean_output, result_facts):
         for f in files:
             os.remove(os.path.join(output_path, f))
 
-    df = pd.DataFrame(columns=Action.columns)
-    #df.set_index(Action.key, inplace=True)
-    for result_fact in result_facts:
-        if type(result_fact) == Action:
-            df = pd.concat([df if not df.empty else None, pd.DataFrame(result_fact.to_dict(), index=[0])])
-    df.to_csv(os.path.join(output_path, f"{time.time()}.csv"), index=False)
+    timestamp = str(time.time())
+    output_file = os.path.join(output_path, f"{timestamp}.csv")
+    
+    with open(output_file, 'w', newline='') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=Action.columns)
+        writer.writeheader()
+        for result_fact in result_facts:
+            if type(result_fact) == Action:
+                writer.writerow(result_fact.to_dict())
 
 def execute_service(service, facts, trace, trace_stream):
     try:

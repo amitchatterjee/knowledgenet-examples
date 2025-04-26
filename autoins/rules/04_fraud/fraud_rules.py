@@ -9,7 +9,7 @@ from autoins.util import record_action_event, create_action, execute
 # AI-generated rule: Create a @ruledef function that inserts an Action when the vin on the ExecutionContext.claim object does not match the vin on the ExecutionContext.incidence_report object
 @ruledef
 def vin_mismatch_claim_incidence_report():
-    return Rule(when=[Fact(of_type='fraud-ruleset', var='ruleset_context'),
+    return Rule(when=[Fact(named='fraud-ruleset', var='ruleset_context'),
                       Fact(of_type=ExecutionContext, var='exec_context',
                             matches=[lambda ctx,this: execute(ctx,ctx.ruleset_context,this),
                                     lambda ctx,this: this.claim.vin != this.incidence_report.vin])],
@@ -18,7 +18,7 @@ def vin_mismatch_claim_incidence_report():
 # AI-generated rule: Create a @ruledef function that inserts an Action when the vin on the ExecutionContext.claim object does not match the vin on any elements of the ExecutionContext.estimates object
 @ruledef
 def vin_mismatch_claim_estimates():
-    return Rule(when=[Fact(of_type='fraud-ruleset', var='ruleset_context'),
+    return Rule(when=[Fact(named='fraud-ruleset', var='ruleset_context'),
                       Fact(of_type=ExecutionContext, var='exec_context',
                             matches=[lambda ctx,this: execute(ctx,ctx.ruleset_context,this),
                                 lambda ctx,this: any(est.vin != this.claim.vin for est in this.estimates)])],

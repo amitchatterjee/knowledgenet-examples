@@ -1,7 +1,8 @@
+import csv
+from datetime import datetime
 import logging
 import os
 import uuid
-import pandas as pd
 
 from knowledgenet.helper import session
 
@@ -41,11 +42,26 @@ def record_action_event(ctx, event):
                     event.added, event.updated, event.deleted)
     event.reset()
 
-def load_from_csv(facts, of_type, file_path, converters=None):
-    df = pd.read_csv(file_path, converters=converters, comment='#').to_dict(orient='records')
+def load_facts_from_csv(facts, of_type, file_path, converters=None):
+    df = _read_csv_and_convert(file_path, converters)
     for row in df:
         fact = of_type(**row)
         facts.add(fact)
+
+def _read_csv_and_convert(file_path, converters):
+    with open(file_path, 'r') as csvfile:
+        reader = csv.DictReader((row for row in csvfile if not row.startswith('#')))
+        df = []
+        for row in reader:
+            if converters:
+                for key, converter in converters.items():
+                    if key in row:
+                        row[key] = converter(row[key])
+            df.append(row)
+    return df
+
+def to_datetime(d):
+    return datetime.strptime(d, '%Y-%m-%d') if d else None
 
 def to_bool(txt):
     if txt.lower() in ['yes', 'true']:
