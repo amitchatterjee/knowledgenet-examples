@@ -43,12 +43,12 @@ def record_action_event(ctx, event):
     event.reset()
 
 def load_facts_from_csv(facts, of_type, file_path, converters=None):
-    df = _read_csv_and_convert(file_path, converters)
+    df = read_csv_and_convert(file_path, converters)
     for row in df:
         fact = of_type(**row)
         facts.add(fact)
 
-def _read_csv_and_convert(file_path, converters):
+def read_csv_and_convert(file_path, converters):
     with open(file_path, 'r') as csvfile:
         reader = csv.DictReader((row for row in csvfile if not row.startswith('#')))
         df = []

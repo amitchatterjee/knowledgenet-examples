@@ -1,5 +1,4 @@
 import argparse
-import csv
 import os
 import io
 import sys
@@ -11,8 +10,7 @@ from knowledgenet.ftypes import EventFact
 from autoins.entities import Action
 import logging
 
-from autoins.loader import load_facts
-from autoins.util import subfiles
+from autoins.fact_io import load_facts, write_actions
 from autoins.util import subdirs
 
 def argsparser():
@@ -49,25 +47,6 @@ def init_logging(log):
     handlers = [logging.StreamHandler(sys.stdout)]
     logging.basicConfig(level=getattr(logging, log.upper(), None), handlers=handlers)
 
-def write_result(output_path, clean_output, result_facts):
-    if not os.path.exists(output_path):
-        os.makedirs(output_path)
-    
-    if clean_output:
-        files = subfiles(output_path)
-        for f in files:
-            os.remove(os.path.join(output_path, f))
-
-    timestamp = str(time.time())
-    output_file = os.path.join(output_path, f"{timestamp}.csv")
-    
-    with open(output_file, 'w', newline='') as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames=Action.columns)
-        writer.writeheader()
-        for result_fact in result_facts:
-            if type(result_fact) == Action:
-                writer.writerow(result_fact.to_dict())
-
 def execute_service(service, facts, trace, trace_stream):
     try:
         start_time = time.time()
@@ -91,7 +70,7 @@ if __name__ == "__main__":
     trace_stream = io.StringIO() if not trace or trace == 'log' else open(trace, 'w')
     result_facts = execute_service(service, facts, trace, trace_stream)
 
-    write_result(args.outputPath, args.cleanOutput, result_facts)
+    write_actions(args.outputPath, args.cleanOutput, result_facts)
 
     if logging.getLogger().isEnabledFor(logging.DEBUG):
         logging.debug("\n\nResults:")

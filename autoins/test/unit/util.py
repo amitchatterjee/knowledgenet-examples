@@ -4,8 +4,8 @@ import hashlib
 import json
 import logging
 
-from autoins.loader import load_facts
-from rule_runner import execute_service, init_knowledgebase, init_rules, write_result
+from autoins.fact_io import load_facts, write_actions
+from rule_runner import execute_service, init_knowledgebase, init_rules
 import pytest
 
 @pytest.fixture(autouse=True, scope="session")
@@ -18,7 +18,7 @@ def service():
 def execute(service, facts_paths, output_path):
     facts = load_facts(facts_paths)
     result_facts = execute_service(service, facts, False, None)
-    write_result(output_path, True, result_facts)
+    write_actions(output_path, True, result_facts)
     return result_facts
 
 def compute_checksum(data):

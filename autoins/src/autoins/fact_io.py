@@ -1,8 +1,10 @@
+import csv
 import json
 import os
+import time
 
 from autoins.bluebook import BlueBook
-from autoins.entities import Automobile, Claim, Driver, Estimate, Group, IncidenceReport, Policy
+from autoins.entities import Action, Automobile, Claim, Driver, Estimate, Group, IncidenceReport, Policy
 from autoins.util import load_facts_from_csv, subfiles, to_bool, to_datetime
 
 from knowledgenet.ftypes import Wrapper
@@ -60,3 +62,23 @@ def load_facts(factsPaths):
             elif f == 'blues.csv':
                 facts.add(BlueBook(os.path.join(path,f)))
     return facts
+
+
+def write_actions(output_path, clean_output, result_facts):
+    if not os.path.exists(output_path):
+        os.makedirs(output_path)
+
+    if clean_output:
+        files = subfiles(output_path)
+        for f in files:
+            os.remove(os.path.join(output_path, f))
+
+    timestamp = str(time.time())
+    output_file = os.path.join(output_path, f"{timestamp}.csv")
+
+    with open(output_file, 'w', newline='') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=Action.columns)
+        writer.writeheader()
+        for result_fact in result_facts:
+            if type(result_fact) == Action:
+                writer.writerow(result_fact.to_dict())
