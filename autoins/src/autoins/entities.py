@@ -31,7 +31,7 @@ class Group:
     def __repr__(self) -> str:
         return self.__str__()
     def __eq__(self, obj):
-        if isinstance(obj, Policy):
+        if isinstance(obj, Group):
             return self.id == obj.id
         return False
     def __hash__(self):
