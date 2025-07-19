@@ -1,4 +1,4 @@
-from knowledgenet.scanner import ruledef
+from knowledgenet.decorator import ruledef
 from knowledgenet.rule import Rule, Fact, Collection
 from knowledgenet.controls import insert, update, delete
 from knowledgenet.container import Collector

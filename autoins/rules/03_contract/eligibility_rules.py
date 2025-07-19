@@ -1,5 +1,5 @@
 import uuid
-from knowledgenet.scanner import ruledef
+from knowledgenet.decorator import ruledef
 from knowledgenet.rule import Rule, Fact, Event
 from knowledgenet.controls import insert
 
