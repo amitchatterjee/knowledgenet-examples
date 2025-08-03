@@ -35,7 +35,7 @@
                     "rank": 997,
                     "percent": 0.0
                 },
-                "insufficent_estimates": {
+                "insufficient_estimates": {
                     "enabled": true,
                     "action": "incomplete",
                     "reason": "NEEST",

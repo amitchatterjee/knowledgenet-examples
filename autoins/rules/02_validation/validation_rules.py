@@ -39,7 +39,7 @@ def no_automobile():
                 then=lambda ctx: insert(ctx, create_action(ctx, ctx.ruleset_context, ctx.exec_context)))
 
 @ruledef 
-def insufficent_estimates():
+def insufficient_estimates():
     '''
     For non-approved vendors, at least three estimates are required, for approved vendors, at least one estimate is required
     '''
