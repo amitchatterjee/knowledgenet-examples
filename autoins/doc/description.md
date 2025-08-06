@@ -12,6 +12,16 @@ The behavior and execution of rules in the system can be controlled through conf
   
 Although, strictly not necessary, a rule configuration must be specified in every rule declaration so that the rule can be configured using `rule-config.json`.
 
+## Rulesets Overview
+
+The rules in this system are organized into distinct rulesets, each corresponding to a phase in the claims processing workflow. The ruleset names match the folder names under the `rules` directory, with numeric prefixes (e.g., `01_`, `02_`) used only for ordering and omitted here for clarity. Below is a list of the main rulesets and their functions:
+
+- **initialization**: Prepares the execution context for each claim by joining it with related entities such as policies, groups, drivers, automobiles, and incidence reports.
+- **validation**: Ensures all required information is present in the claim, checking for missing policies, drivers, automobiles, incidence reports, and sufficient estimates.
+- **contract**: Verifies claim eligibility based on contract terms, such as policy activity, filing timeliness, and VIN matching.
+- **fraud**: Detects potential fraud by checking for inconsistencies and mismatches between claim data and related entities, such as VIN mismatches.
+- **finalization**: Computes final payments and completes the claims process, including calculations for collision and liability claims.
+
 ## Rules
 The rules in this system are implemented as Python functions, each encapsulating a specific business logic check or action. Rules are grouped into modules corresponding to different phases of claim processing, and each rule is annotated with metadata describing its purpose and dependencies. The rules engine executes these rules in a defined sequence, allowing for modularity and extensibility. This design makes it easy to add new rules, modify existing ones, or adjust the workflow to accommodate changes in business requirements.
 
