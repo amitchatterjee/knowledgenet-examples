@@ -1,12 +1,15 @@
+from dataclasses import dataclass, field
+from datetime import datetime
+
+@dataclass(eq=False)
 class Policy:
-    def __init__(self, id, group_id, policy_holder, start_date, end_date, drivers, automobiles):
-        self.id = id
-        self.group_id = group_id
-        self.policy_holder = policy_holder
-        self.start_date = start_date
-        self.end_date = end_date
-        self.drivers = drivers
-        self.automobiles = automobiles
+    id: str
+    group_id: str
+    policy_holder: str
+    start_date: datetime
+    end_date: datetime
+    drivers: list
+    automobiles: list
 
     def __str__(self) -> str:
         return f'Policy({self.id})'
@@ -19,12 +22,12 @@ class Policy:
     def __hash__(self):
         return hash(self.id)
     
+@dataclass(eq=False)
 class Group:
-    def __init__(self, id, collision_deductible, collision_coverage, liability_coverage):
-        self.id = id
-        self.collision_deductible = collision_deductible
-        self.collision_coverage = collision_coverage
-        self.liability_coverage = liability_coverage
+    id: str
+    collision_deductible: float
+    collision_coverage: float
+    liability_coverage: float
 
     def __str__(self) -> str:
         return f'Group({self.id})'
@@ -37,12 +40,12 @@ class Group:
     def __hash__(self):
         return hash(self.id)
 
+@dataclass(eq=False)
 class Automobile:
-    def __init__(self, vin, make, model, year):
-        self.vin = vin
-        self.make = make
-        self.model = model
-        self.year = year
+    vin: str
+    make: str
+    model: str
+    year: str
     def __str__(self) -> str:
         return f'Automobile({self.vin})'
     def __repr__(self) -> str:
@@ -54,13 +57,14 @@ class Automobile:
     def __hash__(self):
         return hash(self.vin)
 
+@dataclass(eq=False)
 class Driver:
-    def __init__(self, id, name, dob, license_number, license_state):
-        self.id = id
-        self.name = name
-        self.dob = dob
-        self.license_number = license_number
-        self.license_state = license_state
+    id: str
+    name: str
+    # Date of birth
+    dob: str
+    license_number: str
+    license_state: str
     def __str__(self) -> str:
         return f'Driver({self.id})'
     def __repr__(self) -> str:
@@ -72,43 +76,47 @@ class Driver:
     def __hash__(self):
         return hash(self.id)
 
-class Claim:
-    def __init__(self, id, type, policy_id, filing_date, claimed_amount, paid_amount, 
-                 vin, driver_id, status, description, incidence_report_id):
-        self.id = id
-        self.type = type
-        self.policy_id = policy_id
-        self.filing_date = filing_date
-        self.claimed_amount = claimed_amount
-        self.paid_amount = paid_amount
-        self.driver_id = driver_id
-        self.status = status
-        self.vin = vin
-        self.description = description
-        self.incidence_report_id = incidence_report_id
+from dataclasses import dataclass
 
-    def __str__(self) -> str:
+@dataclass(eq=False)
+class Claim:
+    id: str
+    type: str
+    policy_id: str
+    filing_date: datetime
+    claimed_amount: float
+    paid_amount: float
+    vin: str
+    driver_id: str
+    status: str
+    description: str
+    incidence_report_id: str
+
+    def __str__(self) -> str:  # keep original string representation
         return f'Claim({self.id}, policy={self.policy_id})'
+
     def __repr__(self) -> str:
         return self.__str__()
-    def __eq__(self, obj):
+
+    def __eq__(self, obj):  # preserve original equality semantics (id only)
         if isinstance(obj, Claim):
             return self.id == obj.id
         return False
-    def __hash__(self):
+
+    def __hash__(self):  # preserve original hash semantics (id only)
         return hash(self.id)
 
+@dataclass(eq=False)
 class IncidenceReport:
-    def __init__(self, id, source, policy, accident_date, description, license_number, license_state, vin, liability_percent):
-        self.id = id
-        self.source = source
-        self.policy = policy
-        self.accident_date = accident_date
-        self.description = description
-        self.license_number = license_number
-        self.license_state = license_state
-        self.vin = vin
-        self.liability_percent = liability_percent
+    id: str
+    source: str
+    policy: str
+    accident_date: datetime
+    description: str
+    license_number: str
+    license_state: str
+    vin: str
+    liability_percent: float
     def __str__(self) -> str:
         return f'IncidenceReport({self.id})'
     def __repr__(self) -> str:
@@ -120,16 +128,16 @@ class IncidenceReport:
     def __hash__(self):
         return hash(self.id)
     
+@dataclass(eq=False)
 class Estimate:
-    def __init__(self, id, estimator_id, approved_vendor, vin, claim_id, date, amount, description):
-        self.id = id
-        self.estimator_id = estimator_id
-        self.approved_vendor = approved_vendor
-        self.vin = vin
-        self.claim_id = claim_id
-        self.date = date
-        self.amount = amount
-        self.description = description
+    id: str
+    estimator_id: str
+    approved_vendor: str
+    vin: str
+    claim_id: str
+    date: datetime
+    amount: float
+    description: str
 
     def __str__(self) -> str:
         return f'Estimate({self.id}, claim={self.claim_id})'
@@ -145,21 +153,21 @@ class Estimate:
     def __hash__(self):
         return hash(self.id)
 
+@dataclass(eq=False)
 class ExecutionContext:
     '''
     The primary purpose of the ExecutionContext class is to reduce combinatorial explosion of facts because everything is in one place. It also makes rules authoring easier.
     '''
-    def __init__(self, claim: Claim):
-        self.claim = claim
-        self.policy = None
-        self.group = None
-        self.driver = None
-        self.automobile = None
-        self.incidence_report = None
-        self.collision_history = None
-        self.liability_history = None
-        self.estimates = None
-        self.bypass = set()
+    claim: Claim
+    policy: Policy | None = None
+    group: Group | None = None
+    driver: Driver | None = None
+    automobile: Automobile | None = None
+    incidence_report: IncidenceReport | None = None
+    collision_history: object | None = None
+    liability_history: object | None = None
+    estimates: list | None = None
+    bypass: set = field(default_factory=set)
 
     def __str__(self) -> str:
         return f'ExecutionContext:({self.claim.id})'
