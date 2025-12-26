@@ -21,15 +21,17 @@ from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExport
 
 from file_exporter import FileSpanExporter
 
+tracer = trace.get_tracer(__name__)
+
 def argsparser():
     parser = argparse.ArgumentParser(description="Auto Insurance Payment Rules Service")
     parser.add_argument('--rulesPath', required=True, help='Full path of the location from where rules are loaded')
     parser.add_argument('--factsPaths', required=True, nargs='+', help='Full paths from where the facts are loaded')
     parser.add_argument('--outputPath', required=True, help='Full path name of the directory where the actions are written to')
     parser.add_argument('--cleanOutput', action='store_true', help='Clean the output directory before writing the actions')
-    parser.add_argument('--traceMethod', choices=['otel', 'stream'], default=None,
+    parser.add_argument('--traceMethod', choices=['otel', 'legacy'], default=None,
                         help='Trace method to use. Valid values: otel, stream. Defaults to None')
-    parser.add_argument('--traceFile', help='If traceMethod is "stream", location where the trace is stored. if "log" is specified, the trace is output as an INFO log')
+    parser.add_argument('--traceFile', help='If traceMethod is "legacy", location where the trace is stored. if "log" is specified, the trace is output as an INFO log')
     parser.add_argument('--log', help='Log severity level. The valid values are DEBUG, INFO, WARNING, ERROR, CRITICAL', default='INFO')
     return parser.parse_args()
 
@@ -60,7 +62,7 @@ def init_logging(log):
 def execute_service(service, facts, trace_method, trace_file):
     try:
         trace_stream = None
-        if trace_method and trace_method == 'stream':
+        if trace_method and trace_method == 'legacy':
             trace_stream = sys.stdout if not trace_file else (io.StringIO() if trace_file == 'log' else open(trace_file, 'w'))
         start_time = time.time()
         result_facts = service.execute(facts, trc_method=trace_method, trc_stream=trace_stream)
@@ -96,13 +98,14 @@ if __name__ == "__main__":
     args = argsparser()
     init_logging(args.log)
 
-    service, facts = init_knowledgebase(args.rulesPath, args.factsPaths)
-    facts.add(EventFact(group='onAction', on_types=Action))
-
     if args.traceMethod == 'otel':
         init_otel()
 
-    result_facts = execute_service(service, facts, args.traceMethod, args.traceFile)
+    service, facts = init_knowledgebase(args.rulesPath, args.factsPaths)
+    facts.add(EventFact(group='onAction', on_types=Action))
+
+    with tracer.start_as_current_span("autoins.execution"):
+        result_facts = execute_service(service, facts, args.traceMethod, args.traceFile)
 
     write_actions(args.outputPath, args.cleanOutput, result_facts)
 
@@ -118,3 +121,6 @@ if __name__ == "__main__":
             #                  len(result_fact.collection))
             #else:
             #    logging.debug("\t%s: %s", result_fact.__class__.__name__, result_fact)
+
+    if args.traceMethod == 'otel':
+        trace.get_tracer_provider().shutdown()

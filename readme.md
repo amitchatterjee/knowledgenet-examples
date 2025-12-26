@@ -1,39 +1,47 @@
-### More information to come:
+## Knowledgenet Example Rules Project:
 
-This is an example project for developing a Knowledgenet rules network. This project is in a very early phase.  
+This is an example project for demonstrating the use of rules authoring using Knowledgenet rules engine.
 
-**Before you start:**  
-The knowledgenet package has not been published to PyPI yet. So, you will have to manually build the package and install it using pip. Please see the instructions in the [knowledgenet project's development documentation](https://github.com/amitchatterjee/knowledgenet/blob/develop/doc/readme-development.md){:target="_blank"}. Once you are done with that, follow the instructions below from a shell.
+Currently, this project includes rules for an auto-insurance claim adjudication system. For received claims, the rules are executed to determine if the claims should be paid or denied. For more details, read the [autoins/doc/description.md](autoins/doc/description.md){:target="_blank"}.
 
+### One-time setup:
 ```bash
 # Change as needed
 export KNOWLEDGENET_EX_HOME=$HOME/git/knowledgenet-examples/
 
-# One-time setup
+# Install required dependencies
 cd $KNOWLEDGENET_EX_HOME
 pip install -r requirements.txt
 
 # Set the PYTHONPATH environment variable
 export PYTHONPATH=$KNOWLEDGENET_EX_HOME/autoins/src
+```
 
+### Execute the application:
+```bash
 # Change to the root of the auto insurance example directory 
 cd $KNOWLEDGENET_EX_HOME/autoins
 
 # Run the rule_runner.py script with specified arguments
 python src/rule_runner.py --rulesPath $KNOWLEDGENET_EX_HOME/autoins/rules --factsPaths $KNOWLEDGENET_EX_HOME/autoins/data --log debug --outputPath $KNOWLEDGENET_EX_HOME/target/results --cleanOutput
 
-# Run the rule_runner.py script with legacy tracing
-python src/rule_runner.py --rulesPath $KNOWLEDGENET_EX_HOME/autoins/rules --factsPaths $KNOWLEDGENET_EX_HOME/autoins/data --log info --outputPath $KNOWLEDGENET_EX_HOME/target/results --cleanOutput --traceMethod stream --traceFile $KNOWLEDGENET_EX_HOME/target/trace.json
+# Run the rule_runner.py script with legacy tracing - will be retired soon
+python src/rule_runner.py --rulesPath $KNOWLEDGENET_EX_HOME/autoins/rules --factsPaths $KNOWLEDGENET_EX_HOME/autoins/data --log info --outputPath $KNOWLEDGENET_EX_HOME/target/results --cleanOutput --traceMethod legacy --traceFile $KNOWLEDGENET_EX_HOME/target/trace.json
 
 # Run the rule_runner.py script with otel tracing
 python src/rule_runner.py --rulesPath $KNOWLEDGENET_EX_HOME/autoins/rules --factsPaths $KNOWLEDGENET_EX_HOME/autoins/data --log info --outputPath $KNOWLEDGENET_EX_HOME/target/results --cleanOutput --traceMethod otel
-
-# Run pytest
-python -m pytest -rPX
 ```
 
-**OpenTelemetry environment variables (used by the example runner)**
+### Run unit tests:
 
+```bash
+python -m pytest -rPX
+
+```
+
+### Use Opentelemetry for tracing:
+
+### OpenTelemetry environment variables
 The `autoins` example `rule_runner.py` supports configuring OpenTelemetry tracing via environment variables. The runner reads the following OTEL-related environment variables:
 
 - `OTEL_SERVICE_NAME`
@@ -64,3 +72,34 @@ Notes:
 - The example runner performs a simple, env-driven exporter selection. For full OpenTelemetry configuration and automatic exporter setup, you can install and use the OpenTelemetry distro (`opentelemetry-distro`) or the auto-instrumentation tool and control behavior solely via standard OTEL_* environment variables.
 - If you choose OTLP exporters, make sure the corresponding exporter package is installed in your Python environment (for example, `opentelemetry-exporter-otlp`).
 
+### Run a OTEL metrics collector and viewer
+A metrics/traces collector receives telemetry data from instrumented applications and forwards or stores it for analysis and viewing. In a typical setup the OpenTelemetry Collector accepts OTLP (gRPC or HTTP) on well-known ports (commonly `4317` for gRPC and `4318` for HTTP), can perform batching and processing, and then exports spans and metrics to backends such as Jaeger, Zipkin, an OTLP-compatible collector, or a local viewer.
+
+The `otel-desktop-viewer` used in the example runs a lightweight collector plus a browser-based UI so you can view traces locally without a full observability stack. The container exposes:
+
+- port `4317` (OTLP/gRPC) and `4318` (OTLP/HTTP) — endpoints that instrumented applications can send data to;
+- port `8000` — the desktop viewer UI where you can inspect traces.
+
+Run the viewer locally (container will listen on the ports above):
+
+```bash
+docker run --rm -d --name otel-desktop-viewer \
+	-p 8000:8000 -p 4317:4317 -p 4318:4318 \
+	ghcr.io/ctrlspice/otel-desktop-viewer:latest-amd64
+```
+
+Point the example runner at the local collector and enable the OTLP exporter:
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
+export OTEL_TRACES_EXPORTER=otlp
+python src/rule_runner.py --rulesPath $KNOWLEDGENET_EX_HOME/autoins/rules \
+	--factsPaths $KNOWLEDGENET_EX_HOME/autoins/data --log info \
+	--outputPath $KNOWLEDGENET_EX_HOME/target/results --cleanOutput --traceMethod otel
+```
+
+View the traces by pointing a web browser to [http://localhost:8000](http://localhost:8000).
+
+Notes:
+- Use `OTEL_TRACES_EXPORTER=file` and `OTEL_FILE_EXPORT_PATH` if you prefer writing spans to a local JSON-lines file instead of sending them to a collector.
+- Ensure required OTEL Python exporter packages are installed when using OTLP exporters (for example `opentelemetry-exporter-otlp`).
