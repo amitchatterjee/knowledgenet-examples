@@ -25,11 +25,6 @@ cd $KNOWLEDGENET_EX_HOME/autoins
 # Run the rule_runner.py script with specified arguments
 python src/rule_runner.py --rulesPath $KNOWLEDGENET_EX_HOME/autoins/rules --factsPaths $KNOWLEDGENET_EX_HOME/autoins/data --log debug --outputPath $KNOWLEDGENET_EX_HOME/target/results --cleanOutput
 
-# Run the rule_runner.py script with legacy tracing - will be retired soon
-python src/rule_runner.py --rulesPath $KNOWLEDGENET_EX_HOME/autoins/rules --factsPaths $KNOWLEDGENET_EX_HOME/autoins/data --log info --outputPath $KNOWLEDGENET_EX_HOME/target/results --cleanOutput --traceMethod legacy --traceFile $KNOWLEDGENET_EX_HOME/target/trace.json
-
-# Run the rule_runner.py script with otel tracing
-python src/rule_runner.py --rulesPath $KNOWLEDGENET_EX_HOME/autoins/rules --factsPaths $KNOWLEDGENET_EX_HOME/autoins/data --log info --outputPath $KNOWLEDGENET_EX_HOME/target/results --cleanOutput --traceMethod otel
 ```
 
 ### Run unit tests:
@@ -95,7 +90,7 @@ export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
 export OTEL_TRACES_EXPORTER=otlp
 python src/rule_runner.py --rulesPath $KNOWLEDGENET_EX_HOME/autoins/rules \
 	--factsPaths $KNOWLEDGENET_EX_HOME/autoins/data --log info \
-	--outputPath $KNOWLEDGENET_EX_HOME/target/results --cleanOutput --traceMethod otel
+	--outputPath $KNOWLEDGENET_EX_HOME/target/results --cleanOutput --tracingOption full
 ```
 
 View the traces by pointing a web browser to [http://localhost:8000](http://localhost:8000).
