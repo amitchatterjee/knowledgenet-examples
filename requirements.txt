@@ -1,1 +1,3 @@
 #knowledgenet==0.0.1
+opentelemetry-distro==0.60b1
+opentelemetry-exporter-otlp==1.39.1

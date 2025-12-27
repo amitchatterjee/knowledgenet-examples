@@ -6,5 +6,3 @@ def test_contract_rules(service):
     assert result_facts is not None
     dump_result(result_facts)
     assert_result_matches(result_facts, 'test/expected/contract-rules/expected.csv')
-
-
