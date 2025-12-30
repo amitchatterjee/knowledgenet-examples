@@ -55,17 +55,17 @@ Notes:
 ### Run a OTEL metrics collector and viewer
 A metrics/traces collector receives telemetry data from instrumented applications and forwards or stores it for analysis and viewing. In a typical setup the OpenTelemetry Collector accepts OTLP (gRPC or HTTP) on well-known ports (commonly `4317` for gRPC and `4318` for HTTP), can perform batching and processing, and then exports spans and metrics to backends such as Jaeger, Zipkin, an OTLP-compatible collector, or a local viewer.
 
-The `otel-desktop-viewer` used in the example runs a lightweight collector plus a browser-based UI so you can view traces locally without a full observability stack. The container exposes:
+The `Jaegar UI` used in the example runs a collector plus a browser-based UI so you can view traces locally without a full observability stack. The container exposes:
 
 - port `4317` (OTLP/gRPC) and `4318` (OTLP/HTTP) — endpoints that instrumented applications can send data to;
-- port `8000` — the desktop viewer UI where you can inspect traces.
+- port `16686` — the viewer UI where you can inspect traces.
 
-Run the viewer locally (container will listen on the ports above):
+Run the Jaegar UI locally (container will listen on the ports above):
 
 ```bash
-docker run --rm -d --name otel-desktop-viewer \
-	-p 8000:8000 -p 4317:4317 -p 4318:4318 \
-	ghcr.io/ctrlspice/otel-desktop-viewer:latest-amd64
+
+docker run --rm -d  --name jaeger   -p 16686:16686   -p 4317:4317   -p 4318:4318   cr.jaegertracing.io/jaegertracing/jaeger:latest
+
 ```
 
 Point the example runner at the local collector and enable the OTLP exporter:
