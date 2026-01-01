@@ -29,8 +29,8 @@ def argsparser():
     parser.add_argument('--factsPaths', required=True, nargs='+', help='Full paths from where the facts are loaded')
     parser.add_argument('--outputPath', required=True, help='Full path name of the directory where the actions are written to')
     parser.add_argument('--cleanOutput', action='store_true', help='Clean the output directory before writing the actions')
-    parser.add_argument('--tracingOption', choices=['full'], default=None,
-                        help='Tracing option. If not specified, tracing is disabled. Valid values: [full - only option for now]. Defaults to None')
+    parser.add_argument('--traceLevel', type=int, default=0,
+                        help='Trace level. If not specified, tracing is disabled (0). Defaults to 0')
     parser.add_argument('--log', help='Log severity level. The valid values are DEBUG, INFO, WARNING, ERROR, CRITICAL', default='INFO')
     return parser.parse_args()
 
@@ -58,17 +58,29 @@ def init_logging(log):
     handlers = [logging.StreamHandler(sys.stdout)]
     logging.basicConfig(level=getattr(logging, log.upper(), None), handlers=handlers)
 
-def execute_service(service, facts, trace_option):
+def execute_service(service, facts, trace_level):
     try:
         start_time = time.time()
-        result_facts = service.execute(facts, trc_option=trace_option)
+        result_facts = service.execute(facts, trc_level=trace_level)
     finally:
         end_time = time.time()
         execution_time_ms = (end_time - start_time) * 1000
         logging.info("Execution time: %s ms", execution_time_ms)
     return result_facts
 
+def to_bool(s):
+    s_lower = s.strip().lower()
+    if s_lower == 'true':
+        return True
+    elif s_lower == 'false':
+        return False
+    else:
+        raise ValueError(f"Invalid boolean string: '{s}'")
+
 def init_otel():
+    if not to_bool(os.getenv('OTEL_ENABLED', 'false')):
+        return
+
     provider = TracerProvider(resource=Resource.create({"service.name": os.getenv("OTEL_SERVICE_NAME", "autoins")}))
     exporter_name = os.getenv('OTEL_TRACES_EXPORTER', 'console').lower()
     if exporter_name in ('otlp', 'otlp_grpc', 'otlp_proto_grpc'):
@@ -89,31 +101,34 @@ def init_otel():
     logging.info("OpenTelemetry initialized using exporter '%s'", exporter_name)
 
 def main(args):
-    if args.tracingOption:
+    if to_bool(os.getenv('OTEL_ENABLED', 'false')):
         init_otel()
 
-    service, facts = init_knowledgebase(args.rulesPath, args.factsPaths)
-    facts.add(EventFact(group='onAction', on_types=Action))
-
     with tracer.start_as_current_span("autoins.execution"):
-        result_facts = execute_service(service, facts, args.tracingOption)
+        with tracer.start_as_current_span("read.facts"):
+            service, facts = init_knowledgebase(args.rulesPath, args.factsPaths)
+            facts.add(EventFact(group='onAction', on_types=Action))
 
-    write_actions(args.outputPath, args.cleanOutput, result_facts)
+        with tracer.start_as_current_span("rules.execution"):
+            result_facts = execute_service(service, facts, args.traceLevel)
 
-    if logging.getLogger().isEnabledFor(logging.DEBUG):
-        logging.debug("\n\nResults:")
-        for result_fact in result_facts:
-            if type(result_fact) == Action:
-                logging.debug("\t%s: %s", result_fact.__class__.__name__, json.dumps(result_fact.to_dict()))
-            #elif type(result_fact) == ExecutionContext:
-            #    logging.debug("\t%s: %s", result_fact.__class__.__name__, json.dumps(result_fact.to_dict()))
-            #elif type(result_fact) == Collector:
-            #    logging.debug("\t%s: %s(%d)", result_fact.__class__.__name__, result_fact.group, 
-            #                  len(result_fact.collection))
-            #else:
-            #    logging.debug("\t%s: %s", result_fact.__class__.__name__, result_fact)
+        with tracer.start_as_current_span("write.results"):
+            write_actions(args.outputPath, args.cleanOutput, result_facts)
 
-    if args.tracingOption:
+        if logging.getLogger().isEnabledFor(logging.DEBUG):
+            logging.debug("\n\nResults:")
+            for result_fact in result_facts:
+                if type(result_fact) == Action:
+                    logging.debug("\t%s: %s", result_fact.__class__.__name__, json.dumps(result_fact.to_dict()))
+                #elif type(result_fact) == ExecutionContext:
+                #    logging.debug("\t%s: %s", result_fact.__class__.__name__, json.dumps(result_fact.to_dict()))
+                #elif type(result_fact) == Collector:
+                #    logging.debug("\t%s: %s(%d)", result_fact.__class__.__name__, result_fact.group, 
+                #                  len(result_fact.collection))
+                #else:
+                #    logging.debug("\t%s: %s", result_fact.__class__.__name__, result_fact)
+
+    if to_bool(os.getenv('OTEL_ENABLED', 'false')):
         trace.get_tracer_provider().shutdown()
 
 if __name__ == "__main__":

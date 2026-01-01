@@ -71,11 +71,12 @@ docker run --rm -d  --name jaeger   -p 16686:16686   -p 4317:4317   -p 4318:4318
 Point the example runner at the local collector and enable the OTLP exporter:
 
 ```bash
+export OTEL_ENABLED=true
 export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
 export OTEL_TRACES_EXPORTER=otlp
 python src/rule_runner.py --rulesPath $KNOWLEDGENET_EX_HOME/autoins/rules \
 	--factsPaths $KNOWLEDGENET_EX_HOME/autoins/data --log info \
-	--outputPath $KNOWLEDGENET_EX_HOME/autoins/target/results --cleanOutput --tracingOption full
+	--outputPath $KNOWLEDGENET_EX_HOME/autoins/target/results --cleanOutput --traceLevel 10
 ```
 
 View the traces by pointing a web browser to [http://localhost:8000](http://localhost:8000).
