@@ -17,7 +17,7 @@ def service():
 
 def execute(service, facts_paths, output_path):
     facts = load_facts(facts_paths)
-    result_facts = execute_service(service, facts, None)
+    result_facts = execute_service(service, facts, 0)
     write_actions(output_path, True, result_facts)
     return result_facts
 

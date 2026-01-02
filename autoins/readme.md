@@ -64,7 +64,11 @@ Run the Jaegar UI locally (container will listen on the ports above):
 
 ```bash
 
-docker run --rm -d  --name jaeger   -p 16686:16686   -p 4317:4317   -p 4318:4318   cr.jaegertracing.io/jaegertracing/jaeger:latest
+#docker run --rm -d  --name jaeger   -p 16686:16686   -p 4317:4317   -p 4318:4318 -v $KNOWLEDGENET_EX_HOME/autoins/config/jaeger/config.json:/etc/jaeger/config.json  cr.jaegertracing.io/jaegertracing/jaeger:latest --query.ui-config=/etc/jaeger/config.json
+
+docker run --rm -d  --name jaeger   -p 16686:16686   -p 4317:4317   -p 4318:4318  cr.jaegertracing.io/jaegertracing/jaeger:latest
+
+invalid parent span IDs=851628afc07999a9; skipping clock skew adjustment
 
 ```
 
