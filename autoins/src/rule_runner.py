@@ -31,6 +31,8 @@ def argsparser():
     parser.add_argument('--cleanOutput', action='store_true', help='Clean the output directory before writing the actions')
     parser.add_argument('--traceLevel', type=int, default=0,
                         help='Trace level. If not specified, tracing is disabled (0). Defaults to 0')
+    parser.add_argument('--traceDetails', type=int, default=0,
+                        help='Trace details - how much information is returned in a span. Defaults to 0')
     parser.add_argument('--log', help='Log severity level. The valid values are DEBUG, INFO, WARNING, ERROR, CRITICAL', default='INFO')
     return parser.parse_args()
 
@@ -58,10 +60,10 @@ def init_logging(log):
     handlers = [logging.StreamHandler(sys.stdout)]
     logging.basicConfig(level=getattr(logging, log.upper(), None), handlers=handlers)
 
-def execute_service(service, facts, trace_level):
+def execute_service(service, facts, trace_level, trace_details):
     try:
         start_time = time.time()
-        result_facts = service.execute(facts, trc_level=trace_level)
+        result_facts = service.execute(facts, trc_level=trace_level, trc_details=trace_details)
     finally:
         end_time = time.time()
         execution_time_ms = (end_time - start_time) * 1000
@@ -96,7 +98,16 @@ def init_otel():
             # default to console exporter
         exporter = ConsoleSpanExporter()
 
-    provider.add_span_processor(BatchSpanProcessor(exporter))
+    # Read BatchSpanProcessor settings from environment variables (with
+    # the same defaults used previously).
+    max_queue_size = int(os.getenv('OTEL_SPAN_PROCESSOR_MAX_QUEUE_SIZE', '2048'))
+    schedule_delay_millis = int(os.getenv('OTEL_SPAN_PROCESSOR_SCHEDULE_DELAY_MILLIS', '5000'))
+    max_export_batch_size = int(os.getenv('OTEL_SPAN_PROCESSOR_MAX_EXPORT_BATCH_SIZE', '1000'))
+
+    provider.add_span_processor(BatchSpanProcessor(exporter,
+                   max_queue_size=max_queue_size,
+                   schedule_delay_millis=schedule_delay_millis,
+                   max_export_batch_size=max_export_batch_size))
     trace.set_tracer_provider(provider)
     logging.info("OpenTelemetry initialized using exporter '%s'", exporter_name)
 
@@ -110,7 +121,7 @@ def main(args):
             facts.add(EventFact(group='onAction', on_types=Action))
 
         with tracer.start_as_current_span("rules.execution"):
-            result_facts = execute_service(service, facts, args.traceLevel)
+            result_facts = execute_service(service, facts, args.traceLevel, args.traceDetails)
 
         with tracer.start_as_current_span("write.results"):
             write_actions(args.outputPath, args.cleanOutput, result_facts)
