@@ -48,6 +48,22 @@ The `autoins` example `rule_runner.py` supports configuring OpenTelemetry tracin
 	- Possible values: file path string. Default: `trace.json` in the current working directory.
 	- Example: `OTEL_FILE_EXPORT_PATH=/tmp/kn-trace.json`
 
+#### Batch span processor tuning (runner-specific env vars)
+
+The runner reads environment variables to tune the `BatchSpanProcessor` used when exporting spans. Defaults match the prior behavior.
+
+- `OTEL_SPAN_PROCESSOR_MAX_QUEUE_SIZE`
+	- Description: Maximum number of spans the processor will queue before dropping.
+	- Example: `OTEL_SPAN_PROCESSOR_MAX_QUEUE_SIZE=4096`
+
+- `OTEL_SPAN_PROCESSOR_SCHEDULE_DELAY_MILLIS`
+	- Description: Time in milliseconds between export attempts (batch schedule delay).
+	- Example: `OTEL_SPAN_PROCESSOR_SCHEDULE_DELAY_MILLIS=10000`
+
+- `OTEL_SPAN_PROCESSOR_MAX_EXPORT_BATCH_SIZE`
+	- Description: Maximum number of spans to include in a single export batch.
+	- Example: `OTEL_SPAN_PROCESSOR_MAX_EXPORT_BATCH_SIZE=250`
+
 Notes:
 - The example runner performs a simple, env-driven exporter selection. For full OpenTelemetry configuration and automatic exporter setup, you can install and use the OpenTelemetry distro (`opentelemetry-distro`) or the auto-instrumentation tool and control behavior solely via standard OTEL_* environment variables.
 - If you choose OTLP exporters, make sure the corresponding exporter package is installed in your Python environment (for example, `opentelemetry-exporter-otlp`).
@@ -64,21 +80,24 @@ Run the Jaegar UI locally (container will listen on the ports above):
 
 ```bash
 
-docker run --rm -d  --name jaeger   -p 16686:16686   -p 4317:4317   -p 4318:4318   cr.jaegertracing.io/jaegertracing/jaeger:latest
+#docker run --rm -d  --name jaeger   -p 16686:16686   -p 4317:4317   -p 4318:4318 -v $KNOWLEDGENET_EX_HOME/autoins/config/jaeger/config.json:/etc/jaeger/config.json  cr.jaegertracing.io/jaegertracing/jaeger:latest --query.ui-config=/etc/jaeger/config.json
+
+docker run --rm -d  --name jaeger   -p 16686:16686   -p 4317:4317   -p 4318:4318  cr.jaegertracing.io/jaegertracing/jaeger:latest
 
 ```
 
 Point the example runner at the local collector and enable the OTLP exporter:
 
 ```bash
+export OTEL_ENABLED=true
 export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
 export OTEL_TRACES_EXPORTER=otlp
 python src/rule_runner.py --rulesPath $KNOWLEDGENET_EX_HOME/autoins/rules \
 	--factsPaths $KNOWLEDGENET_EX_HOME/autoins/data --log info \
-	--outputPath $KNOWLEDGENET_EX_HOME/autoins/target/results --cleanOutput --tracingOption full
+	--outputPath $KNOWLEDGENET_EX_HOME/autoins/target/results --cleanOutput --traceLevel 10 --traceDepth 10
 ```
 
-View the traces by pointing a web browser to [http://localhost:8000](http://localhost:8000).
+View the traces by pointing a web browser to [http://localhost:16686](http://localhost:16686).
 
 Notes:
 - Use `OTEL_TRACES_EXPORTER=file` and `OTEL_FILE_EXPORT_PATH` if you prefer writing spans to a local JSON-lines file instead of sending them to a collector.
