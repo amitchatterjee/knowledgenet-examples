@@ -102,7 +102,7 @@ def init_otel():
     # the same defaults used previously).
     max_queue_size = int(os.getenv('OTEL_SPAN_PROCESSOR_MAX_QUEUE_SIZE', '2048'))
     schedule_delay_millis = int(os.getenv('OTEL_SPAN_PROCESSOR_SCHEDULE_DELAY_MILLIS', '5000'))
-    max_export_batch_size = int(os.getenv('OTEL_SPAN_PROCESSOR_MAX_EXPORT_BATCH_SIZE', '1000'))
+    max_export_batch_size = int(os.getenv('OTEL_SPAN_PROCESSOR_MAX_EXPORT_BATCH_SIZE', '500'))
 
     provider.add_span_processor(BatchSpanProcessor(exporter,
                    max_queue_size=max_queue_size,

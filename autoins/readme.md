@@ -94,7 +94,7 @@ export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
 export OTEL_TRACES_EXPORTER=otlp
 python src/rule_runner.py --rulesPath $KNOWLEDGENET_EX_HOME/autoins/rules \
 	--factsPaths $KNOWLEDGENET_EX_HOME/autoins/data --log info \
-	--outputPath $KNOWLEDGENET_EX_HOME/autoins/target/results --cleanOutput --traceLevel 10 --traceDepth 10
+	--outputPath $KNOWLEDGENET_EX_HOME/autoins/target/results --cleanOutput --traceLevel 5 --traceDetails 10
 ```
 
 View the traces by pointing a web browser to [http://localhost:16686](http://localhost:16686).
