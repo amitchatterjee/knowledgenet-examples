@@ -4,7 +4,7 @@ from knowledgenet.rule import Rule, Collection, Event
 from knowledgenet.controls import insert, update
 from knowledgenet.helper import assign
 
-from autoins.entities2 import Action
+from autoins.entities import Action
 from autoins.util import record_action_event
 
 @ruledef
@@ -16,9 +16,9 @@ def pay_on_no_action():
         when=Collection(group='action-collector', 
                     matches=[lambda ctx,this: this.empty(),  
                             lambda ctx,this: assign(ctx, exec_context=this.exec_context)]),
-        then=lambda ctx: insert(ctx, Action(str(uuid.uuid4()), 'PAYCL', 
-                                            ctx.exec_context.claim.id, 'pay', 'pay', 
-                                            ctx.exec_context.incidence_report.liability_percent, inactive=False)))
+        then=lambda ctx: insert(ctx, Action(id=str(uuid.uuid4()), code='PAYCL', 
+                                            claim_id=ctx.exec_context.claim.id, action='pay', explain='pay', 
+                                            pay_percent=ctx.exec_context.incidence_report.liability_percent, inactive=False)))
 
 @ruledef
 def select_action():

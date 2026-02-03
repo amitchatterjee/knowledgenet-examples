@@ -6,7 +6,7 @@ import time
 from autoins.bluebook import BlueBook
 from autoins.csv_parser import read_csv_and_convert
 from autoins.edi_parser import parse_edi
-from autoins.entities2 import Action, Automobile, Claim, Driver, Estimate, Group, IncidenceReport, Policy
+from autoins.entities import Action, Automobile, Claim, Driver, Estimate, Group, IncidenceReport, Policy
 from autoins.util import subfiles, to_bool, to_datetime
 
 from knowledgenet.ftypes import Wrapper

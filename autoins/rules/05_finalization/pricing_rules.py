@@ -6,7 +6,7 @@ from knowledgenet.controls import insert, update
 from knowledgenet.helper import assign
 
 from autoins.bluebook import BlueBook
-from autoins.entities2 import Request, Action
+from autoins.entities import Request, Action
 
 @ruledef
 def compute_collision_payment():

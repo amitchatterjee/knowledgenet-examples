@@ -7,7 +7,7 @@ import uuid
 from knowledgenet.helper import session
 
 from autoins.csv_parser import read_csv_and_convert
-from autoins.entities2 import Action
+from autoins.entities import Action
 
 def echo(ctx, message):
     print(message)

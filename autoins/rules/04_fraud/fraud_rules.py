@@ -3,7 +3,7 @@ from knowledgenet.decorator import ruledef
 from knowledgenet.rule import Rule, Fact, Event
 from knowledgenet.controls import insert
 
-from autoins.entities2 import Request
+from autoins.entities import Request
 from autoins.util import record_action_event, create_action, execute
 
 # AI-generated rule: Create a @ruledef function that inserts an Action when the vin on the Request.claim object does not match the vin on the Request.incidence_report object

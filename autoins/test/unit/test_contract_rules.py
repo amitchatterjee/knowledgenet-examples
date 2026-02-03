@@ -1,4 +1,3 @@
-from autoins.entities import Action
 from util import execute, assert_result_matches, dump_result, service
 
 def test_contract_rules(service):

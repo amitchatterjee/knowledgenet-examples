@@ -4,7 +4,7 @@ from enum import Enum
 from typing import Any, List, Optional, get_origin, get_args
 import csv
 
-from autoins.entities2 import (
+from autoins.entities import (
     Claim,
     Policy,
     Group,

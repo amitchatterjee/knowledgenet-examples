@@ -3,7 +3,7 @@ from knowledgenet.rule import Rule, Fact, Collection
 from knowledgenet.controls import insert, update, delete
 from knowledgenet.container import Collector
 
-from autoins.entities2 import Request, Automobile, Claim, Driver, Estimate, Group, IncidenceReport, Policy, Action
+from autoins.entities import Request, Automobile, Claim, Driver, Estimate, Group, IncidenceReport, Policy, Action
 from autoins.util import echo
 
 # #########################################################################

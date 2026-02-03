@@ -3,7 +3,7 @@ from knowledgenet.decorator import ruledef
 from knowledgenet.rule import Rule, Fact, Event
 from knowledgenet.controls import insert
 
-from autoins.entities2 import Request
+from autoins.entities import Request
 from autoins.util import create_action, execute, record_action_event, rule_config
 
 @ruledef

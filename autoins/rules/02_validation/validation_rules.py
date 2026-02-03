@@ -3,7 +3,7 @@ from knowledgenet.rule import Rule, Fact, Event, Collection
 from knowledgenet.controls import insert, update
 from knowledgenet.helper import assign
 
-from autoins.entities2 import Request
+from autoins.entities import Request
 from autoins.util import create_action, record_action_event
 
 @ruledef
