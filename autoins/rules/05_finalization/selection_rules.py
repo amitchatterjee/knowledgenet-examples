@@ -15,10 +15,10 @@ def pay_on_no_action():
     return Rule(run_once=True,
         when=Collection(group='action-collector', 
                     matches=[lambda ctx,this: this.empty(),  
-                            lambda ctx,this: assign(ctx, exec_context=this.exec_context)]),
+                            lambda ctx,this: assign(ctx, request=this.request)]),
         then=lambda ctx: insert(ctx, Action(id=str(uuid.uuid4()), code='PAYCL', 
-                                            claim_id=ctx.exec_context.claim.id, action='pay', explain='pay', 
-                                            pay_percent=ctx.exec_context.incidence_report.liability_percent, inactive=False)))
+                                            claim_id=ctx.request.claim.id, action='pay', explain='pay', 
+                                            pay_percent=ctx.request.incidence_report.liability_percent, inactive=False)))
 
 @ruledef
 def select_action():

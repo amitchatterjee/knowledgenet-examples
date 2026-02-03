@@ -10,33 +10,33 @@ from autoins.util import create_action, record_action_event
 def no_policy():
     return Rule(run_once=True, 
                 when=[Fact(named='validation-ruleset', var='ruleset_context'),
-                      Fact(of_type=Request, var='exec_context',
+                      Fact(of_type=Request, var='request',
                         matches=lambda ctx,this: not this.policy)],
-                    then=lambda ctx: insert(ctx, create_action(ctx, ctx.ruleset_context, ctx.exec_context)))
+                    then=lambda ctx: insert(ctx, create_action(ctx, ctx.ruleset_context, ctx.request)))
 
 @ruledef
 def no_incidence_report():
     return Rule(run_once=True, 
                 when=[Fact(named='validation-ruleset', var='ruleset_context'),
-                    Fact(of_type=Request, var='exec_context', 
+                    Fact(of_type=Request, var='request', 
                     matches=lambda ctx,this: not this.incidence_report)],
-                    then=lambda ctx: insert(ctx, create_action(ctx, ctx.ruleset_context, ctx.exec_context)))
+                    then=lambda ctx: insert(ctx, create_action(ctx, ctx.ruleset_context, ctx.request)))
 
 @ruledef
 def no_driver():
     return Rule(run_once=True, 
                 when=[Fact(named='validation-ruleset', var='ruleset_context'),
-                    Fact(of_type=Request, var='exec_context', 
+                    Fact(of_type=Request, var='request', 
                     matches=lambda ctx,this: not this.driver)],
-                then=lambda ctx: insert(ctx, create_action(ctx, ctx.ruleset_context, ctx.exec_context)))
+                then=lambda ctx: insert(ctx, create_action(ctx, ctx.ruleset_context, ctx.request)))
 
 @ruledef
 def no_automobile():
     return Rule(run_once=True, 
                 when=[Fact(named='validation-ruleset', var='ruleset_context'),
-                      Fact(of_type=Request, var='exec_context', 
+                      Fact(of_type=Request, var='request', 
                     matches=lambda ctx,this: not this.automobile)],
-                then=lambda ctx: insert(ctx, create_action(ctx, ctx.ruleset_context, ctx.exec_context)))
+                then=lambda ctx: insert(ctx, create_action(ctx, ctx.ruleset_context, ctx.request)))
 
 @ruledef 
 def insufficient_estimates():
@@ -45,21 +45,21 @@ def insufficient_estimates():
     '''
     return Rule(run_once=True, 
                 when=[Fact(named='validation-ruleset', var='ruleset_context'),
-                      Fact(of_type=Request, var='exec_context', 
+                      Fact(of_type=Request, var='request', 
                         matches=[lambda ctx,this: len(this.estimates) < 3,
                                 lambda ctx,this: len([e for e in this.estimates if e.certified]) == 0])],
-                then=lambda ctx: insert(ctx, create_action(ctx, ctx.ruleset_context, ctx.exec_context)))
+                then=lambda ctx: insert(ctx, create_action(ctx, ctx.ruleset_context, ctx.request)))
 
 @ruledef
 def bypass_rules_with_validation_error():
     def bypass_rules_with_validation_error_rhs(ctx):
-        ctx.exec_context.bypass.add('all')
-        update(ctx, ctx.exec_context)
+        ctx.request.bypass.add('all')
+        update(ctx, ctx.request)
     return Rule(order=1, retrigger_on_update=False,
         when=[
-            Fact(of_type=Request, var='exec_context'),
+            Fact(of_type=Request, var='request'),
             Collection(group='action-collector', 
-                    matches=[lambda ctx,this: this.exec_context == ctx.exec_context,  
+                    matches=[lambda ctx,this: this.request == ctx.request,  
                             lambda ctx,this: this.size() > 0])], 
         then=bypass_rules_with_validation_error_rhs)
 
