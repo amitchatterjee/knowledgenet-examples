@@ -1,6 +1,6 @@
 id,type,policy_id,filing_date,claimed_amount,paid_amount,vin,driver_id,status,description,incidence_report_id
 C1,collision,P1,2024-02-20,5000,0,A1,D1,received,Valid claim,no_incidence_report
-C2,INVALID_TYPE,P2,2024-03-15,-1000,0,A2,D2,received,Invalid amount,R2
+C2,collision,P2,2024-03-15,-1000,0,A2,D2,received,Invalid amount,R2
 C3,collision,INVALID_POLICY,2024-04-01,3000,0,A3,D3,INVALID_STATUS,Invalid status,R3
 C4,liability,P4,2024-02-20,4000,0,A4,INVALID_DRIVER,received,Invalid driver,R4
 C5,collision,P5,2024-05-01,4000,0,INVALID_VIN,D5,received,Invalid amount format,R5

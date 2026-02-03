@@ -76,8 +76,6 @@ class Driver:
     def __hash__(self):
         return hash(self.id)
 
-from dataclasses import dataclass
-
 @dataclass(eq=False)
 class Claim:
     id: str

@@ -4,7 +4,7 @@ from knowledgenet.rule import Rule, Collection, Event
 from knowledgenet.controls import insert, update
 from knowledgenet.helper import assign
 
-from autoins.entities import Action, ExecutionContext
+from autoins.entities2 import Action
 from autoins.util import record_action_event
 
 @ruledef

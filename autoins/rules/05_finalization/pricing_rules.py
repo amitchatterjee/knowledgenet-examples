@@ -6,7 +6,7 @@ from knowledgenet.controls import insert, update
 from knowledgenet.helper import assign
 
 from autoins.bluebook import BlueBook
-from autoins.entities import Action, ExecutionContext
+from autoins.entities2 import Request, Action
 
 @ruledef
 def compute_collision_payment():
@@ -24,7 +24,7 @@ def compute_collision_payment():
         ctx.action.pay_amount = min(balance, payable)
         update(ctx, ctx.action)
     return Rule(run_once=True, order=2,
-        when=[Fact(of_type=ExecutionContext, var='exec_context', matches=lambda ctx,this: this.claim.type == 'collision'), 
+        when=[Fact(of_type=Request, var='exec_context', matches=lambda ctx,this: this.claim.type == 'collision'), 
             Fact(of_type=Action, var='action', 
                 matches=lambda ctx,this: not this.inactive and this.pay_percent > 0 and ctx.exec_context.claim.id == this.claim_id),
             Fact(of_type=BlueBook,
@@ -46,7 +46,7 @@ def compute_liability_payment():
         ctx.action.pay_amount = min(balance, payable)
         update(ctx, ctx.action)
     return Rule(run_once=True, order=2,
-        when=[Fact(of_type=ExecutionContext, var='exec_context', 
+        when=[Fact(of_type=Request, var='exec_context', 
                    matches=lambda ctx,this: this.claim.type == 'liability'), 
             Fact(of_type=Action, var='action', 
                 matches=lambda ctx,this: not this.inactive and this.pay_percent > 0 and ctx.exec_context.claim.id == this.claim_id),

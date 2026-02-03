@@ -3,18 +3,19 @@ from knowledgenet.rule import Rule, Fact, Collection
 from knowledgenet.controls import insert, update, delete
 from knowledgenet.container import Collector
 
-from autoins.entities import Action, ExecutionContext, Automobile, Claim, Driver, Estimate, Group, IncidenceReport, Policy
+from autoins.entities2 import Request, Automobile, Claim, Driver, Estimate, Group, IncidenceReport, Policy, Action
+from autoins.util import echo
 
 # #########################################################################
 # Rule order: 0
-# Set of rules that builds the ExecutionContext object for each claim that has 
+# Set of rules that builds the Request object for each claim that has 
 # been received and joins with the policy 
 # ##########################################################################
 @ruledef
 def create_exec_context():    
     return Rule(when=Fact(of_type=Claim, var='claim', 
                 matches=lambda ctx,this: this.status == 'received'),
-        then=lambda ctx: insert(ctx, ExecutionContext(ctx.claim)))
+        then=lambda ctx: insert(ctx, Request(claim=ctx.claim)))
 
 @ruledef
 def join_exec_context_with_policy():
@@ -22,14 +23,14 @@ def join_exec_context_with_policy():
         ctx.exec_context.policy = ctx.policy
         update(ctx, ctx.exec_context)
     return Rule(run_once=True,
-        when=[Fact(of_type=ExecutionContext, var='exec_context'),
+        when=[Fact(of_type=Request, var='exec_context'),
                 Fact(of_type=Policy, var='policy', 
                     matches=lambda ctx, this: ctx.exec_context.claim.policy_id == this.id)],
         then=join_exec_context_with_policy_rhs)
 
 # #########################################################################
 # Rule order: 1
-# Set of rules that builds the ExecutionContext object for each claim that has been received 
+# Set of rules that builds the Request object for each claim that has been received 
 # ##########################################################################
 @ruledef
 def join_exec_context_with_group():
@@ -37,7 +38,7 @@ def join_exec_context_with_group():
         ctx.exec_context.group = ctx.group
         update(ctx, ctx.exec_context)
     return Rule(run_once=True, order=1,
-        when=[Fact(of_type=ExecutionContext, var='exec_context'),
+        when=[Fact(of_type=Request, var='exec_context'),
               Fact(of_type=Group, var='group', 
                    matches=lambda ctx,this: ctx.exec_context.policy and ctx.exec_context.policy.group_id == this.id)],
         then=join_exec_context_with_group_rhs)
@@ -48,7 +49,7 @@ def join_exec_context_with_driver():
         ctx.exec_context.driver = ctx.driver
         update(ctx, ctx.exec_context)
     return Rule(run_once=True, order=1,
-        when=[Fact(of_type=ExecutionContext, var='exec_context'),
+        when=[Fact(of_type=Request, var='exec_context'),
                 Fact(of_type=Driver, var='driver', 
                     matches=lambda ctx, this: ctx.exec_context.claim.driver_id == this.id)],
         then=join_exec_context_with_driver_rhs)
@@ -59,7 +60,7 @@ def join_exec_context_with_automobile():
         ctx.exec_context.automobile = ctx.automobile
         update(ctx, ctx.exec_context)
     return Rule(run_once=True, order=1,
-        when=[Fact(of_type=ExecutionContext, var='exec_context'),
+        when=[Fact(of_type=Request, var='exec_context'),
                 Fact(of_type=Automobile, var='automobile', 
                     matches=lambda ctx, this: ctx.exec_context.claim.vin == this.vin)],
         then=join_exec_context_with_automobile_rhs)
@@ -70,7 +71,7 @@ def join_exec_context_with_incidence_report():
         ctx.exec_context.incidence_report = ctx.incidence_report
         update(ctx, ctx.exec_context)
     return Rule(run_once=True, order=1,
-        when=[Fact(of_type=ExecutionContext, var='exec_context'),
+        when=[Fact(of_type=Request, var='exec_context'),
                 Fact(of_type=IncidenceReport, var='incidence_report', 
                     matches=lambda ctx, this: ctx.exec_context.claim.incidence_report_id == this.id)],
         then=join_exec_context_with_incidence_report_rhs)
@@ -85,7 +86,7 @@ def create_collision_history_collector():
     Create collectors that collect history (past) of claims of type, collision, for each claim being processed. We are interested in the paid amount
     '''
     return Rule(run_once=True, order=2,
-        when=Fact(of_type=ExecutionContext, var='exec_context'),
+        when=Fact(of_type=Request, var='exec_context'),
         then=lambda ctx: 
             insert(ctx, 
                     Collector(of_type=Claim, group='collision-history-collector', exec_context=ctx.exec_context,
@@ -99,7 +100,7 @@ def create_liability_history_collector():
     Create collectors that collect history (past) of claims of type, liability, for each claim being processed. We are interested in the paid amount
     '''
     return Rule(run_once=True, order=2,
-        when=Fact(of_type=ExecutionContext, var='exec_context'),
+        when=Fact(of_type=Request, var='exec_context'),
         then=lambda ctx: 
             insert(ctx, 
                     Collector(of_type=Claim, group='liability-history-collector', exec_context=ctx.exec_context,
@@ -114,7 +115,7 @@ def create_estimate_collector():
     Create collectors that collect all estimates for a claim being processed
     '''
     return Rule(run_once=True, order=2,
-        when=Fact(of_type=ExecutionContext, var='exec_context'),
+        when=Fact(of_type=Request, var='exec_context'),
         then=lambda ctx: 
             insert(ctx, 
                     Collector(of_type=Estimate, group='estimate-collector', exec_context=ctx.exec_context,
@@ -122,7 +123,7 @@ def create_estimate_collector():
 
 # #########################################################################
 # Rule order: 3
-# Enrich ExecutionContext with collected data
+# Enrich Request with collected data
 # ########################################################################## 
 @ruledef
 def add_collision_history_to_exec_context():
@@ -133,7 +134,7 @@ def add_collision_history_to_exec_context():
         ctx.exec_context.collision_history = ctx.hist.collection
         update(ctx, ctx.exec_context)
     return Rule(order=3, run_once=True,
-        when=(Fact(of_type=ExecutionContext, var='exec_context'),
+        when=(Fact(of_type=Request, var='exec_context'),
                 Collection(group='collision-history-collector', var='hist', matches=lambda ctx,this: ctx.exec_context == this.exec_context)),
         then=add_collision_history_to_exec_context_rhs)
 
@@ -146,7 +147,7 @@ def add_liability_history_to_exec_context():
         ctx.exec_context.liability_history = ctx.hist.collection
         update(ctx, ctx.exec_context)
     return Rule(order=3, run_once=True,
-        when=(Fact(of_type=ExecutionContext, var='exec_context'),
+        when=(Fact(of_type=Request, var='exec_context'),
                 Collection(group='liability-history-collector', var='hist', matches=lambda ctx,this: ctx.exec_context == this.exec_context)),
         then=add_liability_history_to_exec_context_rhs)
 
@@ -159,7 +160,7 @@ def add_estimates_to_exec_context():
         ctx.exec_context.estimates = ctx.estimate.collection
         update(ctx, ctx.exec_context)
     return Rule(order=3, run_once=True,
-        when=(Fact(of_type=ExecutionContext, var='exec_context'),
+        when=(Fact(of_type=Request, var='exec_context'),
                 Collection(group='estimate-collector', var='estimate', matches=lambda ctx,this: ctx.exec_context == this.exec_context)),
         then=add_estimates_to_exec_context_rhs)
 
@@ -201,7 +202,7 @@ def create_action_collector():
     Create a collection that collects all the actions for each claim being processed
     '''
     return Rule(order=4,
-        when=Fact(of_type=ExecutionContext, var='exec_context'),
+        when=Fact(of_type=Request, var='exec_context'),
         then=lambda ctx: insert(ctx, 
                                 Collector(of_type=Action, group='action-collector', 
                                         exec_context=ctx.exec_context, 

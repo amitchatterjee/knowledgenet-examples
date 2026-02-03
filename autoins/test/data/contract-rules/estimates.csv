@@ -1,4 +1,4 @@
-id,estimator_id,approved_vendor,vin,claim_id,date,amount,description
+id,estimator_id,certified,vin,claim_id,date,amount,description
 E1,W1,yes,A1,C1,2023-01-15,3000.00,Initial estimate
 E2,W2,yes,A2,C2,2023-02-20,1500.50,Revised estimate
 E3,W3,yes,A3,C3,2023-03-10,2000.75,Final estimate

@@ -4,8 +4,10 @@ import os
 import time
 
 from autoins.bluebook import BlueBook
-from autoins.entities import Action, Automobile, Claim, Driver, Estimate, Group, IncidenceReport, Policy
-from autoins.util import load_facts_from_csv, subfiles, to_bool, to_datetime
+from autoins.csv_parser import read_csv_and_convert
+from autoins.edi_parser import parse_edi
+from autoins.entities2 import Action, Automobile, Claim, Driver, Estimate, Group, IncidenceReport, Policy
+from autoins.util import subfiles, to_bool, to_datetime
 
 from knowledgenet.ftypes import Wrapper
 
@@ -57,12 +59,24 @@ def load_facts(factsPaths):
                     'date': to_datetime,
                     'amount': float
                 })
+            elif f.startswith('tx') and f.endswith('.edi'):
+                # read entire EDI payload and parse into Request objects
+                with open(os.path.join(path, f), 'r') as fh:
+                    payload = fh.read()
+                    reqs = parse_edi(payload)
+                    for req in reqs:
+                        facts.add(req)
             elif f.startswith('automobiles') and f.endswith('.csv'):
                 load_facts_from_csv(facts, Automobile, os.path.join(path,f))
             elif f == 'blues.csv':
                 facts.add(BlueBook(os.path.join(path,f)))
     return facts
 
+def load_facts_from_csv(facts, of_type, file_path, converters=None):
+    df = read_csv_and_convert(file_path, converters)
+    for row in df:
+        fact = of_type(**row)
+        facts.add(fact)
 
 def write_actions(output_path, clean_output, result_facts):
     if not os.path.exists(output_path):

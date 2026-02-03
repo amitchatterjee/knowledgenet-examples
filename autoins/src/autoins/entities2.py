@@ -1,7 +1,7 @@
 from __future__ import annotations
 from datetime import datetime
 from enum import Enum
-from typing import Any, List, Optional, Set
+from typing import Any, List, Optional, Set, ClassVar, Dict
 
 from pydantic import BaseModel, Field
 
@@ -223,6 +223,9 @@ class Request(BaseModel):
         }
 
 class Action(BaseModel):
+    key: ClassVar[str] = 'id'
+    columns: ClassVar[Dict[str, type]] = {key: str, 'code': str, 'claim_id': str, 'action': str, 'explain': str, 'rank': int, 'pay_percent': float, 'pay_amount': float, 'inactive': bool}
+    
     id: str
     code: str
     claim_id: str
