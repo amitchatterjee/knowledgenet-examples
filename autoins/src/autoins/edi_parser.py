@@ -97,6 +97,9 @@ def parse_edi(payload: str) -> List[Request]:
         line = raw_line.strip()
         if not line:
             continue
+        # skip comment lines beginning with '#'
+        if line.startswith('#'):
+            continue
         reader = csv.reader([line])
         parts = next(reader, None)
         if not parts:
@@ -115,17 +118,18 @@ def parse_edi(payload: str) -> List[Request]:
             if in_block:
                 if claim is None:
                     raise ValueError("CLAIM segment is required in STX/ETX block")
-                results.append(Request(
+                request = Request(
                     claim=claim,
                     policy=policy,
                     group=group,
                     driver=driver,
                     automobile=automobile,
                     incidence_report=incidence_report,
-                    estimates=estimates or None,
-                    collision_history=collision_history or None,
-                    liability_history=liability_history or None,
-                ))
+                    estimates=estimates,
+                    collision_history=collision_history,
+                    liability_history=liability_history,
+                )
+                results.append(request)
             in_block = False
             # reset after closing
             claim, policy, group, driver, automobile, incidence_report, estimates, collision_history, liability_history = _reset_block()
@@ -163,8 +167,19 @@ def parse_edi(payload: str) -> List[Request]:
                 outer = getattr(model, "__annotations__", {}).get(fname)
 
             origin = get_origin(outer)
-            if origin is list or origin is dict or origin is set:
+            # handle list-typed fields (semi-colon separated in CSV/EDI)
+            if origin is list:
+                inner = get_args(outer)[0] if get_args(outer) else None
+                parts = [p.strip() for p in raw_val.split(';')] if raw_val.strip() else []
+                converted_list = []
+                for part in parts:
+                    try:
+                        converted_list.append(_convert_value(part, inner))
+                    except Exception:
+                        converted_list.append(part)
+                kwargs[fname] = converted_list
                 continue
+
             try:
                 kwargs[fname] = _convert_value(raw_val, outer)
             except Exception:

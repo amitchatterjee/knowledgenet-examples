@@ -1,4 +1,0 @@
-id,source,policy,accident_date,description,license_number,license_state,vin,liability_percent
-R1,police,P2,2023-02-20,Minor collision in parking lot,D2,CA,A1,0.5
-R2,police,P1,2024-02-20,Minor collision in secondary road,D1,NC,A2,1.0
-R3,insurance,P6,2023-08-12,Rear-end collision at traffic light,D3,FL,A3,0.75

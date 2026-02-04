@@ -4,7 +4,7 @@ from knowledgenet.controls import insert, update
 from knowledgenet.helper import assign
 
 from autoins.entities import Request
-from autoins.util import create_action, record_action_event
+from autoins.util import create_action, echo, record_action_event
 
 @ruledef
 def no_policy():

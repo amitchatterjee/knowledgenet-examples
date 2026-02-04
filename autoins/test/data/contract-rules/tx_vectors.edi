@@ -1,0 +1,43 @@
+# Valid claim with everything coded properly
+STX
+CLA,C1,collision,P1,2024-02-20,5000,0,A1,D1,received,Valid claim,R1
+POL,P1,G1,John Doe,2024-01-01,2024-12-31,D1;D2,A1;A2
+GRP,G1,500,10000.00,100000.00
+DRV,D1,John Doe,1985-02-15,D1234567,CA
+AUT,A1,Toyota,Prius,2010
+INC,R1,police,P1,2024-03-15,Accident description,D1234567,NY,A1,0.75
+EST,E1,W1,yes,A1,C1,2024-02-15,3000.00,Valid estimate
+ETX
+
+# Inactive policy
+STX
+CLA,C2,collision,P2,2024-02-20,5000,0,A2,D2,received,Valid claim,R2
+POL,P2,G2,John Doe,2023-01-01,2023-12-31,D2,A2
+GRP,G2,500,10000.00,100000.00
+DRV,D2,John Doe,1985-02-15,D1234567,CA
+AUT,A2,Toyota,Prius,2010
+INC,R2,police,P2,2024-02-21,Accident description,D1234567,NY,A2,0.75
+EST,E2,W2,yes,A2,C2,2024-02-22,3000.00,Valid estimate
+ETX
+
+# Late filing
+STX
+CLA,C3,collision,P3,2022-01-10,1000,0,A3,D3,received,Late filing,R3
+POL,P3,G3,Jane Doe,2020-01-01,2025-01-01,D3,A3
+GRP,G3,500,10000.00,100000.00
+DRV,D3,Jane Doe,1990-06-01,D9876543,CA
+AUT,A3,Honda,Civic,2015
+INC,R3,police,P3,2020-01-01,Accident occurred earlier,D9876543,CA,A3,0.0
+EST,E3,W3,yes,A3,C3,2022-01-11,500.00,Estimate
+ETX
+
+# VIN mismatch
+STX
+CLA,C4,collision,P4,2024-06-15,2000,0,XX,D4,received,Vehicle not on policy,R4
+POL,P4,G4,Sam Smith,2024-01-01,2024-12-31,D4,A4
+GRP,G4,500,10000.00,100000.00
+DRV,D4,Sam Smith,1992-07-07,D4444444,CA
+AUT,A4,Ford,Focus,2012
+INC,R4,police,P4,2024-06-15,Accident for VIN mismatch,D4444444,CA,XX,0.5
+EST,E4,W4,yes,XX,C4,2024-06-16,750.00,Estimate
+ETX

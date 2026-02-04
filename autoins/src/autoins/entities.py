@@ -194,10 +194,10 @@ class Request(BaseModel):
     group: Optional[Group] = None
     driver: Optional[Driver] = None
     automobile: Optional[Automobile] = None
-    incidence_report: Optional[IncidenceReport] = None
-    collision_history: Optional[List[Claim]] = None
-    liability_history: Optional[List[Claim]] = None
-    estimates: Optional[List[Estimate]] = None
+    incidence_report: Optional[IncidenceReport] = []
+    collision_history: Optional[List[Claim]] = []
+    liability_history: Optional[List[Claim]] = []
+    estimates: Optional[List[Estimate]] = []
     bypass: Set[str] = Field(default_factory=set)
 
     def __str__(self) -> str:

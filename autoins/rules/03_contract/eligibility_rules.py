@@ -3,15 +3,15 @@ from knowledgenet.rule import Rule, Fact, Event
 from knowledgenet.controls import insert
 
 from autoins.entities import Request
-from autoins.util import create_action, execute, record_action_event, rule_config
+from autoins.util import create_action, echo, execute, record_action_event, rule_config
 
 @ruledef
 def inactive_policy():
     return Rule(when=[Fact(named='contract-ruleset', var='ruleset_context'),
                       Fact(of_type=Request, var='request', 
-                            matches=[lambda ctx,this: execute(ctx,ctx.ruleset_context,this),
-                                lambda ctx,this: 
-                                    not this.policy.start_date <= this.incidence_report.accident_date <= this.policy.end_date])],
+                            matches=[
+                                lambda ctx,this: execute(ctx,ctx.ruleset_context,this),
+                                lambda ctx,this: not this.policy.start_date <= this.incidence_report.accident_date <= this.policy.end_date])],
         then=lambda ctx: insert(ctx, create_action(ctx, ctx.ruleset_context, ctx.request)))
 
 @ruledef
@@ -22,7 +22,6 @@ def late_filing():
                                     lambda ctx,this: (this.claim.filing_date - this.incidence_report.accident_date).days > rule_config(ctx, ctx.ruleset_context, ctx.request)['within']])],
                 then=lambda ctx: insert(ctx, create_action(ctx, ctx.ruleset_context, ctx.request)))
 
-# AI-generated rule: Create a rule function that inserts an Action object when and Request.claim of type, collision, has a vin that does not match the vins in the Request.policy.automobiles object 
 @ruledef
 def vin_mismatch():
     return Rule(when=[Fact(named='contract-ruleset', var='ruleset_context'),
