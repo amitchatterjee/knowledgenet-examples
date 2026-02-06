@@ -1,0 +1,65 @@
+# Valid claim with everything coded properly
+STX
+CLA,C1,collision,P1,2024-02-20,5000,0,A1,D1,received,Valid claim,R1
+POL,P1,G1,John Doe,2024-01-01,2024-12-31,D1;D2,A1;A2
+GRP,G1,500,10000.00,100000.00
+DRV,D1,John Doe,1985-02-15,D1234567,CA
+AUT,A1,Toyota,Prius,2010
+INC,R1,police,P1,2024-03-15,Accident description,D1234567,NY,A1,0.75
+EST,E1,W1,yes,A1,C1,2024-02-15,3000.00,Valid estimate
+ETX
+
+# vin_mismatch_claim_estimates
+STX
+CLA,C2,collision,P2,2024-02-20,4000,0,A2,D2,received,Claim with mismatched VIN,R2
+POL,P2,G2,Jane Roe,2024-01-01,2024-12-31,D2,A2
+GRP,G2,500,10000.00,100000.00
+DRV,D2,Jane Roe,1990-05-01,D7654321,CA
+AUT,A2,Toyota,Prius,2010
+INC,R2,police,P2,2024-03-15,Accident description,D7654321,CA,A2,0.50
+EST,E2,W2,yes,XX,C2,2024-02-16,1500.00,Estimate
+ETX
+
+# vin_mismatch_claim_incidence_report
+STX
+CLA,C3,collision,P3,2024-02-20,4000,0,A3,D3,received,Claim with mismatched VIN,R3
+POL,P3,G3,Jane Roe,2024-01-01,2024-12-31,D3,A3
+GRP,G3,500,10000.00,100000.00
+DRV,D3,Jane Roe,1990-05-01,D7654321,CA
+AUT,A3,Toyota,Prius,2010
+INC,R3,police,P3,2024-03-15,Accident description,D7654321,CA,XX,0.50
+EST,E3,W3,yes,A3,C3,2024-02-16,1500.00,Estimate
+ETX
+
+# VIN mismatch
+STX
+CLA,C4,collision,P4,2024-06-15,2000,0,XX,D4,received,Vehicle not on policy,R4
+POL,P4,G4,Sam Smith,2024-01-01,2024-12-31,D4,A4
+GRP,G4,500,10000.00,100000.00
+DRV,D4,Sam Smith,1992-07-07,D4444444,CA
+AUT,A4,Ford,Focus,2012
+INC,R4,police,P4,2024-06-15,Accident for VIN mismatch,D4444444,CA,XX,0.5
+EST,E4,W4,yes,XX,C4,2024-06-16,750.00,Estimate
+ETX
+
+# Missing automobile
+STX
+CLA,C5,collision,P5,2024-02-20,5000,0,XX,D5,received,Valid claim,R5
+POL,P5,G5,John Doe,2024-01-01,2024-12-31,D5,A5
+GRP,G5,500,10000.00,100000.00
+DRV,D5,John Doe,1985-02-15,D1234567,CA
+INC,R5,police,P5,2024-03-15,Accident description,D1234567,NY,A5,0.75
+EST,E5,W5,yes,A5,C5,2024-02-15,3000.00,Valid estimate
+ETX
+
+# Not enough estimates
+STX
+CLA,C6,collision,P6,2024-02-20,5000,0,A6,D6,received,Valid claim,R6
+POL,P6,G6,John Doe,2024-01-01,2024-12-31,D6,A6
+GRP,G6,500,10000.00,100000.00
+DRV,D6,John Doe,1985-02-15,D1234567,CA
+AUT,A6,Toyota,Prius,2010
+INC,R6,police,P6,2024-03-15,Accident description,D1234567,NY,A6,0.75
+EST,E6-1,W1,no,A6,C6,2024-02-15,3000.00,Valid estimate
+EST,E6-2,W1,no,A6,C6,2024-02-15,2000.00,Valid estimate
+ETX

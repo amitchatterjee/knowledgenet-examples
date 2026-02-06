@@ -9,13 +9,13 @@ from autoins.entities import Action
 from autoins.util import subfiles
 
 from knowledgenet.ftypes import Wrapper
+from knowledgenet.container import Collector
 
 def load_facts(factsPaths):
     facts = set()
     for path in factsPaths:
         files = subfiles(path)
         for f in files:
-            converters = None
             if f == 'rule-config.json':
                 with open(os.path.join(path,f)) as file:
                     configs = json.load(file)
@@ -27,8 +27,12 @@ def load_facts(factsPaths):
                     reqs = parse_edi(payload)
                     for req in reqs:
                         facts.add(req)
+                        facts.add(Collector(of_type=Action, group='action-collector', 
+                                    request=req, 
+                                    filter=lambda this,action: this.request.claim.id == action.claim_id))
             elif f == 'blues.csv':
                 facts.add(BlueBook(os.path.join(path,f)))
+    
     return facts
 
 def write_actions(output_path, clean_output, result_facts):
