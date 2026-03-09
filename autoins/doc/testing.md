@@ -302,6 +302,44 @@ When developing a new test, you may not know the exact expected output in advanc
 5. Copy the verified CSV to `test/expected/{ruleset}-rules/expected.csv`.
 6. Add the `assert_result_matches` assertion back to the test module.
 
+## Expected results — creating `expected.csv`
+
+This short guide explains the `expected.csv` format and a reproducible workflow to generate it from real engine output.
+
+- **Location:** `test/expected/{ruleset}-rules/expected.csv`
+- **Columns (order matters):** `id,code,claim_id,action,explain,rank,pay_percent,pay_amount,inactive`
+- **Important:** The `id` column is ignored by the test comparison. The test framework computes an MD5 checksum over all fields except `id` when comparing actual vs expected, so UUIDs in `id` may be arbitrary.
+
+Steps to create expected results:
+
+1. Add your test input in `test/data/{ruleset}-rules/tx_vectors.edi` and the corresponding `rule-config.json`.
+2. In the test module (`test/unit/test_{ruleset}_rules.py`) temporarily omit or comment out the `assert_result_matches` call so the test doesn't fail while you inspect output.
+3. Enable result dumping in the test by calling `dump_result(result_facts)` (the helper logs the actions at DEBUG level).
+4. Run the test and produce output files:
+
+```bash
+python -m pytest test/unit/test_{ruleset}_rules.py -q
+```
+
+If you need to see `dump_result` output on the console, set `log_cli_level = DEBUG` in `pytest.ini` or run pytest with `-o log_cli=true -o log_cli_level=DEBUG`.
+
+5. Inspect the generated CSV in `target/test-results/{ruleset}-rules/` and verify each row matches your expected action semantics.
+6. When satisfied, copy the generated CSV to `test/expected/{ruleset}-rules/expected.csv` (replace any UUIDs in the `id` column if you prefer a deterministic value).
+7. Restore the `assert_result_matches` assertion in the test module to lock the expectation.
+
+Example expected CSV (IDs can be any UUID):
+
+```csv
+id,code,claim_id,action,explain,rank,pay_percent,pay_amount,inactive
+9f7db5e2-9884-46de-bc3b-f2e263518924,PAYCL,C1,pay,pay,0,0.75,0.0,False
+01a8648b-7060-409b-8097-5aa234dd8ebb,NOPLY,C2,incomplete,no policy found,1000,0.0,0.0,False
+```
+
+Quick notes:
+- Use unique claim IDs in `tx_vectors.edi` to avoid collisions in output rows.
+- The test helpers (`execute`, `dump_result`, `assert_result_matches`) live in `test/unit/util.py` — review them if you need to customize the CSV layout or comparison logic.
+- Keep the `rule-config.json` in sync with the scenario you're testing; rule `reason`/`explain`/`rank` values drive the expected `code`, `explain`, and `rank` columns.
+
 ### Running Tests
 
 Tests are run using pytest from the `autoins` directory:
