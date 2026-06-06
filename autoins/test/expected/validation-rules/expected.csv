@@ -1,9 +1,7 @@
 id,code,claim_id,action,explain,rank,pay_percent,pay_amount,inactive
-6de35dd8-411a-4e66-bf01-10f26178bf38,NODRV,C4,incomplete,no driver found,998,0.0,0.0,False
-0820516e-81ff-43ad-a6ac-beefac89dee8,NEEST,C2,incomplete,insufficient number of estimates,996,0.0,0.0,True
-e0a47359-3570-44b9-a2cd-a479cc376f43,NOAUT,C4,incomplete,no automobile found,997,0.0,0.0,True
-5e017faf-4904-49ab-8911-c47536b7f90b,NOINR,C1,incomplete,no incidence report found,999,0.0,0.0,False
-201b7c96-0612-442e-b6ed-f33f6d438ad7,NOAUT,C1,incomplete,no automobile found,997,0.0,0.0,True
-eeec1d88-c4b7-41d7-a6b0-10be48ce93d4,NOAUT,C5,incomplete,no automobile found,997,0.0,0.0,False
-c2b76105-014f-448c-81d0-b0206774f781,NOAUT,C2,incomplete,no automobile found,997,0.0,0.0,False
-
+9f7db5e2-9884-46de-bc3b-f2e263518924,PAYCL,C1,pay,pay,0,0.75,0.0,False
+01a8648b-7060-409b-8097-5aa234dd8ebb,NOPLY,C2,incomplete,no policy found,1000,0.0,0.0,False
+6bfd6920-cf82-4242-90cb-c0708aab149d,NOINR,C3,incomplete,no incidence report found,999,0.0,0.0,False
+51a1991b-8e5b-4e6a-acf5-6356e070ae4b,NODRV,C4,incomplete,no driver found,998,0.0,0.0,False
+a82ad918-155f-4917-b185-b7a059d00639,NOAUT,C5,incomplete,no automobile found,997,0.0,0.0,False
+e33174ec-b7de-497f-9eb3-88dd63cce19d,NEEST,C6,incomplete,insufficient number of estimates,996,0.0,0.0,False

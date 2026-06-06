@@ -1,0 +1,5 @@
+id,code,claim_id,action,explain,rank,pay_percent,pay_amount,inactive
+9f7db5e2-9884-46de-bc3b-f2e263518924,PAYCL,C1,pay,pay,0,0.75,0.0,False
+cfd5607b-b912-4282-80df-09a70a7ec569,VINCE,C2,deny,claim/estimates vin mismatch,1000,0.0,0.0,False
+b3515a54-cd95-4fd3-aed6-f3c785d651b7,VINCI,C3,deny,claim/incidence-report vin mismatch,1000,0.0,0.0,False
+

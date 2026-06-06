@@ -1,5 +1,4 @@
-import csv
-from autoins.util import read_csv_and_convert
+from autoins.csv_parser import read_csv_and_convert
 
 class BlueBook:
     def __init__(self, file_path):

@@ -3,9 +3,16 @@
 This document describes the relationships between the Python classes (entities) used for adjudicating auto insurance claims in the `autoins` module.
 
 ## Overview
-The entities represent real-world objects and concepts involved in the processing of auto insurance claims. Their relationships reflect how data flows and is connected during the adjudication process.
+The entities represent real-world objects and concepts involved in the processing of auto insurance claims. The system processes EDI (Electronic Data Interchange) transactions where the **Request** entity represents the incoming transaction containing all claim-related data. Other entities are extracted and structured from this incoming Request transaction during the adjudication process.
 
 ## Entity Descriptions and Relationships
+
+### Request
+- **Represents the incoming EDI transaction** containing all claim-related data.
+- Serves as the primary entry point for claim adjudication processing.
+- Contains and aggregates all related entities: Claim, Policy, Group, Driver, Automobile, IncidenceReport, and Estimate(s).
+- All other entities are parsed and extracted from the Request transaction data.
+- Used by rules to access all relevant data for adjudication.
 
 ### Policy
 - Represents an insurance policy.
@@ -43,27 +50,25 @@ The entities represent real-world objects and concepts involved in the processin
 - Contains references to `claim_id` and `vin`.
 - Linked to claims and automobiles.
 
-### ExecutionContext
-- Central container that aggregates all related entities for a single claim.
-- Contains references to Claim, Policy, Group, Driver, Automobile, IncidenceReport, and Estimate(s).
-- Used by rules to access all relevant data for adjudication.
-
 ### Action
 - Represents an action or decision taken during claim adjudication (e.g., approve, deny, pay).
 - Linked to claims via `claim_id`.
+The response to the transaction is written to a CSV file containing one or more action records.
 
 ## Relationship Diagram (Textual)
 
+### Primary Transaction Flow
+- **Request** (incoming EDI transaction) contains/aggregates: Claim, Policy, Group, Driver, Automobile, IncidenceReport, Estimate(s)
+
+### Entity Relationships
 - **Policy** 1---* **Driver**
 - **Policy** 1---* **Automobile**
 - **Policy** 1---* **Claim**
 - **Group** 1---* **Policy**
 - **Claim** 1---1 **Driver**
 - **Claim** 1---1 **Automobile**
-- **Claim** 1---1 **IncidenceReport**
+- **Claim** 1---* **IncidenceReport**
 - **Claim** 1---* **Estimate**
-- **ExecutionContext** aggregates: Claim, Policy, Group, Driver, Automobile, IncidenceReport, Estimate(s)
-- **Action** 1---1 **Claim**
 
 ## Summary
-The entities are tightly interconnected to reflect the real-world relationships in auto insurance claims processing. The `ExecutionContext` class serves as the central hub, joining all relevant entities for efficient rule evaluation and adjudication.
+The system processes EDI transactions where the `Request` entity represents the incoming transaction containing all claim-related data. The entities within Request are tightly interconnected to reflect the real-world relationships in auto insurance claims processing. Request serves as the primary entry point and central hub, providing all relevant entities for efficient rule evaluation and adjudication.

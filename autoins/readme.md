@@ -1,10 +1,36 @@
-## Auto-insurance claim handling rules
+## Python virtual environment setup
 
-# Install required dependencies
+```bash
+python3.14 -m venv ~/knowledgenet-ex-autoins-venv
+source ~/knowledgenet-ex-autoins-venv/bin/activate
+```
+
+## Optional: Install development version of Knowledgenet from workspace
+Use this when you need the latest local development changes from the core
+Knowledgenet repo before they are published to PyPI.
+
+Assumption: `KNOWLEDGENET_HOME` points to your local `knowledgenet` repo root.
+
+```bash
+# Build the wheel in the knowledgenet repo - see the knowledgnet/docs/readme-development.md for details
+
+# Install the latest local wheel into this venv
+pip install --force-reinstall $KNOWLEDGENET_HOME/dist/knowledgenet-*.whl
+
+# Alternatively, only knowledgenet, no deps
+pip install --force-reinstall --no-deps $KNOWLEDGENET_HOME/dist/knowledgenet-*.whl
+```
+
+## Install required dependencies
+```bash
+pip install --upgrade pip
 cd $KNOWLEDGENET_EX_HOME/autoins
 pip install -r requirements.txt
 
 ```
+
+## Execute Auto-insurance claim handling rules
+
 
 ### Execute the application:
 ```bash

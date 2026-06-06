@@ -1,7 +1,0 @@
-id,type,policy_id,filing_date,claimed_amount,paid_amount,vin,driver_id,status,description,incidence_report_id
-H1,collision,P1,2023-01-15,5000,3000,201,D1,approved,Accident on highway,
-H2,collision,P2,2023-01-15,5000,3000,201,D2,approved,Accident on highway,
-H3,collision,P4,2023-04-05,2500,1200,204,,rejected,Hit a tree,
-H4,collision,P5,2023-05-18,4500,1900,205,,approved,Side swipe on freeway,
-H5,liability,P6,2023-06-12,6000,6000,206,D3,approved,Rear-ended another vehicle,
-H6,liability,P6,2023-07-12,7000,7000,207,D4,approved,Hit a pedestrian,

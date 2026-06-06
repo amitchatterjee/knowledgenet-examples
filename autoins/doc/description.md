@@ -1,11 +1,13 @@
 The `knowledgenet autoins` rules are part of a rules-based system for processing auto insurance claims. The rules are organized into different phases or rulesets, each focusing on a specific aspect of the claims processing workflow.
 
-These rules are designed to automate and streamline the processing of auto insurance claims by applying a series of logical checks and actions across distinct phases. The primary purpose of these rules is to ensure that each claim is thoroughly validated, checked for contractual compliance, screened for potential fraud, and finalized for payment in a transparent and explainable manner. The inputs to the rules engine are structured facts representing claims, policies, groups, drivers, automobiles, incidence reports, and estimates, typically loaded from CSV files and assembled into an ExecutionContext for each claim. As the rules are executed, they produce outputs in the form of actions, validation errors, eligibility determinations, fraud flags, and payment computations, which are collected and used to guide the final disposition of each claim. This rules-based approach enables consistent, auditable, and flexible decision-making for complex insurance workflows.
+These rules are designed to automate and streamline the processing of auto insurance claims by applying a series of logical checks and actions across distinct phases. The primary purpose of these rules is to ensure that each claim is thoroughly validated, checked for contractual compliance, screened for potential fraud, and finalized for payment in a transparent and explainable manner. The inputs to the rules engine are structured facts representing claims, policies, groups, drivers, automobiles, incidence reports, and estimates, loaded from EDI transactions and parsed into Request objects for each claim. As the rules are executed, they produce outputs in the form of actions, validation errors, eligibility determinations, fraud flags, and payment computations, which are collected and used to guide the final disposition of each claim. This rules-based approach enables consistent, auditable, and flexible decision-making for complex insurance workflows.
 
-**ExecutionContext Fact:**
-The `ExecutionContext` fact serves as a central container for all the data and entities related to a single insurance claim during rules processing. It aggregates information such as the claim itself, the associated policy, group, driver, automobile, incidence report, and estimates. By joining these related entities into one context, the rules engine can efficiently access and reason about all relevant facts for a claim in one place. This enables rules to perform complex validations, eligibility checks, fraud detection, and payment calculations using a unified view of the claim and its relationships, ensuring consistency and simplifying rule logic throughout the workflow.
+**Note:** While claim transaction data is processed using EDI format, reference data such as bluebook values for vehicle pricing are still maintained in CSV files.
 
-Although, strictly not necessary, all rules must operate on the ExecutionContext fact in order to incur less overhead and to ensure standardization.
+**Request Fact:**
+The `Request` fact serves as a central container for all the data and entities related to a single insurance claim during rules processing. It aggregates information such as the claim itself, the associated policy, group, driver, automobile, incidence report, and estimates. By joining these related entities into one context, the rules engine can efficiently access and reason about all relevant facts for a claim in one place. This enables rules to perform complex validations, eligibility checks, fraud detection, and payment calculations using a unified view of the claim and its relationships, ensuring consistency and simplifying rule logic throughout the workflow.
+
+Although, strictly not necessary, all rules must operate on the Request fact in order to incur less overhead and to ensure standardization.
 
 **Rule Configuration:**
 The behavior and execution of rules in the system can be controlled through configuration files, such as `rule-config.json` found in the `data` directory. This configuration allows administrators and developers to enable or disable specific rules, set actions and reasons for rule outcomes, provide explanations, and assign priorities (ranks) to rules. For example, validation rules like `no_policy` or `no_driver` can be toggled on or off, and their actions (such as marking a claim as incomplete) and explanations are defined in the configuration. Contract and fraud rules can similarly be customized, including group-specific overrides. This flexible configuration mechanism makes it easy to adapt the rules engine to changing business requirements without modifying the underlying code, supporting both global and context-specific rule behaviors.
@@ -16,7 +18,6 @@ Although, strictly not necessary, a rule configuration must be specified in ever
 
 The rules in this system are organized into distinct rulesets, each corresponding to a phase in the claims processing workflow. The ruleset names match the folder names under the `rules` directory, with numeric prefixes (e.g., `01_`, `02_`) used only for ordering and omitted here for clarity. Below is a list of the main rulesets and their functions:
 
-- **01_initialization**: Prepares the execution context for each claim by joining it with related entities such as policies, groups, drivers, automobiles, and incidence reports.
 - **02_validation**: Ensures all required information is present in the claim, checking for missing policies, drivers, automobiles, incidence reports, and sufficient estimates.
 - **03_contract**: Verifies claim eligibility based on contract terms, such as policy activity, filing timeliness, and VIN matching.
 - **04_fraud**: Detects potential fraud by checking for inconsistencies and mismatches between claim data and related entities, such as VIN mismatches.
@@ -69,8 +70,8 @@ These rules are defined using the `@ruledef` decorator and are executed by the K
 
 The rules in the `knowledgenet-example/autoins` system are verified using a suite of unit tests. These tests are designed to ensure that each rule and ruleset behaves as expected when processing various claim scenarios. The unit tests typically:
 
-- Load test data from CSV files to create realistic claim, policy, driver, automobile, and related entity objects.
+- Load test data from EDI transaction files, parsing them into realistic Request objects containing claim, policy, driver, automobile, and related entity data.
 - Execute the rules engine on the constructed context, either for a single ruleset or the entire workflow.
-- Asserts that execution of the above rule matched with the expected result by comparing the output with the stored expected result.
+- Assert that execution of the above rule matched with the expected result by comparing the output with the stored expected result.
 
 Some tests focus on individual rules (e.g., checking that a missing policy triggers the correct validation error), while others verify the integration of multiple rulesets and the overall claims processing flow. This approach ensures that the rules are robust, maintainable, and produce consistent results as the system evolves.
