@@ -5,7 +5,8 @@
     "python.analysis.extraPaths": [
         "autoins/src"
     ],
-    "python.defaultInterpreterPath": "${env:HOME}/knowledgenet-ex-autoins-venv/bin/python",
+    "python.defaultInterpreterPath": "${workspaceFolder}/knowledgenet-examples/autoins/.venv",
+    "python.terminal.activateEnvironment": true,
     "cSpell.enabledFileTypes": {
         "*": false
     }
