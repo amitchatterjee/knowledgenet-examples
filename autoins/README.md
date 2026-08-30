@@ -1,47 +1,34 @@
 ## Python virtual environment setup
 
-```bash
-python3.14 -m venv .venv
-source .venv/bin/activate
-```
-
-## Optional: Install development version of Knowledgenet from workspace
-Use this when you need the latest local development changes from the core
-Knowledgenet repo before they are published to PyPI.
-
-Assumption: `KNOWLEDGENET_HOME` points to your local `knowledgenet` repo root.
+This example has its own `uv`-managed virtual environment, separate from `knowledgenet` and from
+any other example in this repo. `knowledgenet` itself is not installed from PyPI — `pyproject.toml`
+points `uv` at the sibling `knowledgenet` repo's source directory (`[tool.uv.sources]`), so `uv
+sync` builds and installs it straight from there. There's nothing to configure to get the local
+build; just run:
 
 ```bash
-# Build the wheel in the knowledgenet repo - see the knowledgnet/docs/readme-development.md for details
-
-# Install the latest local wheel into this venv
-pip install --force-reinstall $KNOWLEDGENET_HOME/dist/knowledgenet-*.whl
-
-# Alternatively, only knowledgenet, no deps
-pip install --force-reinstall --no-deps $KNOWLEDGENET_HOME/dist/knowledgenet-*.whl
-```
-
-## Install required dependencies
-```bash
-pip install --upgrade pip
 cd $KNOWLEDGENET_EX_HOME/autoins
-pip install -r requirements.txt
-
+uv venv --python 3.14
+uv sync --group dev
 ```
+
+To pick up new `knowledgenet` changes later, just re-run `uv sync` here (or `uv sync
+--reinstall-package knowledgenet` to force a rebuild even if `knowledgenet`'s version string
+hasn't changed).
 
 ## Execute Auto-insurance claim handling rules
 
 
 ### Execute the application:
 ```bash
-python $KNOWLEDGENET_EX_HOME/autoins/src/rule_runner.py --rulesPath $KNOWLEDGENET_EX_HOME/autoins/rules --factsPaths $KNOWLEDGENET_EX_HOME/autoins/data --log debug --outputPath $KNOWLEDGENET_EX_HOME/autoins/target/results --cleanOutput
+uv run python $KNOWLEDGENET_EX_HOME/autoins/src/rule_runner.py --rulesPath $KNOWLEDGENET_EX_HOME/autoins/rules --factsPaths $KNOWLEDGENET_EX_HOME/autoins/data --log debug --outputPath $KNOWLEDGENET_EX_HOME/autoins/target/results --cleanOutput
 
 ```
 
 ### Run unit tests:
 ```bash
 cd $KNOWLEDGENET_EX_HOME/autoins
-python -m pytest -rPX
+uv run pytest -rPX
 
 ```
 
@@ -118,7 +105,7 @@ Point the example runner at the local collector and enable the OTLP exporter:
 export OTEL_ENABLED=true
 export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
 export OTEL_TRACES_EXPORTER=otlp
-python src/rule_runner.py --rulesPath $KNOWLEDGENET_EX_HOME/autoins/rules \
+uv run python src/rule_runner.py --rulesPath $KNOWLEDGENET_EX_HOME/autoins/rules \
 	--factsPaths $KNOWLEDGENET_EX_HOME/autoins/data --log info \
 	--outputPath $KNOWLEDGENET_EX_HOME/autoins/target/results --cleanOutput --traceLevel 5 --traceDetails 10
 ```
