@@ -1,5 +1,0 @@
-knowledgenet==1.0.0
-opentelemetry-distro==0.60b1
-opentelemetry-exporter-otlp==1.39.1
-pydantic==2.12.5
-pytest

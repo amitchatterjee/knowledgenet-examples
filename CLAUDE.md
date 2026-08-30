@@ -7,13 +7,15 @@ Read `../knowledgenet/docs/concepts.md`, `docs/rule-service.md`, and `docs/rules
 ## Environment
 
 - Python 3.13+ (3.14 recommended).
-- **Use the virtualenv at `../knowledgenet/.venv`** (`source ../knowledgenet/.venv/bin/activate`), not a separate venv per example — this repo does not maintain its own venv despite what individual example readmes may say.
+- **Each example subdirectory owns its own `uv`-managed `.venv`, `pyproject.toml`, and `uv.lock`** —
+  not shared with `knowledgenet` or with other examples. See the example's own README for its
+  one-time setup (e.g. `autoins/README.md`).
 - One-time env var: `export KNOWLEDGENET_EX_HOME=$HOME/git/knowledgenet-examples/` (adjust path as needed).
-- To pick up local, unpublished changes to the `knowledgenet` library instead of the PyPI release:
-  ```bash
-  pip install --force-reinstall --no-deps $KNOWLEDGENET_HOME/dist/knowledgenet-*.whl
-  ```
-  (build the wheel in the `knowledgenet` repo first — see `docs/readme-development.md` there).
+- Examples depend on `knowledgenet` via a `[tool.uv.sources]` path entry pointing at the sibling
+  `knowledgenet` repo (e.g. `{ path = "../../knowledgenet" }` from an example subdirectory), not via
+  PyPI. `uv sync` in the example builds `knowledgenet` straight from that source tree, so there is no
+  separate "install the local wheel" step — just re-run `uv sync` (or `uv sync
+  --reinstall-package knowledgenet` to force a rebuild) after changing `knowledgenet` source.
 
 ## `autoins` example
 
@@ -36,9 +38,9 @@ Rules are authored declaratively with `@ruledef` and, by convention here, always
 
 ```bash
 cd $KNOWLEDGENET_EX_HOME/autoins
-pip install -r requirements.txt   # only if deps changed
+uv sync --group dev   # only if deps changed
 
-python src/rule_runner.py --rulesPath $KNOWLEDGENET_EX_HOME/autoins/rules \
+uv run python src/rule_runner.py --rulesPath $KNOWLEDGENET_EX_HOME/autoins/rules \
     --factsPaths $KNOWLEDGENET_EX_HOME/autoins/data --log debug \
     --outputPath $KNOWLEDGENET_EX_HOME/autoins/target/results --cleanOutput
 ```
@@ -47,14 +49,14 @@ python src/rule_runner.py --rulesPath $KNOWLEDGENET_EX_HOME/autoins/rules \
 
 ```bash
 cd $KNOWLEDGENET_EX_HOME/autoins
-python -m pytest -rPX
+uv run pytest -rPX
 ```
 
 When adding or changing a rule, add/update the corresponding EDI fixture under `test/data/` and expected output under `test/expected/`.
 
 ### Tracing
 
-`rule_runner.py` supports OTEL tracing via env vars (`OTEL_TRACES_EXPORTER=console|otlp|otlp_http|file`, `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_FILE_EXPORT_PATH`, batch-processor tuning vars). See `autoins/readme.md` for the full list and for running a local Jaeger collector via Docker.
+`rule_runner.py` supports OTEL tracing via env vars (`OTEL_TRACES_EXPORTER=console|otlp|otlp_http|file`, `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_FILE_EXPORT_PATH`, batch-processor tuning vars). See `autoins/README.md` for the full list and for running a local Jaeger collector via Docker.
 
 ## Editing conventions
 

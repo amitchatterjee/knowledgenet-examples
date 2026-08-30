@@ -13,6 +13,6 @@ export KNOWLEDGENET_EX_HOME=$HOME/git/knowledgenet-examples/
 
 
 ### Autoins example README
-For setup, execution, and tracing instructions for the auto-insurance example, open the example-specific README at [autoins/readme.md](autoins/readme.md){:target="_blank"}.
+For setup, execution, and tracing instructions for the auto-insurance example, open the example-specific README at [autoins/README.md](autoins/README.md){:target="_blank"}.
 
 
