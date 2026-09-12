@@ -67,7 +67,7 @@ The response to the transaction is written to a CSV file containing one or more 
 - **Group** 1---* **Policy**
 - **Claim** 1---1 **Driver**
 - **Claim** 1---1 **Automobile**
-- **Claim** 1---* **IncidenceReport**
+- **Claim** 1---1 **IncidenceReport**
 - **Claim** 1---* **Estimate**
 
 ## Summary
