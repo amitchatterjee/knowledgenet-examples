@@ -12,5 +12,5 @@ See `spec-template.md` for the actual template: three sections (Requirements, Te
 Configuration), sufficiency criteria under each, and a worked example grounded in the real
 `late_filing` rule under `03_contract`.
 
-Status: initial template drafted 2026-09-11, grounded in the real `02_validation`/`03_contract`/
-`04_fraud` rules and `rule-config.json`. Not yet reviewed/iterated with the user.
+Status: drafted and reviewed 2026-09-12, grounded in the real `02_validation`/`03_contract`/
+`04_fraud` rules and `rule-config.json`. First hand-authored content in this repo to be approved.

@@ -150,28 +150,29 @@ Historical claim segments (CLH and LYH) are useful for testing rules that depend
 
 In an EDI transaction, the CLA segment is required (one per transaction), while CLH and LYH segments are optional and can appear multiple times to represent the claimant's complete history.
 
-## rule-config.json
+## rule-config.json for tests
 
-The `rule-config.json` file defines the configuration for all rulesets used in the test framework. It allows fine-grained control over which rules are enabled, their actions, reasons, explanations, and priorities. The configuration is organized by ruleset (e.g., `validation`, `contract`, `fraud`), and can specify default settings as well as group-specific overrides.
+A test's `rule-config.json` needs configuration for **every ruleset its test transactions pass
+through, not just the ruleset under test** — rules in other rulesets can be enabled or disabled as
+needed to isolate the behavior being tested. Confirmed in practice: even
+`test/data/validation-rules/rule-config.json` (a validation-only test) defines `validation`,
+`contract`, *and* `fraud` entries. See `configuration-guidelines/` for `rule-config.json`'s general
+structure and conventions — this section is specifically about what a *test's* config needs, not
+the format itself.
 
-### Structure
-- **Top-level keys**: Each ruleset (e.g., `validation`, `contract`, `fraud`).
-- **default**: The default configuration for the ruleset, including:
-	- `enabled`: Whether the ruleset is active.
-	- `rules`: A dictionary of rule IDs, each with:
-		- `enabled`: Whether the rule is active.
-		- `action`: The action to take if the rule fires (e.g., `incomplete`, `deny`).
-		- `reason`: A short code for the rule's outcome (e.g., `NOPLY`, `NOACT`).
-		- `explain`: Human-readable explanation for the rule.
-		- `rank`: Priority for the rule (higher means higher priority).
-		- `percent`: Percentage value for payment or penalty (if applicable).
-		- Additional fields as needed (e.g., `within` for time windows).
-- **Group-specific overrides**: (e.g., `G1` under `fraud`) allow rules to be enabled/disabled or reconfigured for specific groups.
+## Tests always run the full rule pipeline, including finalization
 
-### Example
-For the `validation` ruleset, the rule `no_policy` is enabled, marks the claim as `incomplete`, and provides a reason and explanation. In the `fraud` ruleset, the rule `vin_mismatch_claim_estimates` can be disabled for group `G1`.
+`rule_runner.init_rules("rules")` loads **every** ruleset directory together — `02_validation`
+through `05_finalization` — into one repository, regardless of which ruleset a given test is
+targeting. So a test scoped to `validation-rules` still executes `05_finalization`'s
+`pay_on_no_action`/`select_action` rules along with it.
 
-This configuration mechanism makes it easy to adapt the rules engine to different business requirements and test scenarios without changing the code, simply by editing the JSON file.
+This matters when writing `expected.csv`: a claim that your rule does **not** flag doesn't simply
+disappear from the results — finalization's `pay_on_no_action` rule inserts a default `pay` action
+(reason `PAYCL`) for any claim with no other action attached. A validation-only test's
+`expected.csv` legitimately contains `pay` rows for claims that passed every validation check, not
+just `incomplete`/`deny` rows for the ones that failed — that `pay` action came from finalization,
+not from the ruleset under test.
 
 ## Creating a New Test
 
@@ -239,13 +240,13 @@ Use unique claim IDs (e.g., `C1`, `C2`) across transactions to avoid conflicts. 
 
 This file controls which rules are enabled and how they behave during the test. It must include configurations for all rulesets that the test transactions will pass through, not just the ruleset under test. Rules from other rulesets can be enabled or disabled as needed to isolate the behavior being tested.
 
-Refer to the [rule-config.json](#rule-configjson) section above for the full configuration structure.
+Refer to the [rule-config.json for tests](#rule-configjson-for-tests) section above for what a test's config specifically needs, and `configuration-guidelines/` for the general format.
 
 ### Artifact 3: Expected Results (`expected.csv`)
 
 **Location:** `test/expected/{ruleset}-rules/expected.csv`
 
-This CSV file defines the expected Action outputs from the rules engine. There should be one row per Action produced - typically one per claim in the test data. The CSV columns are:
+This CSV file defines the expected Action outputs from the rules engine. There should be one row per Action produced - typically one per claim in the test data (see "Tests always run the full rule pipeline, including finalization" above — a claim your rule doesn't flag still produces a `pay` row, not an absent one). The CSV columns are:
 
 | Column | Description |
 |---|---|
@@ -296,56 +297,26 @@ The test module uses three functions from the shared `test/unit/util.py` module:
 When developing a new test, you may not know the exact expected output in advance. A practical approach is:
 
 1. Create the test data (`tx_vectors.edi`) and rule configuration (`rule-config.json`).
-2. Write the test module but temporarily omit the `assert_result_matches` call.
-3. Call `dump_result(result_facts)` and run the test with `log_cli_level = DEBUG` in `pytest.ini` to inspect the actual output.
-4. Review the generated CSV in `target/test-results/{ruleset}-rules/` to verify the results are correct.
-5. Copy the verified CSV to `test/expected/{ruleset}-rules/expected.csv`.
+2. Write the test module but temporarily omit the `assert_result_matches` call; call `dump_result(result_facts)` instead so the actual output is logged.
+3. Run the test with `log_cli_level = DEBUG` in `pytest.ini` (or `-o log_cli=true -o log_cli_level=DEBUG` on the command line) to see the `dump_result` output:
+   ```bash
+   uv run pytest test/unit/test_{ruleset}_rules.py -q
+   ```
+4. Review the generated CSV in `target/test-results/{ruleset}-rules/` (or the logged `dump_result` output) to verify the results are correct.
+5. Copy the verified CSV to `test/expected/{ruleset}-rules/expected.csv` — the `id` column's UUIDs can be anything, they're excluded from comparison.
 6. Add the `assert_result_matches` assertion back to the test module.
 
-## Expected results — creating `expected.csv`
-
-This short guide explains the `expected.csv` format and a reproducible workflow to generate it from real engine output.
-
-- **Location:** `test/expected/{ruleset}-rules/expected.csv`
-- **Columns (order matters):** `id,code,claim_id,action,explain,rank,pay_percent,pay_amount,inactive`
-- **Important:** The `id` column is ignored by the test comparison. The test framework computes an MD5 checksum over all fields except `id` when comparing actual vs expected, so UUIDs in `id` may be arbitrary.
-
-Steps to create expected results:
-
-1. Add your test input in `test/data/{ruleset}-rules/tx_vectors.edi` and the corresponding `rule-config.json`.
-2. In the test module (`test/unit/test_{ruleset}_rules.py`) temporarily omit or comment out the `assert_result_matches` call so the test doesn't fail while you inspect output.
-3. Enable result dumping in the test by calling `dump_result(result_facts)` (the helper logs the actions at DEBUG level).
-4. Run the test and produce output files:
-
-```bash
-python -m pytest test/unit/test_{ruleset}_rules.py -q
-```
-
-If you need to see `dump_result` output on the console, set `log_cli_level = DEBUG` in `pytest.ini` or run pytest with `-o log_cli=true -o log_cli_level=DEBUG`.
-
-5. Inspect the generated CSV in `target/test-results/{ruleset}-rules/` and verify each row matches your expected action semantics.
-6. When satisfied, copy the generated CSV to `test/expected/{ruleset}-rules/expected.csv` (replace any UUIDs in the `id` column if you prefer a deterministic value).
-7. Restore the `assert_result_matches` assertion in the test module to lock the expectation.
-
-Example expected CSV (IDs can be any UUID):
-
-```csv
-id,code,claim_id,action,explain,rank,pay_percent,pay_amount,inactive
-9f7db5e2-9884-46de-bc3b-f2e263518924,PAYCL,C1,pay,pay,0,0.75,0.0,False
-01a8648b-7060-409b-8097-5aa234dd8ebb,NOPLY,C2,incomplete,no policy found,1000,0.0,0.0,False
-```
-
-Quick notes:
+Notes:
 - Use unique claim IDs in `tx_vectors.edi` to avoid collisions in output rows.
-- The test helpers (`execute`, `dump_result`, `assert_result_matches`) live in `test/unit/util.py` — review them if you need to customize the CSV layout or comparison logic.
-- Keep the `rule-config.json` in sync with the scenario you're testing; rule `reason`/`explain`/`rank` values drive the expected `code`, `explain`, and `rank` columns.
+- The test helpers (`execute`, `dump_result`, `assert_result_matches`, `service`) live in `test/unit/util.py` — review them if you need to customize comparison logic.
+- Keep `rule-config.json` in sync with the scenario you're testing; the rule's `reason`/`explain`/`rank` values there drive the expected `code`/`explain`/`rank` columns.
 
 ### Running Tests
 
-Tests are run using pytest from the `autoins` directory:
+Tests are run using `uv run pytest` from the `autoins` directory:
 
 ```bash
-python -m pytest -rPX
+uv run pytest -rPX
 ```
 
 The `pytest.ini` file configures the Python path to include `src` and `test/unit`, and enables console logging at the INFO level. To see DEBUG-level output (including `dump_result` output), change `log_cli_level` to `DEBUG` in `pytest.ini`.
@@ -353,5 +324,5 @@ The `pytest.ini` file configures the Python path to include `src` and `test/unit
 To run a specific test:
 
 ```bash
-python -m pytest test/unit/test_validation_rules.py -rPX
+uv run pytest test/unit/test_validation_rules.py -rPX
 ```
