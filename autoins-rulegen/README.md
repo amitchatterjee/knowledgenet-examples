@@ -17,22 +17,29 @@ knowledge/
   specification-guidelines/    spec template + population instructions + validator sufficiency
                                 criteria -- hand-authored (the only remaining hand-authored
                                 directory; see tools/README.md for why the other six are generated)
-target/knowledge/              generated, gitignored (**/target/ already in the repo .gitignore) --
+prompts/                       supervisor + subagent prompts tuned for autoins -- rule-spec-validator,
+                                supervisor, code-generator, config-generator, test-generator -- loaded
+                                by knowledgexpert's graph.py via RULEGEN_ROOT/prompts/<name>.md
+target/knowledge/               generated, gitignored (**/target/ already in the repo .gitignore) --
                                 a complete, ready-to-ship knowledge base assembled by tools/:
                                 knowledgenet-foundation/, application-domain/,
                                 application-architecture/, exemplars/, testing-guidelines/,
                                 configuration-guidelines/ (generated from knowledgenet/autoins) plus
-                                specification-guidelines/ (copied in from knowledge/ above). Not
-                                committed, safe to delete/regenerate. Consumed by knowledgexpert
-                                either by pushing to S3 (knowledge prefix) or by zipping with
-                                knowledge/ as the zip's top-level dir, so a user unzips it and
-                                points RULEGEN_ROOT at the parent -- no code change needed.
-tools/                         bash scripts that assemble target/knowledge/ from source and publish
-                                it (S3 push; zip-for-filesystem-distribution not written yet) --
-                                assemble-all.sh orchestrates all seven per-directory scripts in one
+                                specification-guidelines/ (copied in from knowledge/ above).
+target/prompts/                 generated, gitignored -- a copy of prompts/ above, so that a single
+                                RULEGEN_ROOT (pointed at target/) resolves both knowledge/ and
+                                prompts/ as the fixed subpaths knowledgexpert's graph.py expects from
+                                one root (see tools/assemble-prompts.sh). Both target/ subdirectories
+                                are not committed, safe to delete/regenerate, and consumed by
+                                knowledgexpert either by pushing target/knowledge/ to S3 (knowledge
+                                prefix; prompts/ is always read from local disk, never pushed) or by
+                                zipping target/ with knowledge/ and prompts/ as the zip's top-level
+                                dirs, so a user unzips it and points RULEGEN_ROOT at the parent -- no
+                                code change needed.
+tools/                         bash scripts that assemble target/{knowledge,prompts}/ from source and
+                                publish it (S3 push; zip-for-filesystem-distribution not written yet)
+                                -- assemble-all.sh orchestrates all eight per-directory scripts in one
                                 command; see tools/README.md
-prompts/                       supervisor + subagent prompts tuned for autoins (not yet authored --
-                                blocked on knowledgexpert's phase 2 supervisor/validator design)
 mcp/                           optional -- omitted entirely once autoins defines no MCP services.
                                 Currently one service, OpenSearch (MSRP vehicle pricing lookup) --
                                 see mcp/README.md.
@@ -43,10 +50,12 @@ infra/                         optional -- docker-compose/admin fixtures for wha
 
 ## Status
 
-Knowledge-base content work is essentially done: all seven directories assemble via
-`tools/assemble-all.sh` (six generated, verified against real `knowledgenet`/`autoins` source;
-`specification-guidelines/spec-template.md` hand-authored, drafted and approved). See
-`tools/README.md` for exact source mappings and the whole-file-copy design principle.
+Knowledge-base content work is essentially done: all seven `target/knowledge/` directories assemble
+via `tools/assemble-all.sh` (six generated, verified against real `knowledgenet`/`autoins` source;
+`specification-guidelines/spec-template.md` hand-authored, drafted and approved), and all five
+`prompts/*.md` files are drafted (grounded in the modernization plan and real `autoins` code/KB
+content) and assemble into `target/prompts/` the same way. See `tools/README.md` for exact source
+mappings and the whole-file-copy design principle.
 
 `mcp/` and `infra/` are populated -- the OpenSearch MCP config/infra migrated here 2026-09-18 from
 `knowledgexpert/infrastructure/` (which now holds only the generic, tool-level `conf/log-config.yaml`),
@@ -55,5 +64,5 @@ code -- see `infra/README.md`). Two things deliberately not migrated/resolved: `
 (the bulk pricing data itself, still under `knowledgexpert/`) and whether `knowledgexpert` should
 orchestrate starting the OpenSearch container itself, versus a manual step.
 
-Remaining phase-1 work: `prompts/` (blocked on phase 2) and the golden fixture set that phases 2-5
-reuse for CLI verification.
+Remaining phase-1 work: the golden fixture set that phases 2-5 reuse for CLI verification (deferred,
+not blocking phase 2's supervisor/validator graph itself).

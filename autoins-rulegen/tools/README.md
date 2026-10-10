@@ -1,20 +1,22 @@
 # tools/
 
 Bash (and, where needed, Python) scripts, run as part of `knowledgenet`/`autoins`'s release
-process, that assemble `../target/knowledge/` -- a complete, ready-to-ship knowledge-base
-directory -- and publish it for `knowledgexpert` to consume.
+process, that assemble `../target/{knowledge,prompts}/` -- a complete, ready-to-ship root
+`knowledgexpert`'s `RULEGEN_ROOT` can point at directly -- and publish it for `knowledgexpert` to
+consume.
 
 Four separate concerns:
 
-1. **Collect/assemble** -- one `assemble-*.sh` script per `target/knowledge/` directory, each a
-   straight `cp` from `knowledgenet`/`autoins` (both sibling directories under this repo) or, for
-   `specification-guidelines/`, from this repo's own hand-authored `../knowledge/`. `../target/` is
-   generated, gitignored (`**/target/` is already in this repo's root `.gitignore` -- the same
-   convention `autoins/target/` uses for `rule_runner.py` output), and safe to delete/regenerate at
-   any time.
-2. **Orchestrate** -- `assemble-all.sh` clears `../target/knowledge/` entirely and reruns every
-   `assemble-*.sh` script in sequence, so the whole knowledge base is rebuilt from scratch in one
-   command:
+1. **Collect/assemble** -- one `assemble-*.sh` script per `target/knowledge/` directory, plus
+   `assemble-prompts.sh` for `target/prompts/`, each a straight `cp` from `knowledgenet`/`autoins`
+   (both sibling directories under this repo) or, for `specification-guidelines/` and `prompts/`,
+   from this repo's own hand-authored `../knowledge/specification-guidelines/`/`../prompts/`.
+   `../target/` is generated, gitignored (`**/target/` is already in this repo's root `.gitignore`
+   -- the same convention `autoins/target/` uses for `rule_runner.py` output), and safe to
+   delete/regenerate at any time.
+2. **Orchestrate** -- `assemble-all.sh` clears `../target/knowledge/` and `../target/prompts/`
+   entirely and reruns every `assemble-*.sh` script in sequence, so the whole thing is rebuilt from
+   scratch in one command:
    ```bash
    export KNOWLEDGENET_HOME=/path/to/knowledgenet          # knowledgenet repo root
    export KNOWLEDGENET_EX_HOME=/path/to/knowledgenet-examples  # this repo's root
@@ -25,11 +27,14 @@ Four separate concerns:
    introduced for this script, naming it by direct analogy.
 3. **Publish to S3** -- push `../target/knowledge/` to an S3-compatible bucket (as the `knowledge`
    prefix). `sync-docs.sh` does this via `s3cmd sync`: `./sync-docs.sh ../target/knowledge
-   s3://<bucket>/<prefix>/knowledge`.
-4. **Publish as a zip** -- for filesystem-backed installs, zip `../target/knowledge/` such that its
-   *top-level directory inside the archive is named `knowledge/`*. That way a user unzips it
+   s3://<bucket>/<prefix>/knowledge`. `prompts/` is always read from local disk regardless of
+   `RULEGEN_ROOT`'s scheme (see `knowledgexpert/graph.py`'s `_load_prompt_from_file()`), so it is
+   never pushed to S3 -- only `target/knowledge/` is.
+4. **Publish as a zip** -- for filesystem-backed installs, zip `../target/` such that its top-level
+   directories inside the archive are named `knowledge/` and `prompts/`. That way a user unzips it
    anywhere and points `RULEGEN_ROOT` at the parent directory, with no code change needed --
-   `_create_knowledge_backend()` already does `RULEGEN_ROOT/knowledge`.
+   `_create_knowledge_backend()`/`_load_prompt_from_file()` already do `RULEGEN_ROOT/knowledge` and
+   `RULEGEN_ROOT/prompts`.
 
 ## Design principle: whole-file copies, never section-excerpting
 
@@ -70,6 +75,11 @@ scope" section for the full reasoning.
 | `configuration-guidelines/`            | `../../autoins/docs/configuration.md` -- extracted from `testing.md` (see above); `rule-config.json`'s general structure/conventions, not a test's specific needs (testing-guidelines/) or what a spec should state (specification-guidelines/); see `assemble-configuration-guidelines.sh -h` |
 | `specification-guidelines/`             | hand-authored directly in `../knowledge/`, copied as-is (whole directory, not a fixed file list) by `assemble-specification-guidelines.sh -h` |
 
+`target/prompts/` (a sibling of `target/knowledge/`, not under it) is assembled the same way:
+hand-authored directly in `../prompts/`, copied as-is by `assemble-prompts.sh` -- needed so a single
+`RULEGEN_ROOT` (pointed at `target/`) resolves both `knowledge/` and `prompts/`, since the source
+`../prompts/` has no assembled counterpart otherwise (see that script's header comment).
+
 ## Open question
 
 Assembly needs *some* snapshot of `knowledgenet` and `autoins` to build from together --
@@ -79,15 +89,15 @@ records what it was built from. Not resolved yet.
 
 ## Status
 
-`sync-docs.sh` (S3 publish), all seven per-directory assemble scripts (six generated:
+`sync-docs.sh` (S3 publish), all eight per-directory assemble scripts (six generated:
 `assemble-knowledgenet-foundation.sh`, `assemble-application-domain.sh`,
 `assemble-application-architecture.sh`, `assemble-exemplars.sh`, `assemble-testing-guidelines.sh`,
-`assemble-configuration-guidelines.sh`; one hand-authored-copy: `assemble-specification-guidelines.sh`),
-and `assemble-all.sh` (orchestrates all seven, clearing and rebuilding `target/knowledge/` from
-scratch) are all in place and verified end-to-end. The zip-publish script is not written yet. What
-each assemble script actually selects/curates from its source material is content work, done
-interactively.
+`assemble-configuration-guidelines.sh`; two hand-authored-copy: `assemble-specification-guidelines.sh`,
+`assemble-prompts.sh`), and `assemble-all.sh` (orchestrates all eight, clearing and rebuilding
+`target/knowledge/` and `target/prompts/` from scratch) are all in place and verified end-to-end. The
+zip-publish script is not written yet. What each assemble script actually selects/curates from its
+source material is content work, done interactively.
 
-`specification-guidelines/spec-template.md` and `configuration-guidelines/` (via `configuration.md`)
-are both drafted/verified and in place. Only `prompts/` (needs the supervisor/validator design from
-phase 2 first) and the golden fixture set remain from phase 1's knowledge-base content work.
+`specification-guidelines/spec-template.md`, `configuration-guidelines/` (via `configuration.md`),
+and all five `prompts/*.md` files are drafted/verified and in place. Only the golden fixture set
+remains from phase 1's knowledge-base content work.

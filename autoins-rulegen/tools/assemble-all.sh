@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
-# Orchestrates all seven per-directory assemble-*.sh scripts to build a
-# complete target/knowledge/ from scratch: clears it entirely, then
-# repopulates every directory (six generated + one hand-authored copy).
+# Orchestrates all eight per-directory assemble-*.sh scripts to build a
+# complete target/ from scratch: clears target/knowledge/ and target/prompts/
+# entirely, then repopulates every directory (six generated knowledge dirs,
+# one hand-authored knowledge copy, plus prompts/). Both live under target/
+# so that knowledgexpert's RULEGEN_ROOT can point at target/ and resolve
+# `knowledge/` and `prompts/` as the fixed subpaths it expects from one root
+# (see assemble-prompts.sh for why prompts/ needs this too).
 #
 # Requires KNOWLEDGENET_HOME (knowledgenet repo root) and KNOWLEDGENET_EX_HOME
 # (knowledgenet-examples repo root, per that repo's own CLAUDE.md convention)
@@ -13,19 +17,21 @@ usage() {
   cat <<EOF
 Usage: $(basename "$0") [-n]
 
-Clears \$KNOWLEDGENET_EX_HOME/autoins-rulegen/target/knowledge/ and rebuilds it
-by running every assemble-*.sh script in this directory:
+Clears \$KNOWLEDGENET_EX_HOME/autoins-rulegen/target/{knowledge,prompts}/ and
+rebuilds them by running every assemble-*.sh script in this directory:
 
   knowledgenet-foundation, application-domain, application-architecture,
   exemplars, testing-guidelines, configuration-guidelines (all generated from
-  \$KNOWLEDGENET_HOME / \$KNOWLEDGENET_EX_HOME/autoins), plus
-  specification-guidelines (hand-authored, copied from ../knowledge/).
+  \$KNOWLEDGENET_HOME / \$KNOWLEDGENET_EX_HOME/autoins), specification-guidelines
+  (hand-authored, copied from ../knowledge/), and prompts (hand-authored,
+  copied from ../prompts/).
 
 Requires KNOWLEDGENET_HOME and KNOWLEDGENET_EX_HOME to already be set.
 
 Options:
   -n   Dry run: pass -n through to every sub-script, and skip clearing
-       target/knowledge/ (show what would happen without changing anything).
+       target/{knowledge,prompts}/ (show what would happen without changing
+       anything).
   -h   Show this help.
 EOF
 }
@@ -46,6 +52,7 @@ script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 rulegen_dir="$KNOWLEDGENET_EX_HOME/autoins-rulegen"
 autoins_dir="$KNOWLEDGENET_EX_HOME/autoins"
 knowledge_dir="$rulegen_dir/target/knowledge"
+prompts_dir="$rulegen_dir/target/prompts"
 
 if [[ ! -d "$rulegen_dir" ]]; then
   echo "Error: autoins-rulegen/ not found under KNOWLEDGENET_EX_HOME ($KNOWLEDGENET_EX_HOME)" >&2
@@ -63,11 +70,14 @@ fi
 dry_flag=()
 if [[ $dry_run -eq 1 ]]; then
   dry_flag=(-n)
-  echo "Dry run -- target/knowledge/ will not be cleared, sub-scripts run with -n."
+  echo "Dry run -- target/{knowledge,prompts}/ will not be cleared, sub-scripts run with -n."
 else
   echo "Clearing $knowledge_dir"
   rm -rf "$knowledge_dir"
   mkdir -p "$knowledge_dir"
+  echo "Clearing $prompts_dir"
+  rm -rf "$prompts_dir"
+  mkdir -p "$prompts_dir"
 fi
 
 echo "==> knowledgenet-foundation"
@@ -106,8 +116,16 @@ echo "==> specification-guidelines"
   -s "$rulegen_dir/knowledge/specification-guidelines" \
   -o "$knowledge_dir/specification-guidelines"
 
+echo "==> prompts"
+"$script_dir/assemble-prompts.sh" "${dry_flag[@]}" \
+  -s "$rulegen_dir/prompts" \
+  -o "$prompts_dir"
+
 if [[ $dry_run -eq 0 ]]; then
   echo
   echo "target/knowledge/ assembled at $knowledge_dir"
   find "$knowledge_dir" -type f | sort
+  echo
+  echo "target/prompts/ assembled at $prompts_dir"
+  find "$prompts_dir" -type f | sort
 fi
