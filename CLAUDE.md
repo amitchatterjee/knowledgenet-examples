@@ -12,10 +12,19 @@ Read `../knowledgenet/docs/concepts.md`, `docs/rule-service.md`, and `docs/rules
   one-time setup (e.g. `autoins/README.md`).
 - One-time env var: `export KNOWLEDGENET_EX_HOME=$HOME/git/knowledgenet-examples/` (adjust path as needed).
 - Examples depend on `knowledgenet` via a `[tool.uv.sources]` path entry pointing at the sibling
-  `knowledgenet` repo (e.g. `{ path = "../../knowledgenet" }` from an example subdirectory), not via
-  PyPI. `uv sync` in the example builds `knowledgenet` straight from that source tree, so there is no
-  separate "install the local wheel" step — just re-run `uv sync` (or `uv sync
-  --reinstall-package knowledgenet` to force a rebuild) after changing `knowledgenet` source.
+  `knowledgenet` repo (e.g. `{ path = "../../knowledgenet" }` from an example subdirectory), **plus**
+  a normal version-floor requirement in `project.dependencies` (e.g. `"knowledgenet>=1.0.1"`) for
+  when that source isn't used — see below. By default (sibling repo checked out, the common dev
+  case), `uv sync` builds `knowledgenet` straight from that source tree, so there is no separate
+  "install the local wheel" step — just re-run `uv sync` (or `uv sync --reinstall-package
+  knowledgenet` to force a rebuild) after changing `knowledgenet` source.
+- **Running an example standalone, without cloning `knowledgenet`:** `tool.uv.sources` is a uv-only
+  dev-time override and isn't respected by non-uv consumers or by uv itself when told to ignore it.
+  Pass `--no-sources` (or the narrower `--no-sources-package knowledgenet`) to `uv sync`/`uv lock` to
+  resolve `knowledgenet` from PyPI per the version floor instead of the local path — e.g. `uv sync
+  --no-sources` in `autoins/`. This installs the published `knowledgenet` wheel; no sibling checkout,
+  no extra files, same `pyproject.toml`. Re-run a plain `uv sync` (no flag) to switch back to the
+  local path source.
 
 ## `autoins` example
 

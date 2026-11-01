@@ -16,6 +16,23 @@ To pick up new `knowledgenet` changes later, just re-run `uv sync` here (or `uv 
 --reinstall-package knowledgenet` to force a rebuild even if `knowledgenet`'s version string
 hasn't changed).
 
+### Running this example without the `knowledgenet` repo checked out
+
+The sibling-repo source build above is a uv-only dev-time convenience
+(`[tool.uv.sources]`) layered on top of a normal version-constrained dependency
+(`knowledgenet>=1.0.1` in `pyproject.toml`). If you only have this repo (no sibling
+`knowledgenet` checkout), tell uv to ignore that override and resolve `knowledgenet`
+from PyPI instead:
+
+```bash
+cd $KNOWLEDGENET_EX_HOME/autoins
+uv venv --python 3.14
+uv sync --group dev --no-sources
+```
+
+This installs the published `knowledgenet` wheel and otherwise behaves identically.
+Switch back to the local source build at any time with a plain `uv sync` (no flag).
+
 ## Execute Auto-insurance claim handling rules
 
 
@@ -31,6 +48,57 @@ cd $KNOWLEDGENET_EX_HOME/autoins
 uv run pytest -rPX
 
 ```
+
+## Performance measurements and profiling
+
+`data/tx_vectors.edi` and the `test/data/` fixtures are sized for correctness coverage (a handful
+of hand-crafted claims, each exercising one edge case) — too small and too skewed toward
+validation-failure paths to profile meaningfully. `test/perf/` holds a separate harness for that,
+built to support the precompilation exploration in
+`$KNOWLEDGENET_EX_HOME/knowledgenet/.plans/002-2026-10-10-precompilation-options-exploratory-plan.md`
+(Phase 0: establishing how much of execution time is `knowledgenet` engine bookkeeping vs. time
+spent inside rule-author `when`/`then` code, before evaluating any precompilation option against
+that split).
+
+- `test/perf/generate_data.py` — generates a synthetic, volume-sized `tx_vectors.edi` from the same
+  claim patterns as `data/tx_vectors.edi` (valid claim, VIN mismatches, missing automobile,
+  insufficient estimates), in a configurable mix weighted toward claims that flow through to
+  `05_finalization`, so the profile reflects a realistic rule-path distribution rather than an even
+  spread across edge cases. Deterministic given `--seed`.
+- `test/perf/profile_engine.py` — loads the real `rule-config.json` (from `data/`) together with the
+  generated transactions and profiles (or times) a single `Service.execute()` call over the whole
+  batch, matching how `rule_runner.py` actually invokes the engine (one call across all requests,
+  not one call per claim).
+
+Generated data and profiling output land under `test/perf/target/` (gitignored, like
+`target/results` above — regenerate anytime via `--seed`).
+
+### Profile a run and see where time goes
+
+```bash
+cd $KNOWLEDGENET_EX_HOME/autoins
+uv run python test/perf/profile_engine.py --count 5000
+```
+
+Prints a breakdown of `tottime` (time in each function itself, not its callees, so the buckets sum
+to the profiled total without double-counting) into three buckets — `engine` (knowledgenet's own
+internals), `rule_bodies` (the `matches=`/`then=` callables under `rules/`), and `other`
+(everything else reached during execution: entity construction, pydantic validation, stdlib,
+logging) — plus the hottest individual functions within each bucket, and writes a raw `.prof` file
+you can open with `snakeviz` or `python -m pstats`.
+
+### Time runs without profiler overhead
+
+For comparing against other interpreters/compilers (PyPy, Nuitka, ...) later in the same
+exploration, `cProfile`'s own per-call instrumentation cost would skew the comparison. Use:
+
+```bash
+uv run python test/perf/profile_engine.py --mode time --repeats 5
+```
+
+This rebuilds a fresh `Service` and fact set for each repeat (RETE execution mutates working
+memory, so repeats must not observe each other's inserted/updated facts) and reports per-run and
+average wall-clock time for `Service.execute()` alone, excluding rule scanning and fact loading.
 
 ### Use Opentelemetry for tracing:
 
@@ -107,7 +175,7 @@ export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
 export OTEL_TRACES_EXPORTER=otlp
 uv run python src/rule_runner.py --rulesPath $KNOWLEDGENET_EX_HOME/autoins/rules \
 	--factsPaths $KNOWLEDGENET_EX_HOME/autoins/data --log info \
-	--outputPath $KNOWLEDGENET_EX_HOME/autoins/target/results --cleanOutput --traceLevel 5 --traceDetails 10
+	--outputPath $KNOWLEDGENET_EX_HOME/autoins/target/results --cleanOutput --traceLevel 10 --traceDetails 10
 ```
 
 View the traces by pointing a web browser to [http://localhost:16686](http://localhost:16686).
