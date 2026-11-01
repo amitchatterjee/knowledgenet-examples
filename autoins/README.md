@@ -16,6 +16,23 @@ To pick up new `knowledgenet` changes later, just re-run `uv sync` here (or `uv 
 --reinstall-package knowledgenet` to force a rebuild even if `knowledgenet`'s version string
 hasn't changed).
 
+### Running this example without the `knowledgenet` repo checked out
+
+The sibling-repo source build above is a uv-only dev-time convenience
+(`[tool.uv.sources]`) layered on top of a normal version-constrained dependency
+(`knowledgenet>=1.0.1` in `pyproject.toml`). If you only have this repo (no sibling
+`knowledgenet` checkout), tell uv to ignore that override and resolve `knowledgenet`
+from PyPI instead:
+
+```bash
+cd $KNOWLEDGENET_EX_HOME/autoins
+uv venv --python 3.14
+uv sync --group dev --no-sources
+```
+
+This installs the published `knowledgenet` wheel and otherwise behaves identically.
+Switch back to the local source build at any time with a plain `uv sync` (no flag).
+
 ## Execute Auto-insurance claim handling rules
 
 
