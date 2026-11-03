@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.13"
 
 [[package]]
@@ -265,6 +265,7 @@ requires-dist = [
 dev = [
     { name = "build" },
     { name = "debugpy" },
+    { name = "maturin", specifier = ">=1.7,<2.0" },
     { name = "mypy" },
     { name = "pytest" },
     { name = "pytest-cov" },
