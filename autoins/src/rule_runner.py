@@ -98,8 +98,7 @@ def init_otel():
             # default to console exporter
         exporter = ConsoleSpanExporter()
 
-    # Read BatchSpanProcessor settings from environment variables (with
-    # the same defaults used previously).
+    # Read BatchSpanProcessor settings from environment variables.
     max_queue_size = int(os.getenv('OTEL_SPAN_PROCESSOR_MAX_QUEUE_SIZE', '2048'))
     schedule_delay_millis = int(os.getenv('OTEL_SPAN_PROCESSOR_SCHEDULE_DELAY_MILLIS', '5000'))
     max_export_batch_size = int(os.getenv('OTEL_SPAN_PROCESSOR_MAX_EXPORT_BATCH_SIZE', '500'))
