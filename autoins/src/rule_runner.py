@@ -43,7 +43,7 @@ def init_knowledgebase(rules_root, facts_path):
     logging.info(f"Loaded {len(facts)} facts")
     return service,facts
 
-def init_rules(rules_root):
+def init_rules(rules_root, backend='auto'):
     rules_paths = []
     repo = subdirs(rules_root)
     for r in repo:
@@ -52,7 +52,7 @@ def init_rules(rules_root):
 
     rules_basename = os.path.basename(rules_root)
     repository = scanner.lookup(rules_basename)
-    service = Service(repository)
+    service = Service(repository, backend=backend)
     logging.info(f"Loaded {len(repository.rulesets)} rulesets")
     return service
 

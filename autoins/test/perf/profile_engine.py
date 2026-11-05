@@ -52,9 +52,9 @@ from knowledgenet.ftypes import EventFact  # noqa: E402
 from rule_runner import init_rules  # noqa: E402
 
 
-def _build_service_and_facts(rules_path: Path, data_path: Path, perf_data_dir: Path):
+def _build_service_and_facts(rules_path: Path, data_path: Path, perf_data_dir: Path, backend: str = "auto"):
     scanner.clear()
-    service = init_rules(str(rules_path))
+    service = init_rules(str(rules_path), backend=backend)
     facts = load_facts([str(data_path), str(perf_data_dir)])
     facts.add(EventFact(group="onAction", on_types=Action))
     return service, facts
@@ -110,6 +110,7 @@ def main() -> None:
     parser.add_argument("--out-dir", type=Path, default=Path(__file__).parent / "target" / "results")
     parser.add_argument("--reuse-data", action="store_true", help="Skip regenerating the synthetic tx file if one already exists")
     parser.add_argument("--mode", choices=["profile", "time"], default="profile")
+    parser.add_argument("--backend", choices=["auto", "native", "pure"], default="auto")
     parser.add_argument("--repeats", type=int, default=3, help="--mode time only")
     parser.add_argument("--top", type=int, default=20, help="--mode profile only")
     args = parser.parse_args()
@@ -120,17 +121,17 @@ def main() -> None:
         print(f"Generated {args.count} synthetic claims (seed={args.seed}) -> {tx_path}")
 
     if args.mode == "profile":
-        service, facts = _build_service_and_facts(args.rules_path, args.data_path, args.perf_data_dir)
-        print(f"Loaded {len(facts)} facts; profiling a single Service.execute() call...")
+        service, facts = _build_service_and_facts(args.rules_path, args.data_path, args.perf_data_dir, args.backend)
+        print(f"Loaded {len(facts)} facts; profiling a single Service.execute() call (backend={args.backend})...")
         run_profile(service, facts, str(args.rules_path.resolve()), args.out_dir, args.top)
     else:
         # Fresh service+facts per repeat so repeats don't observe each other's
         # inserted/updated facts (RETE execution mutates working memory).
         durations = []
         for i in range(args.repeats):
-            service, facts = _build_service_and_facts(args.rules_path, args.data_path, args.perf_data_dir)
+            service, facts = _build_service_and_facts(args.rules_path, args.data_path, args.perf_data_dir, args.backend)
             if i == 0:
-                print(f"Loaded {len(facts)} facts; timing {args.repeats} independent Service.execute() calls...")
+                print(f"Loaded {len(facts)} facts; timing {args.repeats} independent Service.execute() calls (backend={args.backend})...")
             start = time.perf_counter()
             service.execute(facts, trc_level=0, trc_details=0)
             durations.append(time.perf_counter() - start)
