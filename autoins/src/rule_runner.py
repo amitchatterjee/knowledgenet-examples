@@ -43,7 +43,7 @@ def init_knowledgebase(rules_root, facts_path):
     logging.info(f"Loaded {len(facts)} facts")
     return service,facts
 
-def init_rules(rules_root, backend='auto'):
+def init_rules(rules_root, backend='pure'):
     rules_paths = []
     repo = subdirs(rules_root)
     for r in repo:
