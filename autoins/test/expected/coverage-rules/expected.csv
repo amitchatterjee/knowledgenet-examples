@@ -1,0 +1,3 @@
+id,code,claim_id,action,explain,rank,pay_percent,pay_amount,inactive
+00000000-0000-0000-0000-000000000001,MINCOV,C1,deny,liability coverage below state statutory minimum,1000,0.0,0.0,False
+00000000-0000-0000-0000-000000000002,PAYCL,C2,pay,pay,0,0.6,0.0,False

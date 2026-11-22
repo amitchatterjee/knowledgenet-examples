@@ -65,15 +65,21 @@
                     "explain": "late filing",
                     "rank": 1000,
                     "percent": 0.0,
-
                     "within": 90
                 },
-
                 "vin_mismatch": {
                     "enabled": true,
                     "action": "deny",
                     "reason": "AUTMIS",
                     "explain": "automobile not registred in policy",
+                    "rank": 1000,
+                    "percent": 0.0
+                },
+                "insufficient_liability_coverage": {
+                    "enabled": true,
+                    "action": "deny",
+                    "reason": "MINCOV",
+                    "explain": "liability coverage below state statutory minimum",
                     "rank": 1000,
                     "percent": 0.0
                 }

@@ -4,11 +4,12 @@ import os
 import time
 
 from autoins.bluebook import BlueBook
+from autoins.csv_parser import read_csv_and_convert
 from autoins.edi_parser import parse_edi
 from autoins.entities import Action
 from autoins.util import subfiles
 
-from knowledgenet.ftypes import Wrapper
+from knowledgenet.ftypes import Wrapper, Table
 from knowledgenet.container import Collector
 
 def load_facts(factsPaths):
@@ -32,7 +33,12 @@ def load_facts(factsPaths):
                                     filter=lambda this,action: this.request.claim.id == action.claim_id))
             elif f == 'blues.csv':
                 facts.add(BlueBook(os.path.join(path,f)))
-    
+            elif f == 'state_min_liability.csv':
+                rows = read_csv_and_convert(os.path.join(path, f), converters={'min_liability_coverage': float})
+                table = Table('state_min_liability', run_all=True,
+                              rows=tuple((row['state'], row['min_liability_coverage']) for row in rows))
+                table.kickoff(facts)
+
     return facts
 
 def write_actions(output_path, clean_output, result_facts):
